@@ -1,12 +1,11 @@
-import { C, interventions } from '../data/mock.js'
+import { C } from './colors.js'
 
 const dotColor = { g: C.green, a: C.amber, m: C.muted, r: C.red }
 
-/* Linha do tempo vertical */
-export function InterventionTimeline() {
+export function InterventionTimeline({ dados }) {
   return (
     <div className="body" style={{ overflow: 'auto' }}>
-      {interventions.map((it) => (
+      {dados.itens.map((it) => (
         <div key={it.titulo} style={{ display: 'flex', gap: 10, marginBottom: 11 }}>
           <span style={{ width: 10, height: 10, borderRadius: '50%', marginTop: 3, flex: '0 0 auto', background: dotColor[it.cor] }} />
           <div style={{ fontSize: 12, fontWeight: 700 }}>{it.titulo}
@@ -18,15 +17,13 @@ export function InterventionTimeline() {
   )
 }
 
-/* Status board (estado atual) */
-export function InterventionBoard() {
-  const items = [
-    { l: 'JR: enviado', c: 'g' }, { l: 'SLA: 48h', c: 'a' }, { l: 'SIGAP: off', c: 'r' },
-  ]
+export function InterventionBoard({ dados }) {
   return (
     <div className="body" style={{ display: 'flex', alignItems: 'center' }}>
       <div className="chiprow">
-        {items.map((i) => <span className="sgc" key={i.l}><span className={`cd ${i.c}`} />{i.l}</span>)}
+        {dados.sinais.map((s) => (
+          <span className="sgc" key={s.nome}><span className={`cd ${s.nivel}`} />{s.nome}</span>
+        ))}
       </div>
     </div>
   )

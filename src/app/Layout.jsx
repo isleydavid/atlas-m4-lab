@@ -28,7 +28,7 @@ export default function Layout() {
   const activeModule = MODULES.find((m) => m.id === moduleId) || null
   const slots = activeModule?.slots ?? []
 
-  const { slotState, mosaic, setMosaic, setType, toggle, hide, setAll, reset } = useModuleState(moduleId, slots)
+  const { slotState, mosaic, setMosaic, setType, toggle, hide, setAll, reset, aprovada, dataAprovacao, aprovar } = useModuleState(moduleId, slots)
   const [custom, setCustom] = useState(loadCustom)
   const [editing, setEditing] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -41,6 +41,8 @@ export default function Layout() {
   const activeMosaic = allMosaics.find((m) => m.id === mosaic) || MOSAICS[0]
   const activeCount = slots.filter((s) => slotState[s.id]?.visible).length
   const currentLabel = (s) => (s.options.find((x) => x.key === slotState[s.id]?.type) || s.options[0]).label
+  const groupedIds = new Set(GROUPS.flatMap(([, ids]) => ids))
+  const ungroupedSlots = slots.filter((s) => !groupedIds.has(s.id))
   const isReady = activeModule?.status === 'ready'
 
   const saveMosaic = (m) => { setCustom((prev) => [...prev.filter((x) => x.id !== m.id), m]); setMosaic(m.id); setEditing(false) }
@@ -49,7 +51,7 @@ export default function Layout() {
     setMosaic((cur) => (cur === id ? DEFAULT_MOSAIC : cur))
   }
 
-  const outletContext = { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType: setType, onHide: hide, onReset: reset }
+  const outletContext = { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType: setType, onHide: hide, onReset: reset, aprovada, dataAprovacao, aprovar }
 
   const sidebarContent = (
     <div className="p-body">
@@ -117,6 +119,15 @@ export default function Layout() {
                     </div>
                   )
                 })}
+              </div>
+            )
+          })}
+          {ungroupedSlots.map((s) => {
+            const on = slotState[s.id]?.visible
+            return (
+              <div className={`toggle-row ${on ? '' : 'off'}`} key={s.id}>
+                <span className={`sw ${on ? 'on' : ''}`} onClick={() => toggle(s.id)} />
+                <div className="nm">{s.title}<small>{on ? currentLabel(s) : 'inativo'}</small></div>
               </div>
             )
           })}

@@ -1,7 +1,12 @@
-import { SLOTS } from './perfil-apostador/slots.jsx'
+import { loadModule } from './loader.jsx'
+import perfilRaw from './perfil-apostador/module.md?raw'
+import financieroRaw from './financiero/module.md?raw'
+
+const _perfilModule = loadModule(perfilRaw)
+const _financieroModule = loadModule(financieroRaw)
 
 export const MODULES = [
-  { id: 'perfil-apostador', nome: 'Perfil do Apostador', icone: '👤', status: 'ready', slots: SLOTS },
-  { id: 'financeiro',       nome: 'Financeiro',          icone: '💰', status: 'soon',  slots: [] },
-  { id: 'risco-fraude',     nome: 'Risco & Fraude',      icone: '🛡️', status: 'soon',  slots: [] },
+  _perfilModule,
+  _financieroModule,
+  { id: 'risco-fraude',  nome: 'Risco & Fraude', icone: '🛡️', status: 'soon', slots: [] },
 ]

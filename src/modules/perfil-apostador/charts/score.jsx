@@ -2,13 +2,10 @@ import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area, XAxis, YAxis,
   CartesianGrid, Tooltip, ReferenceArea,
 } from 'recharts'
-import { C, player, scoreFactors, scoreEvolution, dimensions } from '../data/mock.js'
+import { C } from './colors.js'
 
-const maxF = Math.max(...scoreFactors.map(f => f.pts))
-
-/* Donut de veredito + tendência */
-export function RiskVerdict() {
-  const pct = player.score
+export function RiskVerdict({ dados }) {
+  const pct = dados.valor
   return (
     <div className="body" style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
       <div style={{
@@ -21,19 +18,19 @@ export function RiskVerdict() {
         </div>
       </div>
       <div style={{ flex: 1 }}>
-        <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: C.orange, padding: '4px 11px', borderRadius: 999 }}>{player.faixa}</span>
-        <div style={{ fontSize: 12, color: C.amber, fontWeight: 700, marginTop: 10 }}>▲ {player.deltaScore}</div>
-        <div style={{ fontSize: 11, color: C.muted, marginTop: 6 }}>Subiu de “Baixo” para “Médio-Alto” esta semana. {player.alertas} alertas ativos.</div>
+        <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: C.orange, padding: '4px 11px', borderRadius: 999 }}>{dados.rotulo}</span>
+        <div style={{ fontSize: 12, color: C.amber, fontWeight: 700, marginTop: 10 }}>▲ {dados.delta}</div>
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 6 }}>Subiu de "Baixo" para "Médio-Alto" esta semana. {dados.alertas} alertas ativos.</div>
       </div>
     </div>
   )
 }
 
-/* Explainable AI — fatores ponderados */
-export function ScoreFactors() {
+export function ScoreFactors({ dados }) {
+  const maxF = Math.max(...dados.fatores.map((f) => f.pts))
   return (
     <div className="body" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12 }}>
-      {scoreFactors.map((f) => (
+      {dados.fatores.map((f) => (
         <div key={f.nome}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
             <b style={{ fontWeight: 700 }}>{f.nome}</b><span style={{ color: C.muted, fontWeight: 700 }}>+{f.pts} pts</span>
@@ -47,12 +44,10 @@ export function ScoreFactors() {
   )
 }
 
-/* Waterfall de contribuição ao score (alternativa do XAI) */
-export function ScoreWaterfall() {
+export function ScoreWaterfall({ dados }) {
   let acc = 0
-  const base = 8
-  const steps = [{ nome: 'Base', pts: base, baseStep: true }, ...scoreFactors]
-  const total = base + scoreFactors.reduce((s, f) => s + f.pts, 0)
+  const steps = [{ nome: 'Base', pts: dados.base, baseStep: true }, ...dados.fatores]
+  const total = dados.base + dados.fatores.reduce((s, f) => s + f.pts, 0)
   const data = steps.map((s) => {
     const start = acc; acc += s.pts
     return { nome: s.baseStep ? 'Base' : s.nome.split(' ')[0], start, val: s.pts }
@@ -73,12 +68,11 @@ export function ScoreWaterfall() {
   )
 }
 
-/* Evolução do score com faixas de risco */
-export function ScoreEvolution() {
+export function ScoreEvolution({ dados }) {
   return (
     <div className="body">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={scoreEvolution} margin={{ top: 8, right: 10, left: -20, bottom: 0 }}>
+        <AreaChart data={dados.linhas} margin={{ top: 8, right: 10, left: -20, bottom: 0 }}>
           <defs><linearGradient id="sc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={C.orange} stopOpacity={0.25} /><stop offset="1" stopColor={C.orange} stopOpacity={0} /></linearGradient></defs>
           <ReferenceArea y1={70} y2={100} fill="#FBE7E7" fillOpacity={0.7} />
           <ReferenceArea y1={45} y2={70} fill="#FBF0DD" fillOpacity={0.7} />
@@ -94,12 +88,11 @@ export function ScoreEvolution() {
   )
 }
 
-/* Multi-linha das 3 dimensões */
-export function ScoreMultiLine() {
+export function ScoreMultiLine({ dados }) {
   return (
     <div className="body">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={scoreEvolution} margin={{ top: 8, right: 10, left: -20, bottom: 0 }}>
+        <LineChart data={dados.linhas} margin={{ top: 8, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#EEF0F3" vertical={false} />
           <XAxis dataKey="dia" tick={{ fontSize: 10, fill: C.muted }} />
           <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: C.muted }} />
@@ -113,26 +106,24 @@ export function ScoreMultiLine() {
   )
 }
 
-/* Sparkline compacto + delta */
-export function ScoreSparkline() {
+export function ScoreSparkline({ dados }) {
   return (
     <div className="body" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-      <div style={{ fontSize: 34, fontWeight: 800 }}>{player.score}</div>
+      <div style={{ fontSize: 34, fontWeight: 800 }}>{dados.valor}</div>
       <div style={{ flex: 1, height: '70%' }}>
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={scoreEvolution}><Line type="monotone" dataKey="risco" stroke={C.orange} strokeWidth={2.5} dot={false} /></LineChart>
+          <LineChart data={dados.linhas}><Line type="monotone" dataKey="risco" stroke={C.orange} strokeWidth={2.5} dot={false} /></LineChart>
         </ResponsiveContainer>
-        <div style={{ fontSize: 11, color: C.amber, fontWeight: 700 }}>▲ {player.deltaScore}</div>
+        <div style={{ fontSize: 11, color: C.amber, fontWeight: 700 }}>▲ {dados.delta}</div>
       </div>
     </div>
   )
 }
 
-/* Barras das dimensões */
-export function DimensionsBars() {
+export function DimensionsBars({ dados }) {
   return (
     <div className="body" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 12 }}>
-      {dimensions.map((d) => (
+      {dados.dimensoes.map((d) => (
         <div key={d.nome}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, marginBottom: 5 }}><span>{d.nome}</span><span>{d.valor}</span></div>
           <div style={{ height: 8, borderRadius: 5, background: '#EFF1F4', overflow: 'hidden' }}>

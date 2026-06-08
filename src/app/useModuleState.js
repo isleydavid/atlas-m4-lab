@@ -4,7 +4,16 @@ import { MODULES } from '../modules/registry.js'
 const MOSAIC_KEY = 'atlas-m4-lab-mosaics'
 const DEFAULT_MOSAIC = 'destaque'
 
-function storeKey(moduleId) { return `atlas-m4-lab-v4/${moduleId}` }
+function storeKey(moduleId)    { return `atlas-m4-lab-v5/${moduleId}` }
+function approvalKey(moduleId) { return `atlas-m4-lab-v5/${moduleId}/approval` }
+
+function loadApproval(moduleId) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(approvalKey(moduleId)) || 'null')
+    if (saved && typeof saved.aprovada === 'boolean') return saved
+  } catch { /* ignore */ }
+  return { aprovada: false, dataAprovacao: null }
+}
 
 function defaultSlots(slots) {
   const base = {}
@@ -36,6 +45,8 @@ function load(moduleId, slots) {
 export function useModuleState(moduleId, slots) {
   const [slotState, setSlotState] = useState(() => load(moduleId, slots).slots)
   const [mosaic, setMosaic] = useState(() => load(moduleId, slots).mosaic)
+  const [aprovada, setAprovada] = useState(() => loadApproval(moduleId).aprovada)
+  const [dataAprovacao, setDataAprovacao] = useState(() => loadApproval(moduleId).dataAprovacao)
 
   const isFirstRender = useRef(true)
   useEffect(() => {
@@ -45,6 +56,9 @@ export function useModuleState(moduleId, slots) {
     const init = load(moduleId, s)
     setSlotState(init.slots)
     setMosaic(init.mosaic)
+    const approval = loadApproval(moduleId)
+    setAprovada(approval.aprovada)
+    setDataAprovacao(approval.dataAprovacao)
   }, [moduleId])
 
   useEffect(() => {
@@ -52,6 +66,10 @@ export function useModuleState(moduleId, slots) {
       localStorage.setItem(storeKey(moduleId), JSON.stringify({ mosaic, slots: slotState }))
     }
   }, [mosaic, slotState])
+
+  useEffect(() => {
+    localStorage.setItem(approvalKey(moduleId), JSON.stringify({ aprovada, dataAprovacao }))
+  }, [aprovada, dataAprovacao])
 
   const setType = (id, type) => setSlotState((p) => ({ ...p, [id]: { ...p[id], type } }))
   const toggle = (id) => setSlotState((p) => ({ ...p, [id]: { ...p[id], visible: !p[id].visible } }))
@@ -68,7 +86,17 @@ export function useModuleState(moduleId, slots) {
     setMosaic(init.mosaic)
   }
 
-  return { slotState, mosaic, setMosaic, setType, toggle, hide, setAll, reset }
+  const aprovar = () => {
+    if (aprovada) {
+      setAprovada(false)
+      setDataAprovacao(null)
+    } else {
+      setAprovada(true)
+      setDataAprovacao(new Date().toISOString())
+    }
+  }
+
+  return { slotState, mosaic, setMosaic, setType, toggle, hide, setAll, reset, aprovada, dataAprovacao, aprovar }
 }
 
 export { MOSAIC_KEY }

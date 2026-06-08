@@ -24,7 +24,7 @@ export default function Card({ slot, typeKey, onChangeType, onHide }) {
           <Kebab slot={slot} typeKey={opt.key} onChangeType={onChangeType} onHide={onHide} />
         </div>
       </div>
-      <Component />
+      <Component dados={opt.dados} />
     </div>
   )
 }
