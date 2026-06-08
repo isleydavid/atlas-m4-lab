@@ -7,7 +7,7 @@ import { cellFor } from '../mosaics.js'
 export default function Dashboard({ slots, state, mosaic, onChangeType, onHide }) {
   const visible = slots.filter((s) => state[s.id]?.visible)
   return (
-    <div className="dash">
+    <div className="dash" data-density={mosaic?.density ?? 'confortavel'}>
       {visible.length === 0 && (
         <div className="empty">Nenhum componente visível. Ative algum na lista da esquerda.</div>
       )}

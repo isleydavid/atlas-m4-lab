@@ -20,7 +20,7 @@ export default function Card({ slot, typeKey, onChangeType, onHide }) {
         </div>
         <div className="ch-r">
           {s && <span className={`st ${s.cls}`}>{s.label}</span>}
-          <InfoButton text={opt.info} />
+          <InfoButton slot={slot} opt={opt} />
           <Kebab slot={slot} typeKey={opt.key} onChangeType={onChangeType} onHide={onHide} />
         </div>
       </div>

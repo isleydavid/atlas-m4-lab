@@ -32,6 +32,23 @@ export const MOSAICS = [
     pattern: [{ w: 8, h: 4 }, { w: 4, h: 4 }, { w: 4, h: 3 }, { w: 4, h: 3 }, { w: 4, h: 3 }],
     fallback: { w: 4, h: 3 },
   },
+  {
+    id: 'perfil-executivo',
+    name: 'Perfil Executivo',
+    desc: 'Identidade + score, faixa de KPIs e grade',
+    mode: 'prefix',
+    pattern: [
+      { w: 7, h: 4 },
+      { w: 5, h: 4 },
+      { w: 4, h: 2 },
+      { w: 4, h: 2 },
+      { w: 4, h: 2 },
+      { w: 8, h: 3 },
+      { w: 4, h: 3 },
+    ],
+    fallback: { w: 4, h: 3 },
+    density: 'confortavel',
+  },
 ]
 
 // Tamanho da célula para o componente na posição `index` dentro do mosaico.

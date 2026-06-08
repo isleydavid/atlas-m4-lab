@@ -35,28 +35,33 @@ export function loadModule(rawText) {
     const optionStatus = STATUS_MAP[comp.status] ?? 'new'
     const visualizacoes = comp.visualizacoes ?? []
 
-    const options = visualizacoes.map((vis, idx) => {
+    const options = visualizacoes.map((vis) => {
       const tipo = vis.tipo
       const Component = ({ dados }) => <ChartRenderer tipo={tipo} dados={dados} />
       Component.displayName = `ManifestSlot_${comp.id}_${tipo}`
 
       return {
-        key:      tipo,
-        label:    vis.rotulo ?? tipo,
+        key:         tipo,
+        label:       vis.rotulo ?? tipo,
         ...(vis.subtitulo ? { subtitle: vis.subtitulo } : {}),
-        status:   optionStatus,
+        status:      optionStatus,
         Component,
-        dados:    vis.dados ?? {},
-        info:     vis.info ?? '',
+        dados:       vis.dados ?? {},
+        info:        vis.info ?? '',
+        nota:        vis.nota ?? '',
+        recomendada: comp.recomendada === tipo,
       }
     })
 
     return {
-      id:      comp.id,
-      title:   comp.titulo ?? comp.id,
-      w:       comp.tamanho?.w ?? 4,
-      h:       comp.tamanho?.h ?? 3,
-      visible: comp.visivel ?? true,
+      id:           comp.id,
+      title:        comp.titulo ?? comp.id,
+      w:            comp.tamanho?.w ?? 4,
+      h:            comp.tamanho?.h ?? 3,
+      visible:      comp.visivel ?? true,
+      persona:      comp.persona ?? '',
+      recomendada:  comp.recomendada ?? '',
+      recomendacao: comp.recomendacao ?? '',
       options,
     }
   })

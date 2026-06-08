@@ -65,12 +65,16 @@ componentes:
   - id: xai
     titulo: "Por que esse score"
     status: novo
+    persona: "Risco + Compliance"
+    recomendada: waterfall
+    recomendacao: "B para o caso/auditoria + A como visão rápida no perfil."
     tamanho: { w: 8, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: barras
         rotulo: "Barras ponderadas"
         subtitulo: "Ranking de fatores"
+        nota: "Ranking direto: o que mais pesa no topo."
         info: "Ranking do que mais pesa no score. Responde 'por que esse score?' em segundos — o fator no topo é o principal motivador."
         dados:
           fatores:
@@ -81,6 +85,7 @@ componentes:
       - tipo: waterfall
         rotulo: "Waterfall"
         subtitulo: "Contribuição acumulada"
+        nota: "Mostra como cada fator empilha até o score final — narrativa causal."
         info: "Conta a história do score: começa neutro e cada fator soma até o valor final. É a leitura que sustenta a justificativa numa auditoria."
         dados:
           base: 8
@@ -93,12 +98,16 @@ componentes:
   - id: score-trend
     titulo: "Evolução do Score"
     status: novo
+    persona: "Dir. de Risco"
+    recomendada: area_faixas
+    recomendacao: "B na tela de perfil + C como resumo no header."
     tamanho: { w: 7, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: area_faixas
         rotulo: "Linha + faixa de risco"
         subtitulo: "Trajetória sobre as faixas"
+        nota: "Faixas verde/âmbar/vermelha dão contexto: a linha cruzou para zona de atenção."
         info: "A linha sobre as faixas verde/âmbar/vermelha mostra a posição: cruzar para o âmbar = gatilho de revisão."
         dados:
           linhas:
@@ -112,6 +121,7 @@ componentes:
       - tipo: linha
         rotulo: "Multi-linha (3 dimensões)"
         subtitulo: "Risco · PLD · JR"
+        nota: "Risco, PLD e JR juntos — vê divergência entre dimensões."
         info: "Compara as 3 dimensões no tempo. Útil para ver divergência — ex.: risco subindo enquanto PLD fica estável."
         dados:
           linhas:
@@ -125,6 +135,7 @@ componentes:
       - tipo: kpi
         rotulo: "Sparkline"
         subtitulo: "Resumo compacto"
+        nota: "Compacto — cabe ao lado do donut, sem tela extra."
         info: "Resumo compacto da tendência, para caber ao lado do número. Mostra direção, não detalhe."
         dados:
           valor: 64
@@ -157,12 +168,16 @@ componentes:
   - id: cashflow
     titulo: "Fluxo de Caixa"
     status: novo
+    persona: "Dir. de Risco"
+    recomendada: barras_empilhadas
+    recomendacao: "A — leitura em <3s e expõe o padrão de risco que importa."
     tamanho: { w: 7, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: barras_empilhadas
         rotulo: "Barras dep/saque"
         subtitulo: "Por dia"
+        nota: "Pico diário salta aos olhos. Laranja=depósito, claro=saque."
         info: "Depósitos × saques por dia. Barras crescentes = aceleração (chasing/risco); saque no mesmo dia = ciclo depósito→saque rápido."
         dados:
           series:
@@ -179,6 +194,7 @@ componentes:
       - tipo: cashflow_net
         rotulo: "Saldo líquido"
         subtitulo: "Acumulado no tempo"
+        nota: "Trajetória do saldo acumulado — bom p/ tendência, esconde o pico do dia."
         info: "Trajetória do saldo acumulado. Boa para a tendência geral; esconde o pico de um dia específico."
         dados:
           linhas:
@@ -193,12 +209,16 @@ componentes:
   - id: vinculos
     titulo: "Vínculos"
     status: novo
+    persona: "Dir. de Risco"
+    recomendada: grafo
+    recomendacao: "A interativo, com B acessível em ver detalhes."
     tamanho: { w: 5, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: grafo
         rotulo: "Grafo de nós"
         subtitulo: "IP · dispositivo · PIX"
+        nota: "A topologia revela o cluster: 4 contas no mesmo IP = anel suspeito."
         info: "A topologia revela o anel: muitas contas no mesmo IP/PIX = fraude coordenada, percebida num relance."
         dados:
           nos:
@@ -216,6 +236,7 @@ componentes:
       - tipo: tabela
         rotulo: "Tabela de conexões"
         subtitulo: "Evidência exportável"
+        nota: "Auditável e exportável — bom para anexar ao caso."
         info: "Lista auditável das conexões e a força de cada vínculo. Formato de evidência para anexar ao caso."
         dados:
           linhas:
@@ -227,12 +248,16 @@ componentes:
   - id: responsible
     titulo: "Jogo Responsável"
     status: novo
+    persona: "Dir. de Compliance"
+    recomendada: semaforo
+    recomendacao: "A — liga direto sinal → intervenção exigida por lei."
     tamanho: { w: 5, h: 2 }
     visivel: true
     visualizacoes:
       - tipo: semaforo
         rotulo: "Semáforo de sinais"
         subtitulo: "Portaria 1.231/2024"
+        nota: "Cores = ação. Vermelho/âmbar pedem intervenção; verde tranquiliza."
         info: "Sinais de jogo responsável por cor: vermelho/âmbar pedem intervenção (monitoramento exigido pela Portaria 1.231/2024)."
         dados:
           sinais:
@@ -244,6 +269,7 @@ componentes:
       - tipo: radar
         rotulo: "Radar"
         subtitulo: "Perfil multidimensional"
+        nota: "Forma do polígono = perfil de risco JR. Bom p/ comparar perfis."
         info: "A forma do polígono = perfil de risco de JR. Bom para comparar o formato de risco entre apostadores."
         dados:
           eixos:
@@ -255,6 +281,7 @@ componentes:
       - tipo: gauge
         rotulo: "Gauge"
         subtitulo: "Resumo de 1 dimensão"
+        nota: "Resumo de uma dimensão. Esconde quais sinais dispararam."
         info: "Resumo de uma só dimensão de JR. Rápido de ler, mas esconde quais sinais dispararam."
         dados:
           valor: 61
@@ -263,12 +290,16 @@ componentes:
   - id: pld
     titulo: "Padrões PLD / AML"
     status: novo
+    persona: "PLD / AML"
+    recomendada: histograma
+    recomendacao: "B como detector principal, A/C como evidência de apoio."
     tamanho: { w: 5, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: histograma
         rotulo: "Histograma + limite"
         subtitulo: "Detecta estruturação"
+        nota: "Pico de valores logo abaixo do limite = assinatura clássica de smurfing."
         info: "Pico de depósitos logo abaixo do limite de reporte = assinatura clássica de estruturação/smurfing."
         dados:
           barras:
@@ -283,6 +314,7 @@ componentes:
       - tipo: dispersao
         rotulo: "Dispersão no tempo"
         subtitulo: "Depósitos vs. limite"
+        nota: "Pontos colando no limite vermelho = estruturação ao longo do tempo."
         info: "Depósitos no tempo vs. o limite. Pontos colando na linha = fracionamento ao longo dos dias."
         dados:
           pontos:
@@ -298,6 +330,7 @@ componentes:
       - tipo: heatmap
         rotulo: "Heatmap dia × hora"
         subtitulo: "Automação por horário"
+        nota: "Concentração em horário fixo = comportamento automatizado."
         info: "Concentração de atividade num horário fixo = comportamento automatizado (possível robô)."
         dados:
           matriz:
@@ -309,12 +342,16 @@ componentes:
   - id: peer
     titulo: "Comparação com Pares"
     status: novo
+    persona: "Dir. de CRM / Risco"
+    recomendada: percentil
+    recomendacao: "B para risco/compliance; A para o CRM em ações de retenção."
     tamanho: { w: 4, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: percentil
         rotulo: "Percentil"
         subtitulo: "Posição na distribuição"
+        nota: "Marcador na curva: top 4% dos apostadores — posição exata."
         info: "Posição na distribuição dos pares. 'Top 4%' comunica raridade melhor que um número absoluto."
         dados:
           percentil: 96
@@ -322,6 +359,7 @@ componentes:
       - tipo: barras_pares
         rotulo: "Barras vs. mediana"
         subtitulo: "Vezes o típico"
+        nota: "Quantas vezes acima do típico — simples e direto."
         info: "Quantas vezes acima da mediana dos pares. Leitura simples e direta para um briefing."
         dados:
           barras:
@@ -331,6 +369,7 @@ componentes:
       - tipo: radar_pares
         rotulo: "Radar vs. cohort"
         subtitulo: "Forma do desvio"
+        nota: "Laranja=apostador, cinza=mediana do grupo. Vê o excesso."
         info: "Apostador vs. mediana do grupo em várias métricas — mostra o 'excesso' como forma."
         dados:
           eixos:
@@ -362,12 +401,16 @@ componentes:
   - id: intervention
     titulo: "Trilha de Intervenção"
     status: novo
+    persona: "Dir. de Compliance"
+    recomendada: timeline
+    recomendacao: "A no perfil + B exportável para evidência regulatória."
     tamanho: { w: 4, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: timeline
         rotulo: "Linha do tempo"
         subtitulo: "Histórico p/ auditoria"
+        nota: "Sequência cronológica = histórico defensável do caso."
         info: "Sequência de ações com data e canal — o histórico defensável que uma auditoria da SPA exige."
         dados:
           itens:
@@ -377,6 +420,7 @@ componentes:
       - tipo: board
         rotulo: "Status board"
         subtitulo: "Estado atual"
+        nota: "Estado agora — bom p/ painel, fraco p/ histórico."
         info: "Estado atual das ações (JR, SLA, SIGAP). Bom para painel; fraco como registro histórico."
         dados:
           sinais:
