@@ -6,14 +6,14 @@
 //  Campos: id, title, subtitle, category, status, w (colunas 1-12),
 //          h (linhas de 96px), enabled, Component
 // ============================================================
-import { RiskVerdict, ScoreFactors, ScoreWaterfall, ScoreEvolution, ScoreMultiLine, ScoreSparkline, DimensionsBars } from './charts/score.jsx'
-import { RgSemaforo, RgRadar, RgGauge } from './charts/responsible.jsx'
-import { CashflowStacked, CashflowNet } from './charts/cashflow.jsx'
-import { VinculosGraph, VinculosTable } from './charts/vinculos.jsx'
-import { PldHistogram, PldScatter, PldHeatmap } from './charts/pld.jsx'
-import { PeerBars, PeerPercentile, PeerRadar } from './charts/peer.jsx'
-import { InterventionTimeline, InterventionBoard } from './charts/intervention.jsx'
-import { IdentityCard, Behavioral, ActionCard, AlertsFeed, Transactions } from './charts/profile.jsx'
+import { RiskVerdict, ScoreFactors, ScoreWaterfall, ScoreEvolution, ScoreMultiLine, ScoreSparkline, DimensionsBars } from './modules/perfil-apostador/charts/score.jsx'
+import { RgSemaforo, RgRadar, RgGauge } from './modules/perfil-apostador/charts/responsible.jsx'
+import { CashflowStacked, CashflowNet } from './modules/perfil-apostador/charts/cashflow.jsx'
+import { VinculosGraph, VinculosTable } from './modules/perfil-apostador/charts/vinculos.jsx'
+import { PldHistogram, PldScatter, PldHeatmap } from './modules/perfil-apostador/charts/pld.jsx'
+import { PeerBars, PeerPercentile, PeerRadar } from './modules/perfil-apostador/charts/peer.jsx'
+import { InterventionTimeline, InterventionBoard } from './modules/perfil-apostador/charts/intervention.jsx'
+import { IdentityCard, Behavioral, ActionCard, AlertsFeed, Transactions } from './modules/perfil-apostador/charts/profile.jsx'
 
 // status: 'have' (temos) | 'part' (parcial) | 'new' (proposto)
 export const REGISTRY = [
