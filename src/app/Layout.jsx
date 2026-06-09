@@ -17,7 +17,7 @@ const NAV = [
     { id: 'cassino',          icon: '🌐', label: 'Cassino', badge: 'NEW' },
     { id: 'perfil-apostador', icon: '👤', label: 'Perfil de Apostador' },
     { id: 'risco-fraude',     icon: '🛡️', label: 'Risco e Fraude', disabled: true },
-    { id: 'pld',              icon: '🔎', label: 'PLD / AML', disabled: true },
+    { id: 'pld-aml',          icon: '🛡️', label: 'PLD / AML' },
     { id: 'web-analytics',    icon: '📈', label: 'Web Analytics', badge: 'NEW' },
   ]},
   { group: 'Research Preview', items: [
