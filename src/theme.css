@@ -139,8 +139,9 @@ button{font-family:inherit}
 .count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700}
 
 .dash{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(var(--dash-row,96px),auto);grid-auto-flow:row dense;
-  gap:var(--dash-gap,16px);padding:var(--dash-pad,22px);font-size:calc(14px * var(--fs-scale,1));
-  max-width:var(--w-content-max);margin-inline:auto;width:100%}
+  gap:var(--dash-gap,16px);padding-block:var(--dash-pad,22px);padding-inline:clamp(16px,2vw,40px);
+  font-size:calc(14px * var(--fs-scale,1));width:100%}
+.dash.leitura{max-width:var(--w-content-max);margin-inline:auto}
 .dash .card .ch h3{font-size:calc(14px * var(--fs-scale,1))}
 .dash .cap,.dash .card .ch p{font-size:calc(11px * var(--fs-scale,1))}
 .dash[data-density="compacto"]   {--dash-gap:12px;--dash-row:88px; --dash-pad:16px;--fs-scale:.92}
@@ -278,6 +279,25 @@ button{font-family:inherit}
 @media(prefers-reduced-motion:reduce){.feed-card.is-new{animation:none}}
 
 /* ---------- responsividade (design system) ---------- */
+/* ≥ 1920px — escalar cards e fonte: visão operacional / TV */
+@media(min-width:1920px){
+  :root{--gap-sec:28px}
+  .dash[data-density="compacto"]   {--dash-gap:13px;--dash-row:96px; --dash-pad:20px;--fs-scale:.98}
+  .dash[data-density="confortavel"]{--dash-gap:19px;--dash-row:108px;--dash-pad:26px;--fs-scale:1.06}
+  .dash[data-density="amplo"]      {--dash-gap:23px;--dash-row:120px;--dash-pad:32px;--fs-scale:1.14}
+}
+@media(min-width:2560px){
+  :root{--gap-sec:32px}
+  .dash[data-density="compacto"]   {--dash-gap:17px;--dash-row:112px;--dash-pad:26px;--fs-scale:1.09}
+  .dash[data-density="confortavel"]{--dash-gap:24px;--dash-row:126px;--dash-pad:34px;--fs-scale:1.18}
+  .dash[data-density="amplo"]      {--dash-gap:29px;--dash-row:142px;--dash-pad:42px;--fs-scale:1.28}
+}
+@media(min-width:3840px){
+  :root{--gap-sec:40px}
+  .dash[data-density="compacto"]   {--dash-gap:22px;--dash-row:136px;--dash-pad:36px;--fs-scale:1.26}
+  .dash[data-density="confortavel"]{--dash-gap:30px;--dash-row:154px;--dash-pad:46px;--fs-scale:1.38}
+  .dash[data-density="amplo"]      {--dash-gap:36px;--dash-row:174px;--dash-pad:56px;--fs-scale:1.50}
+}
 /* < 1100px: esconde sidebar de Ocorrências */
 @media(max-width:1100px){
   .feed{display:none}
@@ -290,10 +310,10 @@ button{font-family:inherit}
   .panel:not(.collapsed) .p-body,
   .panel:not(.collapsed) .collapse-btn{display:none}
 }
-/* < 768px: painel some; conteúdo ocupa tudo */
+/* < 768px: painel some; conteúdo empilha */
 @media(max-width:768px){
   .panel{display:none}
-  .dash{grid-template-columns:1fr;max-width:100%}
+  .dash{grid-template-columns:1fr}
   .dash .cell{grid-column:span 1!important;grid-row:span 1!important}
   .modal.wide{width:100%}
   .canvas-head .hidden-wrap{display:none}

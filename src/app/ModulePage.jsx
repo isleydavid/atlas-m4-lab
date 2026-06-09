@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import Dashboard from '../ui/Dashboard.jsx'
 
@@ -13,6 +14,7 @@ function fmtData(iso) {
 
 export default function ModulePage() {
   const { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType, onHide, onReset, aprovada, dataAprovacao, aprovar, onMoveSlot, onMoveToSection, sections } = useOutletContext()
+  const [leitura, setLeitura] = useState(false)
 
   if (!activeModule || activeModule.status === 'soon') {
     return (
@@ -30,7 +32,6 @@ export default function ModulePage() {
       </main>
     )
   }
-
   const visibleCount = slots.filter((s) => slotState[s.id]?.visible).length
 
   return (
@@ -53,6 +54,14 @@ export default function ModulePage() {
         </span>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           <button
+            onClick={() => setLeitura((v) => !v)}
+            className="btn-ghost"
+            title={leitura ? 'Modo TV: preenche a tela' : 'Modo Leitura: limita a 1328px'}
+            style={leitura ? { color: 'var(--orange)', borderColor: 'var(--orange-line)' } : undefined}
+          >
+            {leitura ? 'TV' : 'Leitura'}
+          </button>
+          <button
             onClick={aprovar}
             className="btn-ghost"
             style={aprovada ? { color: 'var(--red)', borderColor: 'var(--red-soft)' } : undefined}
@@ -72,7 +81,7 @@ export default function ModulePage() {
           </a>
         </div>
       </div>
-      <Dashboard slots={slots} state={slotState} mosaic={activeMosaic} onChangeType={onChangeType} onHide={onHide} onMoveSlot={onMoveSlot} onMoveToSection={onMoveToSection} sections={sections} />
+      <Dashboard slots={slots} state={slotState} mosaic={activeMosaic} leitura={leitura} onChangeType={onChangeType} onHide={onHide} onMoveSlot={onMoveSlot} onMoveToSection={onMoveToSection} sections={sections} />
     </main>
   )
 }
