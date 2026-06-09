@@ -221,9 +221,9 @@ componentes:
     titulo: "Vínculos"
     status: novo
     persona: "Dir. de Risco"
-    recomendada: grafo
-    recomendacao: "A interativo, com B acessível em ver detalhes."
-    tamanho: { w: 5, h: 3 }
+    recomendada: analise_riscos
+    recomendacao: "C para análise completa (sinais + grafo + descrição); A para visão rápida."
+    tamanho: { w: 5, h: 4 }
     visivel: true
     visualizacoes:
       - tipo: grafo
@@ -255,6 +255,40 @@ componentes:
             - { conta: "A3",    vinculo: "Mesmo dispositivo", forca: "Média" }
             - { conta: "PIX-X", vinculo: "Conta bancária",    forca: "Alta"  }
             - { conta: "A5",    vinculo: "Mesmo IP",          forca: "Baixa" }
+      - tipo: analise_riscos
+        rotulo: "Análise completa"
+        subtitulo: "Riscos + grafo + descrição"
+        nota: "Visão integrada: painel do Atlas oficial com topologia do lab."
+        info: "Combina os sinais críticos, os vínculos identificados e a topologia do grafo em um painel unificado — ideal para montar o caso ou apresentar à compliance."
+        recomendada: true
+        dados:
+          vinculosMesmoIP: true
+          contasVinculadas: 1
+          conta:
+            nome: "ADIEL FERREIRA"
+            marca: "vaidebet-ngx"
+            cpf: "076.161.543-10"
+            ip: "2804:29b8:517b:87b6:32be:efe9:1c98:f334"
+          score:
+            valor: 100
+            max: 100
+            critico: true
+          sinais:
+            - "Vínculos com mesmo IP"
+          grafo:
+            nos:
+              - { id: "EP",  x: 210, y: 85,  principal: true  }
+              - { id: "IP",  x: 95,  y: 38,  principal: false }
+              - { id: "A2",  x: 88,  y: 135, principal: false }
+              - { id: "A3",  x: 330, y: 40,  principal: false }
+              - { id: "PIX", x: 340, y: 135, principal: false }
+            arestas:
+              - ["EP", "IP"]
+              - ["EP", "A2"]
+              - ["EP", "A3"]
+              - ["EP", "PIX"]
+              - ["A3", "PIX"]
+          descricao: "Foram identificados 1 alerta(s), com destaque para vínculos com mesmo IP. O último IP observado também foi utilizado por 1 outra(s) conta(s) dentro do recorte selecionado."
 
   - id: responsible
     titulo: "Jogo Responsável"

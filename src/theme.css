@@ -150,7 +150,7 @@ button{font-family:inherit}
 
 /* ---------- card ---------- */
 .card{height:100%;background:var(--card);border:var(--border-hair);border-radius:var(--radius);
-  box-shadow:var(--shadow-card);padding:var(--pad-card) var(--pad-card) 14px;display:flex;flex-direction:column;overflow:hidden}
+  box-shadow:var(--shadow-card);padding:var(--pad-card) var(--pad-card) 14px;display:flex;flex-direction:column;overflow:visible}
 .card .ch{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px;flex:0 0 auto}
 .card .ch h3{font-size:13px;margin:0;font-weight:700;font-family:var(--font-head)}
 .card .ch p{margin:2px 0 0;font-size:11px;color:var(--muted)}
@@ -198,7 +198,7 @@ button{font-family:inherit}
 .kbtn{width:26px;height:26px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--muted);
   cursor:pointer;font-size:16px;line-height:1;display:grid;place-items:center}
 .kbtn:hover{border-color:var(--orange-line);color:var(--orange)}
-.kmenu{position:absolute;top:32px;right:0;z-index:30;background:#fff;border:1px solid var(--line);
+.kmenu{position:absolute;top:32px;right:0;z-index:200;background:#fff;border:1px solid var(--line);
   border-radius:12px;box-shadow:0 10px 30px rgba(16,24,40,.14);padding:6px;min-width:212px}
 .klabel{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted-2);padding:7px 9px 4px}
 .kitem{display:flex;align-items:flex-start;gap:9px;width:100%;text-align:left;background:none;border:none;

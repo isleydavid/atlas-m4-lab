@@ -7,6 +7,7 @@ import { PldHistogram, PldScatter, PldHeatmap } from '../modules/perfil-apostado
 import { PeerBars, PeerPercentile, PeerRadar } from '../modules/perfil-apostador/charts/peer.jsx'
 import { InterventionTimeline, InterventionBoard } from '../modules/perfil-apostador/charts/intervention.jsx'
 import IdentityCard from '../modules/perfil-apostador/charts/identity-card.jsx'
+import AnaliseRiscos from '../modules/perfil-apostador/charts/analise-riscos.jsx'
 import { Behavioral, ActionCard, AlertsFeed, Transactions } from '../modules/perfil-apostador/charts/profile.jsx'
 import { C } from '../modules/perfil-apostador/charts/colors.js'
 
@@ -28,6 +29,7 @@ const CHART_MAP = {
   heatmap:           PldHeatmap,
   grafo:             VinculosGraph,
   tabela:            VinculosTable,
+  analise_riscos:    AnaliseRiscos,
   barras_pares:      PeerBars,
   percentil:         PeerPercentile,
   radar_pares:       PeerRadar,
