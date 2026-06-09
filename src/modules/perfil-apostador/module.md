@@ -67,17 +67,6 @@ componentes:
             - tipo: link
               titulo: "Ganhos elevados em cassino"
               desc: "O perfil dominante em cassino registrou ganhos acima do benchmark da marca."
-      - tipo: donut
-        rotulo: "Donut + tendência"
-        subtitulo: "Score consolidado (compacto)"
-        info: "O número-resumo do risco. A seta de tendência mostra se está piorando — o usuário decide num olhada se o caso merece atenção agora."
-        dados:
-          valor: 64
-          max: 100
-          rotulo: "RISCO MÉDIO-ALTO"
-          delta: "+19 em 7 dias"
-          alertas: 15
-
   - id: action
     titulo: "Ação recomendada"
     status: novo
@@ -186,7 +175,7 @@ componentes:
     titulo: "Dimensões & JR"
     status: parcial
     tamanho: { w: 5, h: 3 }
-    visivel: true
+    visivel: false
     visualizacoes:
       - tipo: barras_dimensoes
         rotulo: "Barras das dimensões"
@@ -248,41 +237,10 @@ componentes:
     tamanho: { w: 5, h: 4 }
     visivel: true
     visualizacoes:
-      - tipo: grafo
-        rotulo: "Grafo de nós"
-        subtitulo: "IP · dispositivo · PIX"
-        nota: "A topologia revela o cluster: 4 contas no mesmo IP = anel suspeito."
-        info: "A topologia revela o anel: muitas contas no mesmo IP/PIX = fraude coordenada, percebida num relance."
-        dados:
-          nos:
-            - { id: "EP",  x: 50, y: 50, principal: true  }
-            - { id: "IP",  x: 22, y: 22, principal: false }
-            - { id: "A2",  x: 20, y: 80, principal: false }
-            - { id: "A3",  x: 80, y: 24, principal: false }
-            - { id: "PIX", x: 82, y: 80, principal: false }
-          arestas:
-            - ["EP", "IP"]
-            - ["EP", "A2"]
-            - ["EP", "A3"]
-            - ["EP", "PIX"]
-            - ["A3", "PIX"]
-      - tipo: tabela
-        rotulo: "Tabela de conexões"
-        subtitulo: "Evidência exportável"
-        nota: "Auditável e exportável — bom para anexar ao caso."
-        info: "Lista auditável das conexões e a força de cada vínculo. Formato de evidência para anexar ao caso."
-        dados:
-          linhas:
-            - { conta: "A2",    vinculo: "Mesmo IP + PIX",    forca: "Alta"  }
-            - { conta: "A3",    vinculo: "Mesmo dispositivo", forca: "Média" }
-            - { conta: "PIX-X", vinculo: "Conta bancária",    forca: "Alta"  }
-            - { conta: "A5",    vinculo: "Mesmo IP",          forca: "Baixa" }
       - tipo: analise_riscos
-        rotulo: "Análise completa"
+        rotulo: "Análise de Riscos"
         subtitulo: "Riscos + grafo + descrição"
-        nota: "Visão integrada: painel do Atlas oficial com topologia do lab."
         info: "Combina os sinais críticos, os vínculos identificados e a topologia do grafo em um painel unificado — ideal para montar o caso ou apresentar à compliance."
-        recomendada: true
         dados:
           vinculosMesmoIP: true
           contasVinculadas: 1
@@ -557,22 +515,6 @@ componentes:
                   status: "NÃO PREMIADO"
                   legs:
                     - { ev: "04 Jun 2026 · 18h59m · 6 seleções", odd: "BILHETE" }
-      - tipo: bilhetes
-        rotulo: "Bilhetes esportivos"
-        subtitulo: "Evidência bruta"
-        info: "Evidência bruta das apostas — a base que sustenta os scores e a Explainable AI."
-        dados:
-          transacoes:
-            - tipo: "Aposta Múltipla"
-              status: "NÃO PREMIADO"
-              legs:
-                - { ev: "Rússia x Burkina Faso · GOALS_OVER_UNDER", odd: "1.24" }
-                - { ev: "Canadá x Irlanda · GOALS_OVER_UNDER",      odd: "1.34" }
-                - { ev: "Geórgia x Bahrain · GOALS_OVER_UNDER",     odd: "1.20" }
-            - tipo: "Aposta Múltipla"
-              status: "NÃO PREMIADO"
-              legs:
-                - { ev: "04 Jun 2026 · 18h59m · 6 seleções", odd: "BILHETE" }
 ---
 # Perfil do Apostador
 
