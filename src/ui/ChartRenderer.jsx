@@ -9,7 +9,8 @@ import IdentityCard from '../modules/perfil-apostador/charts/identity-card.jsx'
 import AnaliseRiscos from '../modules/perfil-apostador/charts/analise-riscos.jsx'
 import Transacoes from '../modules/perfil-apostador/charts/transacoes.jsx'
 import ScoreRisco from '../modules/perfil-apostador/charts/score-risco.jsx'
-import { Behavioral, ActionCard, AlertsFeed } from '../modules/perfil-apostador/charts/profile.jsx'
+import { ActionCard, AlertsFeed } from '../modules/perfil-apostador/charts/profile.jsx'
+import Comportamental from '../modules/perfil-apostador/charts/comportamental.jsx'
 import { C } from '../modules/perfil-apostador/charts/colors.js'
 
 const CHART_MAP = {
@@ -33,7 +34,7 @@ const CHART_MAP = {
   timeline:          InterventionTimeline,
   board:             InterventionBoard,
   ficha:             IdentityCard,
-  chips:             Behavioral,
+  comportamental:    Comportamental,
   acoes:             ActionCard,
   alertas:           AlertsFeed,
   transacoes:        Transacoes,

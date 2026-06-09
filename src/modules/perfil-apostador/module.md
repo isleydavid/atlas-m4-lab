@@ -407,21 +407,22 @@ componentes:
   - id: behavioral
     titulo: "Classificação Comportamental"
     status: existente
-    tamanho: { w: 4, h: 2 }
+    tamanho: { w: 4, h: 3 }
     visivel: true
+    recomendada: comportamental
     visualizacoes:
-      - tipo: chips
-        rotulo: "Chips com tendência"
-        subtitulo: "Sobe / cai"
-        info: "Classificação qualitativa com seta de tendência (subindo/caindo). Dá contexto rápido do comportamento."
+      - tipo: comportamental
+        rotulo: "Comportamental"
+        subtitulo: "Ícones + toggle de período"
+        info: "Classificação qualitativa das dimensões comportamentais com ícone, seta de tendência e detalhe numérico. Toggle 30D/90D/Histórico para contexto temporal."
         dados:
           itens:
-            - { k: "Depósitos",    v: "Alto",     tendencia: up   }
-            - { k: "Saques",       v: "Baixo",    tendencia: flat }
-            - { k: "Ticket Médio", v: "R$ 3,73",  tendencia: null }
-            - { k: "Frequência",   v: "Alta",     tendencia: up   }
-            - { k: "Ganhos",       v: "Baixo",    tendencia: down }
-            - { k: "Tipo",         v: "Múltipla", tendencia: null }
+            - { k: "Depósitos",     icone: dep,  v: "Alto",      detalhe: "R$ 1.234,00",  tendencia: up   }
+            - { k: "Saques",        icone: saq,  v: "Baixo",     detalhe: "R$ 0,00",      tendencia: flat }
+            - { k: "Ticket Médio",  icone: tick, v: "R$ 3,73",   detalhe: "vs R$ 2,10",   tendencia: up   }
+            - { k: "Frequência",    icone: freq, v: "Alta",      detalhe: "14 sessões",    tendencia: up   }
+            - { k: "Ganhos",        icone: gan,  v: "Baixo",     detalhe: "−R$ 230,00",   tendencia: down }
+            - { k: "Tipo de Aposta",icone: tipo, v: "Múltipla",  detalhe: "87% múltipla", tendencia: null }
 
   - id: intervention
     titulo: "Trilha de Intervenção"
