@@ -14,7 +14,7 @@ export function RiskVerdict({ dados }) {
         display: 'grid', placeItems: 'center',
       }}>
         <div style={{ width: 90, height: 90, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', textAlign: 'center' }}>
-          <div><div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1 }}>{pct}</div><div style={{ fontSize: 10, color: C.muted }}>de 100</div></div>
+          <div><div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1, fontFamily: 'var(--font-mono)' }}>{pct}</div><div style={{ fontSize: 10, color: C.muted }}>de 100</div></div>
         </div>
       </div>
       <div style={{ flex: 1 }}>
@@ -109,7 +109,7 @@ export function ScoreMultiLine({ dados }) {
 export function ScoreSparkline({ dados }) {
   return (
     <div className="body" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-      <div style={{ fontSize: 34, fontWeight: 800 }}>{dados.valor}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, fontFamily: 'var(--font-mono)' }}>{dados.valor}</div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <div style={{ flex: 1, minHeight: 0 }}>
           <ResponsiveContainer width="100%" height="100%">

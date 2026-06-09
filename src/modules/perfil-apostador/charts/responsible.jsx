@@ -39,7 +39,7 @@ export function RgGauge({ dados }) {
         display: 'grid', placeItems: 'center',
       }}>
         <div style={{ width: 78, height: 78, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center' }}>
-          <div style={{ textAlign: 'center' }}><div style={{ fontWeight: 800, fontSize: 22 }}>{v}</div><div style={{ fontSize: 10, color: C.muted }}>{dados.rotulo}</div></div>
+          <div style={{ textAlign: 'center' }}><div style={{ fontWeight: 800, fontSize: 20, fontFamily: 'var(--font-mono)' }}>{v}</div><div style={{ fontSize: 10, color: C.muted }}>{dados.rotulo}</div></div>
         </div>
       </div>
     </div>
