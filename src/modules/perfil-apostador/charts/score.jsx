@@ -110,11 +110,13 @@ export function ScoreSparkline({ dados }) {
   return (
     <div className="body" style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
       <div style={{ fontSize: 34, fontWeight: 800 }}>{dados.valor}</div>
-      <div style={{ flex: 1, height: '70%' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={dados.linhas}><Line type="monotone" dataKey="risco" stroke={C.orange} strokeWidth={2.5} dot={false} /></LineChart>
-        </ResponsiveContainer>
-        <div style={{ fontSize: 11, color: C.amber, fontWeight: 700 }}>▲ {dados.delta}</div>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={dados.linhas}><Line type="monotone" dataKey="risco" stroke={C.orange} strokeWidth={2.5} dot={false} /></LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ fontSize: 11, color: C.amber, fontWeight: 700, flexShrink: 0 }}>▲ {dados.delta}</div>
       </div>
     </div>
   )
