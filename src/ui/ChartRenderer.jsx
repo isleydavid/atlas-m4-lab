@@ -1,4 +1,4 @@
-import { ScoreFactors, ScoreWaterfall, ScoreEvolution, ScoreMultiLine, ScoreSparkline } from '../modules/perfil-apostador/charts/score.jsx'
+import { ScoreFactors, ScoreWaterfall, ScoreEvolution, ScoreMultiLine, ScoreSparkline, DimensionsBars } from '../modules/perfil-apostador/charts/score.jsx'
 import { RgSemaforo, RgRadar, RgGauge } from '../modules/perfil-apostador/charts/responsible.jsx'
 import { CashflowStacked, CashflowNet } from '../modules/perfil-apostador/charts/cashflow.jsx'
 
@@ -7,9 +7,10 @@ import { PeerBars, PeerPercentile, PeerRadar } from '../modules/perfil-apostador
 import { InterventionTimeline, InterventionBoard } from '../modules/perfil-apostador/charts/intervention.jsx'
 import IdentityCard from '../modules/perfil-apostador/charts/identity-card.jsx'
 import AnaliseRiscos from '../modules/perfil-apostador/charts/analise-riscos.jsx'
+import { VinculosTable } from '../modules/perfil-apostador/charts/vinculos.jsx'
 import Transacoes from '../modules/perfil-apostador/charts/transacoes.jsx'
 import ScoreRisco from '../modules/perfil-apostador/charts/score-risco.jsx'
-import { ActionCard, AlertsFeed } from '../modules/perfil-apostador/charts/profile.jsx'
+import { ActionCard, AlertsFeed, Behavioral } from '../modules/perfil-apostador/charts/profile.jsx'
 import Comportamental from '../modules/perfil-apostador/charts/comportamental.jsx'
 import { C } from '../modules/perfil-apostador/charts/colors.js'
 
@@ -33,6 +34,9 @@ const CHART_MAP = {
   radar_pares:       PeerRadar,
   timeline:          InterventionTimeline,
   board:             InterventionBoard,
+  chips:             Behavioral,
+  barras_dimensoes:  DimensionsBars,
+  tabela:            VinculosTable,
   ficha:             IdentityCard,
   comportamental:    Comportamental,
   acoes:             ActionCard,
