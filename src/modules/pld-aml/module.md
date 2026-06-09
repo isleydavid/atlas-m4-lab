@@ -9,19 +9,19 @@ componentes:
     titulo: "Indicadores PLD — MTD"
     subtitulo: "Jun/2026 · vaidebet"
     status: existente
+    recomendada: chips
     tamanho: { w: 12, h: 2 }
     visivel: true
     visualizacoes:
       - tipo: chips
         rotulo: "Grade de KPIs"
         subtitulo: "7 indicadores de compliance"
-        recomendada: true
         info: "Panorama PLD de relance: alertas abertos, SLA estourado, comunicações COAF e cobertura KYC. Ponto de partida do analista — define onde agir primeiro."
         dados:
           itens:
-            - { k: "Alertas PLD abertos", v: "34 ▲8 D/D", tendencia: up }
+            - { k: "Alertas PLD abertos", v: "34 ▲8 D/D", tendencia: null }
             - { k: "Casos em análise", v: "12", tendencia: null }
-            - { k: "SLA estourado (>30d)", v: "2 ⚠️", tendencia: up }
+            - { k: "SLA estourado (>30d)", v: "2 ⚠️", tendencia: null }
             - { k: "Comunicações COAF", v: "3 enviadas", tendencia: null }
             - { k: "Não-ocorrência 2026", v: "Pendente", tendencia: null }
             - { k: "% KYC classificados", v: "91,4%", tendencia: null }
@@ -31,14 +31,14 @@ componentes:
     titulo: "Avaliação de Risco · art. 14"
     subtitulo: "Matriz por categoria de apostador"
     status: existente
+    recomendada: heatmap
     tamanho: { w: 6, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: heatmap
         rotulo: "Heatmap de risco"
         subtitulo: "Categoria × nível de risco"
-        recomendada: true
-        info: "Avaliação interna de risco exigida pelo art. 14: probabilidade × impacto financeiro/jurídico/reputacional. Células mais quentes = concentração de risco que exige medidas reforçadas. PEP entra sempre na categoria alto."
+        info: "Avaliação interna de risco exigida pelo art. 14: probabilidade × impacto. Células mais quentes = concentração de risco que exige medidas reforçadas. PEP entra sempre na categoria alto."
         dados:
           matriz:
             - [12, 8, 3, 1]
@@ -50,14 +50,14 @@ componentes:
     titulo: "Estruturação · art. 25 XI"
     subtitulo: "Fracionamento de aportes/retiradas"
     status: existente
+    recomendada: histograma
     tamanho: { w: 6, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: histograma
         rotulo: "Histograma de faixas"
         subtitulo: "Depósitos por valor · pico abaixo de R$ 2k"
-        recomendada: true
-        info: "Detecta fracionamento (smurfing): aportes ou retiradas em curto intervalo de tempo que sugerem dissimulação da operação real (art. 25 XI). Concentração logo abaixo de faixas redondas é sinal clássico."
+        info: "Detecta fracionamento (smurfing): aportes em curto intervalo que sugerem dissimulação da operação real (art. 25 XI). Concentração logo abaixo de faixas redondas é sinal clássico."
         dados:
           barras:
             - { faixa: "< R$200", n: 6 }
@@ -73,14 +73,14 @@ componentes:
     titulo: "Pass-through dep↔saque · art. 25 XII"
     subtitulo: "Saque logo após depósito sem aposta efetiva"
     status: existente
+    recomendada: dispersao
     tamanho: { w: 6, h: 3 }
     visivel: true
     visualizacoes:
       - tipo: dispersao
         rotulo: "Dispersão dep × saque"
         subtitulo: "Cada ponto = 1 apostador"
-        recomendada: true
-        info: "Detecta uso da conta como passagem de recursos: retirada logo após o depósito, sem aposta efetiva (art. 25 XII). Pontos próximos à diagonal = passagem quase total dos fundos. PEPs e contas de alto risco destacados."
+        info: "Detecta uso da conta como passagem de recursos: retirada logo após o depósito, sem aposta efetiva (art. 25 XII). Pontos próximos à diagonal = passagem quase total dos fundos."
         dados:
           pontos:
             - { x: 1200, y: 1150, pld: 0.92, nome: "#A-48217" }
@@ -98,75 +98,89 @@ componentes:
     titulo: "Vínculos e Intermediários · art. 25 XIII–XVI"
     subtitulo: "Rede de contas conectadas"
     status: existente
+    recomendada: analise_riscos
     tamanho: { w: 6, h: 4 }
     visivel: true
     visualizacoes:
       - tipo: analise_riscos
         rotulo: "Grafo de vínculos"
-        subtitulo: "Dispositivo / IP / CPF compartilhado"
-        recomendada: true
-        info: "Detecta uso de conta por terceiro/intermediador ou laranjas (art. 25 XIII–XV) e conluio em bolsa de apostas com apostas opostas para transferência de valor (art. 25 XVI). Cada aresta é uma conexão verificada."
+        subtitulo: "Dispositivo / IP / aposta oposta"
+        info: "Detecta uso de conta por terceiro/intermediador ou laranjas (art. 25 XIII–XV) e conluio em bolsa de apostas com apostas opostas (art. 25 XVI). Cada aresta é uma conexão verificada."
         dados:
-          nos:
-            - { id: "A-48217", tipo: "apostador", risco: "alto",  label: "#A-48217" }
-            - { id: "A-48220", tipo: "apostador", risco: "alto",  label: "#A-48220" }
-            - { id: "A-48231", tipo: "apostador", risco: "medio", label: "#A-48231" }
-            - { id: "A-50883", tipo: "apostador", risco: "alto",  label: "#A-50883" }
-            - { id: "A-50884", tipo: "apostador", risco: "medio", label: "#A-50884" }
-            - { id: "A-51002", tipo: "apostador", risco: "medio", label: "#A-51002" }
-            - { id: "A-49771", tipo: "apostador", risco: "baixo", label: "#A-49771" }
-          arestas:
-            - { origem: "A-48217", destino: "A-48220", tipo: "dispositivo" }
-            - { origem: "A-48217", destino: "A-48231", tipo: "ip" }
-            - { origem: "A-48220", destino: "A-48231", tipo: "cpf_remetente" }
-            - { origem: "A-50883", destino: "A-50884", tipo: "aposta_oposta" }
-            - { origem: "A-50883", destino: "A-51002", tipo: "aposta_oposta" }
-            - { origem: "A-50883", destino: "A-49771", tipo: "aposta_oposta" }
+          vinculosMesmoIP: true
+          contasVinculadas: 5
+          conta:
+            nome: "Grupo Suspeito — #A-48217"
+            marca: "vaidebet"
+            cpf: "•••.•••.•••-17"
+            ip: "200.148.x.x"
+          score:
+            valor: 92
+            max: 100
+            critico: true
+          sinais:
+            - "Vínculos com mesmo dispositivo/IP"
+            - "Apostas opostas em bolsa (conluio)"
+          grafo:
+            nos:
+              - { id: "A-48217", x: 210, y: 85,  principal: true  }
+              - { id: "A-48220", x: 95,  y: 38,  principal: false }
+              - { id: "A-48231", x: 88,  y: 135, principal: false }
+              - { id: "A-50883", x: 330, y: 40,  principal: false }
+              - { id: "A-50884", x: 340, y: 135, principal: false }
+              - { id: "A-51002", x: 185, y: 160, principal: false }
+            arestas:
+              - ["A-48217", "A-48220"]
+              - ["A-48217", "A-48231"]
+              - ["A-48220", "A-48231"]
+              - ["A-50883", "A-50884"]
+              - ["A-50883", "A-51002"]
+          descricao: "3 contas compartilham mesmo dispositivo/IP (#A-48217, #A-48220, #A-48231). 3 contas com apostas opostas em bolsa (#A-50883 ↔ #A-50884, #A-51002)."
 
   - id: fila-casos
     titulo: "Fila de Análise · SLA 30 dias"
     subtitulo: "art. 26 §2 — encerrar em 30 dias da operação"
     status: existente
+    recomendada: timeline
     tamanho: { w: 8, h: 4 }
     visivel: true
     visualizacoes:
-      - tipo: board
-        rotulo: "Kanban de casos"
+      - tipo: timeline
+        rotulo: "Linha do tempo de casos"
         subtitulo: "Por estado de análise"
-        recomendada: true
-        info: "Fila auditável com SLA de 30 dias (art. 26 §2). Estados: Aberto → Em Análise → Comunicado (→ SISCOAF) ou Arquivado. Cada transição é logada com autor e timestamp (art. 32)."
+        info: "Fila auditável com SLA de 30 dias (art. 26 §2). Cada transição é logada com autor e timestamp (art. 32)."
         dados:
-          colunas:
-            - titulo: "Aberto"
-              itens:
-                - { titulo: "#C-2026-0620", sub: "#A-52014 · Estruturação · SLA 09/jul", cor: r }
-                - { titulo: "#C-2026-0619", sub: "#A-51998 · PEP · SLA 07/jul", cor: a }
-                - { titulo: "#C-2026-0618", sub: "#A-51887 · Pass-through · SLA 05/jul", cor: r }
-            - titulo: "Em análise"
-              itens:
-                - { titulo: "#C-2026-0612", sub: "#A-48217 · Estruturação · SLA 09/jul ⚠️", cor: r }
-                - { titulo: "#C-2026-0613", sub: "#A-50883 · Conluio · SLA 09/jul", cor: a }
-                - { titulo: "#C-2026-0614", sub: "#A-39105 · PEP · aguardando diligência", cor: a }
-            - titulo: "Comunicado"
-              itens:
-                - { titulo: "#C-2026-0589", sub: "#A-44092 · SISCOAF pendente", cor: a }
-                - { titulo: "#C-2026-0541", sub: "#A-40017 · SIS-877-2026", cor: g }
-            - titulo: "Arquivado"
-              itens:
-                - { titulo: "#C-2026-0503", sub: "#A-36654 · Sem indício · doc. 5 anos", cor: g }
-                - { titulo: "#C-2026-0488", sub: "#A-34002 · Diligência negativa", cor: g }
+          itens:
+            - { titulo: "#C-2026-0612 · SLA estourado ⚠️", sub: "#A-48217 · Estruturação · Em análise", cor: r }
+            - { titulo: "#C-2026-0613 · SLA 09/jul", sub: "#A-50883 · Conluio · Em análise", cor: a }
+            - { titulo: "#C-2026-0614 · Aguardando diligência", sub: "#A-39105 · PEP · Due diligence reforçada", cor: a }
+            - { titulo: "#C-2026-0589 · SISCOAF pendente", sub: "#A-44092 · Comunicado", cor: a }
+            - { titulo: "#C-2026-0541 · SIS-877-2026", sub: "#A-40017 · Enviado ao COAF", cor: g }
+            - { titulo: "#C-2026-0503 · Arquivado", sub: "#A-36654 · Sem indício · doc. 5 anos", cor: g }
+      - tipo: board
+        rotulo: "Sinais de status"
+        subtitulo: "Visão de chips"
+        info: "Resumo de status da fila em chips coloridos."
+        dados:
+          sinais:
+            - { nome: "#C-2026-0612 · SLA estourado", nivel: r }
+            - { nome: "#C-2026-0613 · Em análise", nivel: a }
+            - { nome: "#C-2026-0614 · Diligência", nivel: a }
+            - { nome: "#C-2026-0589 · SISCOAF pendente", nivel: a }
+            - { nome: "#C-2026-0541 · Enviado COAF", nivel: g }
+            - { nome: "#C-2026-0503 · Arquivado", nivel: g }
 
   - id: caso-drawer
     titulo: "Drawer de Caso"
     subtitulo: "Análise detalhada + rascunho SISCOAF"
     status: existente
+    recomendada: caso_drawer
     tamanho: { w: 4, h: 6 }
     visivel: true
     visualizacoes:
       - tipo: caso_drawer
         rotulo: "Drawer de caso PLD"
         subtitulo: "3 casos sintéticos · 3 desfechos"
-        recomendada: true
         info: "Instrutor de análise: sinais identificados, fatos observados, conclusão e rascunho da comunicação (art. 27 §2). Toda a base legal está atrás do 'i' — a tela mostra só os dados do caso."
         dados: {}
 
@@ -174,14 +188,14 @@ componentes:
     titulo: "Comunicações COAF/SISCOAF"
     subtitulo: "art. 27–28 suspeita · art. 30 não-ocorrência"
     status: existente
+    recomendada: comunicacoes
     tamanho: { w: 6, h: 4 }
     visivel: true
     visualizacoes:
       - tipo: comunicacoes
         rotulo: "Registro SISCOAF + SIGAP"
         subtitulo: "Suspeita e não-ocorrência"
-        recomendada: true
-        info: "Dois canais distintos: SISCOAF para comunicações de operações suspeitas (art. 28, até o dia útil seguinte à conclusão — art. 27 §3) e SIGAP para não-ocorrência anual (art. 30). Sigilo obrigatório — art. 29."
+        info: "Dois canais distintos: SISCOAF para operações suspeitas (art. 28) e SIGAP para não-ocorrência anual (art. 30). Sigilo obrigatório — art. 29."
         dados:
           siscoaf:
             - { id: "COM-2026-0031", caso: "#C-2026-0612", apostador: "#A-48217", status: "Enviada",   data: "11/jun/2026", canal: "SISCOAF", protocolo: "SIS-931-2026" }
@@ -200,7 +214,5 @@ componentes:
 Página de compliance/PLD-FTP do Atlas — implementa, em produto, os deveres da **Portaria SPA/MF nº 1.143/2024** sobre a Lei 9.613/1998 para operadores de apostas de quota fixa. Fiscalização e sanção em vigor desde 1º/jan/2025 (art. 36).
 
 Personas: Analista PLD/AML (`compliance_analyst`) · Encarregado/Diretor (`compliance_admin`) · Auditoria (`auditor`, read-only) · Diretoria (`exec_viewer`, KPIs).
-
-Fonte de dados: ClickHouse (≤ 90 dias, quente) para alertas e monitoramento · BigQuery (> 90 dias, frio) para casos encerrados, comunicações e trilha de auditoria de 5 anos (art. 32).
 
 Gates obrigatórios: explicabilidade de todo sinal/score · sigilo art. 29 (RBAC) · trilha com autor + timestamp · SLA 30 dias (art. 26 §2) · comunicação até dia útil seguinte (art. 27 §3) · não-ocorrência anual via SIGAP (art. 30).
