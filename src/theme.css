@@ -104,8 +104,8 @@ button{font-family:inherit}
 .otag{font-size:12px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:10px}
 .otag i{font-style:normal;color:var(--orange)}
 .star{margin-left:auto;font-size:10px;font-weight:800;color:#fff;background:var(--orange);padding:3px 8px;border-radius:999px;white-space:nowrap}
-.opt .preview{height:160px;width:100%;position:relative;overflow:hidden}
-.opt .preview>.body,.opt .preview>div{width:100%;height:100%}
+.opt .preview{width:100%;position:relative;min-height:220px;max-height:64vh;overflow:auto}
+.opt .preview>.body,.opt .preview>div{width:100%;height:auto;min-height:260px}
 .ocap{font-size:11px;color:var(--muted);margin-top:9px;min-height:28px}
 .interp{display:flex;gap:12px;align-items:flex-start;background:#FAFAFB;border:1px solid var(--line);border-radius:13px;padding:13px 15px}
 .interp .eye{width:26px;height:26px;flex:0 0 auto;border-radius:8px;background:var(--orange);color:#fff;display:grid;place-items:center;font-size:14px}

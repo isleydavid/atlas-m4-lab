@@ -30,7 +30,7 @@ export default function InfoModal({ slot, currentKey, onClose }) {
                   <i>{LETTERS[i]}</i>{opt.label}
                   {opt.recomendada && <span className="star">★ Recomendado</span>}
                 </div>
-                <div className="preview" style={{ width: '100%', height: 160, position: 'relative', overflow: 'hidden' }}>
+                <div className="preview" style={{ width: '100%', position: 'relative' }}>
                   <opt.Component dados={opt.dados} />
                 </div>
                 {opt.nota && <div className="ocap">{opt.nota}</div>}
