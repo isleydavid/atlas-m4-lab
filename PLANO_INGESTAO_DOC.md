@@ -43,10 +43,15 @@ modulo:
   nome: "Perfil do Apostador"
   icone: user
 dados_disponiveis: [deposito_total, saque_total, score_risco, vinculos, transacoes]
+secoes:                          # ordem + títulos visíveis das seções
+  - { id: resumo, titulo: "Resumo" }
+  - { id: risco, titulo: "Risco" }
+  - { id: financeiro, titulo: "Financeiro" }
 componentes:
   - id: verdict
     titulo: "Veredito de Risco"
     subtitulo: "Score consolidado"
+    secao: resumo                # a qual seção pertence (ver `secoes`)
     status: existente            # existente | novo
     tamanho: { w: 4, h: 2 }
     visivel: true
@@ -57,6 +62,7 @@ componentes:
         dados: { valor: 64, max: 100, rotulo: "RISCO MÉDIO-ALTO", delta: "+19 em 7d" }
   - id: cashflow
     titulo: "Fluxo de Caixa"
+    secao: financeiro
     status: novo
     tamanho: { w: 7, h: 3 }
     visivel: true
@@ -119,11 +125,14 @@ que despacha para o tipo certo. Tipos mínimos e o formato de `dados` de cada um
   `Component = ChartRenderer` ligado a `{tipo, dados}`).
 - O `dados_disponiveis` é informativo (pode virar uma seção "dados da página" / ajudar a IA).
 
-## 7. Organização da página
+## 7. Organização da página — seções nomeadas
 
-- Mantém-se o sistema atual: **mosaico** (define os tamanhos) + **⋮** em cada card
-  (trocar tipo de gráfico / ocultar). **Drag-and-drop foi descartado** — sem reordenar
-  arrastando. A ordem dos blocos segue a ordem dos componentes no manifesto.
+- A página é dividida em **seções com cabeçalho visível**, definidas em `secoes` no manifesto
+  (ordem + título). Cada componente declara a que `secao` pertence.
+- **Renderização:** para cada seção → um cabeçalho (no design system) + o grid de 12 colunas
+  com os cards daquela seção, dimensionados pelo `tamanho` (w/h) de cada componente.
+- Mosaico/⋮ continuam para ajustar a visualização; **drag-and-drop descartado** (sem arrastar).
+- Componentes sem `secao` caem numa seção padrão sem título, no fim.
 
 ## 8. Aprovação da página
 
@@ -161,6 +170,7 @@ Assim o doc não precisa de formato rígido — a IA o traduz para o manifesto.
 - [ ] Um `module.md` (manifesto) renderiza a página inteira do módulo.
 - [ ] Componentes mostram selo `novo`/`existente` e respeitam o design system.
 - [ ] Um dado pode ter mais de uma visualização (troca pelo ⋮).
+- [ ] Componentes aparecem agrupados em **seções nomeadas**, na ordem de `secoes`.
 - [ ] Página pode ser aprovada e exportada como HTML autocontido.
 - [ ] `npm run build` passa; deploy funciona.
 

@@ -19,10 +19,10 @@ export const MOSAICS = [
   {
     id: 'duas-colunas',
     name: 'Duas colunas',
-    desc: 'Largo + estreito alternados',
-    mode: 'repeat',
-    pattern: [{ w: 8, h: 3 }, { w: 4, h: 3 }],
-    fallback: { w: 4, h: 3 },
+    desc: '4 cards em 2 colunas, depois largura total',
+    mode: 'prefix',
+    pattern: [{ w: 6, h: 3 }, { w: 6, h: 3 }, { w: 6, h: 3 }, { w: 6, h: 3 }],
+    fallback: { w: 12, h: 3 },
   },
   {
     id: 'destaque',
