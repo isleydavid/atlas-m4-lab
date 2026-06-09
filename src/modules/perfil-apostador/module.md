@@ -493,11 +493,50 @@ componentes:
   - id: transactions
     titulo: "Transações / Bilhetes"
     status: existente
-    tamanho: { w: 8, h: 3 }
-    visivel: false
+    tamanho: { w: 12, h: 4 }
+    visivel: true
+    recomendada: transacoes
+    recomendacao: "A (painel completo com abas) para análise do histórico financeiro; B para evidência bruta de apostas."
     visualizacoes:
+      - tipo: transacoes
+        rotulo: "Painel de transações"
+        subtitulo: "Dep · Saq · Cas · Esp"
+        info: "Visão completa do histórico financeiro com abas por tipo. Depósitos e saques revelam padrão de funding; Esportivas mostra os bilhetes detalhados."
+        dados:
+          periodo: "08 jun – 09 jun 2026"
+          rodape: "07/06/2026 — 08/06/2026"
+          abas:
+            - id: depositos
+              label: "Depósitos"
+              tipo: fin
+              itens:
+                - { tipo: "Depósito", data: "09 Jun 2026", status: "Aprovado", marca: "vaidebet-ngx", id: "6a2778cd80949b25909559e0", valor: "R$ 10,00", tempo: "02h 22m" }
+                - { tipo: "Depósito", data: "09 Jun 2026", status: "Pendente", marca: "vaidebet-ngx", id: "06adbcb1-9dcb-48ec-8a30-31d2baa7f33a", valor: "R$ 10,00", tempo: "02h 22m" }
+                - { tipo: "Depósito", data: "09 Jun 2026", status: "Aprovado", marca: "vaidebet-ngx", id: "6a2778cd80949b25909559e0", valor: "R$ 10,00", tempo: "02h 22m" }
+            - id: saques
+              label: "Saques"
+              tipo: fin
+              itens: []
+            - id: cassino
+              label: "Cassino"
+              tipo: fin
+              itens: []
+            - id: esportivas
+              label: "Esportivas"
+              tipo: esp
+              itens:
+                - titulo: "Aposta Múltipla"
+                  status: "NÃO PREMIADO"
+                  legs:
+                    - { ev: "Rússia x Burkina Faso · GOALS_OVER_UNDER", odd: "1.24" }
+                    - { ev: "Canadá x Irlanda · GOALS_OVER_UNDER",      odd: "1.34" }
+                    - { ev: "Geórgia x Bahrain · GOALS_OVER_UNDER",     odd: "1.20" }
+                - titulo: "Aposta Múltipla"
+                  status: "NÃO PREMIADO"
+                  legs:
+                    - { ev: "04 Jun 2026 · 18h59m · 6 seleções", odd: "BILHETE" }
       - tipo: bilhetes
-        rotulo: "Lista de bilhetes"
+        rotulo: "Bilhetes esportivos"
         subtitulo: "Evidência bruta"
         info: "Evidência bruta das apostas — a base que sustenta os scores e a Explainable AI."
         dados:
