@@ -12,7 +12,7 @@ function fmtData(iso) {
 }
 
 export default function ModulePage() {
-  const { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType, onHide, onReset, aprovada, dataAprovacao, aprovar } = useOutletContext()
+  const { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType, onHide, onReset, aprovada, dataAprovacao, aprovar, onMoveSlot, onMoveToSection, sections } = useOutletContext()
 
   if (!activeModule || activeModule.status === 'soon') {
     return (
@@ -72,7 +72,7 @@ export default function ModulePage() {
           </a>
         </div>
       </div>
-      <Dashboard slots={slots} state={slotState} mosaic={activeMosaic} onChangeType={onChangeType} onHide={onHide} />
+      <Dashboard slots={slots} state={slotState} mosaic={activeMosaic} onChangeType={onChangeType} onHide={onHide} onMoveSlot={onMoveSlot} onMoveToSection={onMoveToSection} sections={sections} />
     </main>
   )
 }

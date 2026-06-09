@@ -62,7 +62,7 @@ export default function Layout() {
   const activeModule = MODULES.find((m) => m.id === moduleId) || null
   const slots = activeModule?.slots ?? []
 
-  const { slotState, mosaic, setMosaic, setType, toggle, hide, setAll, reset, aprovada, dataAprovacao, aprovar } = useModuleState(moduleId, slots)
+  const { slotState, slotSections, orderedSlots, mosaic, setMosaic, setType, toggle, hide, setAll, reset, moveSlot, moveToSection, aprovada, dataAprovacao, aprovar } = useModuleState(moduleId, slots)
   const [custom, setCustom] = useState(loadCustom)
   const [editing, setEditing] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -90,13 +90,24 @@ export default function Layout() {
   }, [])
 
   const allMosaics = [...MOSAICS, ...custom]
-  const byId = Object.fromEntries(slots.map((s) => [s.id, s]))
   const activeMosaic = allMosaics.find((m) => m.id === mosaic) || MOSAICS[0]
   const activeCount = slots.filter((s) => slotState[s.id]?.visible).length
   const currentLabel = (s) => (s.options.find((x) => x.key === slotState[s.id]?.type) || s.options[0]).label
-  const groupedIds = new Set(GROUPS.flatMap(([, ids]) => ids))
-  const ungroupedSlots = slots.filter((s) => !groupedIds.has(s.id))
   const isReady = activeModule?.status === 'ready'
+
+  const slotToSection = (id) => {
+    if (slotSections[id]) return slotSections[id]
+    const grp = GROUPS.find(([, ids]) => ids.includes(id))
+    return grp ? grp[0] : null
+  }
+  const sidebarGroups = GROUPS.map(([cat]) => [cat, orderedSlots.filter((s) => slotToSection(s.id) === cat)]).filter(([, sl]) => sl.length > 0)
+  const ungroupedInOrder = orderedSlots.filter((s) => slotToSection(s.id) === null)
+  const moduleSections = sidebarGroups.map(([cat]) => cat)
+
+  const onMoveToSection = (slotId, sectionName) => {
+    const targetIds = orderedSlots.filter((s) => slotToSection(s.id) === sectionName).map((s) => s.id)
+    moveToSection(slotId, sectionName, targetIds)
+  }
 
   const saveMosaic = (m) => { setCustom((prev) => [...prev.filter((x) => x.id !== m.id), m]); setMosaic(m.id); setEditing(false) }
   const deleteMosaic = (id) => {
@@ -104,7 +115,7 @@ export default function Layout() {
     setMosaic((cur) => (cur === id ? DEFAULT_MOSAIC : cur))
   }
 
-  const outletContext = { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType: setType, onHide: hide, onReset: reset, aprovada, dataAprovacao, aprovar }
+  const outletContext = { slots: orderedSlots, slotState, allMosaics, activeMosaic, activeModule, onChangeType: setType, onHide: hide, onReset: reset, aprovada, dataAprovacao, aprovar, onMoveSlot: moveSlot, onMoveToSection, sections: moduleSections }
   const showFeed = moduleId === 'perfil-apostador'
   const feedProps = { ocorrencias, collapsed: feedCollapsed, onCollapse: () => setFeedCollapsed((v) => !v) }
 
@@ -159,25 +170,21 @@ export default function Layout() {
             <button onClick={() => setAll(true)}>Ativar tudo</button>
             <button onClick={() => setAll(false)}>Desativar tudo</button>
           </div>
-          {GROUPS.map(([cat, ids]) => {
-            const groupSlots = ids.map((id) => byId[id]).filter(Boolean)
-            if (groupSlots.length === 0) return null
-            return (
-              <div key={cat}>
-                <div className="cat sub">{cat}</div>
-                {groupSlots.map((s) => {
-                  const on = slotState[s.id]?.visible
-                  return (
-                    <div className={`toggle-row ${on ? '' : 'off'}`} key={s.id}>
-                      <span className={`sw ${on ? 'on' : ''}`} onClick={() => toggle(s.id)} />
-                      <div className="nm">{s.title}<small>{on ? currentLabel(s) : 'inativo'}</small></div>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
-          {ungroupedSlots.map((s) => {
+          {sidebarGroups.map(([cat, groupSlots]) => (
+            <div key={cat}>
+              <div className="cat sub">{cat}</div>
+              {groupSlots.map((s) => {
+                const on = slotState[s.id]?.visible
+                return (
+                  <div className={`toggle-row ${on ? '' : 'off'}`} key={s.id}>
+                    <span className={`sw ${on ? 'on' : ''}`} onClick={() => toggle(s.id)} />
+                    <div className="nm">{s.title}<small>{on ? currentLabel(s) : 'inativo'}</small></div>
+                  </div>
+                )
+              })}
+            </div>
+          ))}
+          {ungroupedInOrder.map((s) => {
             const on = slotState[s.id]?.visible
             return (
               <div className={`toggle-row ${on ? '' : 'off'}`} key={s.id}>

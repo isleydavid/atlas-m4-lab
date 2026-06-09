@@ -7,7 +7,7 @@ const STATUS = {
   new: { cls: 'st-new', label: 'Novo' },
 }
 
-export default function Card({ slot, typeKey, onChangeType, onHide }) {
+export default function Card({ slot, typeKey, onChangeType, onHide, slotIndex, totalSlots, onMoveSlot, onMoveToSection, sections }) {
   const opt = slot.options.find((o) => o.key === typeKey) || slot.options[0]
   const { Component } = opt
   const s = STATUS[opt.status]
@@ -21,7 +21,8 @@ export default function Card({ slot, typeKey, onChangeType, onHide }) {
         <div className="ch-r">
           {s && <span className={`st ${s.cls}`}>{s.label}</span>}
           <InfoButton slot={slot} opt={opt} />
-          <Kebab slot={slot} typeKey={opt.key} onChangeType={onChangeType} onHide={onHide} />
+          <Kebab slot={slot} typeKey={opt.key} onChangeType={onChangeType} onHide={onHide}
+            slotIndex={slotIndex} totalSlots={totalSlots} onMoveSlot={onMoveSlot} onMoveToSection={onMoveToSection} sections={sections} />
         </div>
       </div>
       <Component dados={opt.dados} />
