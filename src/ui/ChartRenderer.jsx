@@ -6,7 +6,8 @@ import { VinculosGraph, VinculosTable } from '../modules/perfil-apostador/charts
 import { PldHistogram, PldScatter, PldHeatmap } from '../modules/perfil-apostador/charts/pld.jsx'
 import { PeerBars, PeerPercentile, PeerRadar } from '../modules/perfil-apostador/charts/peer.jsx'
 import { InterventionTimeline, InterventionBoard } from '../modules/perfil-apostador/charts/intervention.jsx'
-import { IdentityCard, Behavioral, ActionCard, AlertsFeed, Transactions } from '../modules/perfil-apostador/charts/profile.jsx'
+import IdentityCard from '../modules/perfil-apostador/charts/identity-card.jsx'
+import { Behavioral, ActionCard, AlertsFeed, Transactions } from '../modules/perfil-apostador/charts/profile.jsx'
 import { C } from '../modules/perfil-apostador/charts/colors.js'
 
 const CHART_MAP = {

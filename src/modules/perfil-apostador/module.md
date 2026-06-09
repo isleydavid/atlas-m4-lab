@@ -19,14 +19,25 @@ componentes:
           iniciais: "EP"
           nome: "EVANDRO PANTA"
           email: "ev••••••••••@gmail.com"
+          kyc:
+            texto: "KYC Verificado"
+            verificado: true
+          documento: "•••.•••.•••-••"
+          marca: "vaidebet-ngx"
+          dataRegistro: "22/05/2026"
+          dataCaso: "Nenhum caso analisado"
+          telefone: "•••••••2338"
+          ultimoAcesso: "05/06 · 17:13"
+          id: "6a0fef2e60857e6c1bd388ee"
           alertas: 15
-          campos:
-            - ["Documento", "•••.•••.•••-••"]
-            - ["Marca", "vaidebet-ngx"]
-            - ["Telefone", "•••••••2338"]
-            - ["Registro", "22/05/2026"]
-            - ["Último acesso", "05/06 · 17:13"]
-            - ["Saldo", "R$ 1,00"]
+          depositos:
+            valor: "R$ 0,00"
+            transacoes: "0 transações"
+          saques:
+            valor: "R$ 0,00"
+            transacoes: "0 transações"
+          saldo:
+            valor: "R$ 1,00"
 
   - id: verdict
     titulo: "Veredito de Risco"
