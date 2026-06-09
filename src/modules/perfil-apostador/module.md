@@ -40,14 +40,36 @@ componentes:
             valor: "R$ 1,00"
 
   - id: verdict
-    titulo: "Veredito de Risco"
+    titulo: "Score de Risco"
     status: existente
-    tamanho: { w: 4, h: 2 }
+    tamanho: { w: 4, h: 5 }
     visivel: true
+    recomendada: score_risco
     visualizacoes:
+      - tipo: score_risco
+        rotulo: "Score de Risco completo"
+        subtitulo: "Donut + dimensões + sinais"
+        info: "Visão completa do risco: score consolidado em donut, 3 dimensões com barra de progresso e sinais de alerta. Toggle para ver a tendência em linha."
+        dados:
+          valor: 91
+          max: 100
+          faixa: "RISCO BAIXO"
+          delta: "▲ +6 em 7 dias"
+          serie: [70, 74, 78, 83, 86, 88, 91]
+          dimensoes:
+            - { nome: "Financeiro",       valor: 100 }
+            - { nome: "PLD / AML",        valor: 100 }
+            - { nome: "Jogo Responsável", valor: 35  }
+          sinais:
+            - tipo: warn
+              titulo: "Alto volume financeiro"
+              desc: "O apostador apresenta movimentação elevada de depósitos ou saques na janela atual."
+            - tipo: link
+              titulo: "Ganhos elevados em cassino"
+              desc: "O perfil dominante em cassino registrou ganhos acima do benchmark da marca."
       - tipo: donut
         rotulo: "Donut + tendência"
-        subtitulo: "Score consolidado"
+        subtitulo: "Score consolidado (compacto)"
         info: "O número-resumo do risco. A seta de tendência mostra se está piorando — o usuário decide num olhada se o caso merece atenção agora."
         dados:
           valor: 64
