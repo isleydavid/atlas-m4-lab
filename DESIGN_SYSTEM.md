@@ -110,24 +110,48 @@ Regras-chave para **não cortar**:
 
 ---
 
-## 6. Breakpoints (resumo)
+## 6. Breakpoints (por tamanho de tela — 13" / 14" / 21" / 27")
 
-| Largura | Layout |
-|---|---|
-| ≥ 1200px | 3 colunas completas; grid cheio |
-| 1100–1199px | esconde sidebar de Ocorrências |
-| 768–1099px | nav vira ícones/drawer; grid reduz colunas |
-| < 768px | tudo empilhado em 1 coluna; sidebars viram drawer/topo |
+> O CSS responde à **largura em px do navegador**, não às polegadas (há scaling do SO).
+> Abaixo, a largura CSS efetiva típica de cada classe de tela.
 
-Usar `clamp()` para paddings que respiram (ex.: `padding: clamp(16px, 2vw, 24px)`) e evitar valores fixos que estouram em telas pequenas.
+**Modo de largura: PREENCHER (dashboard operacional / TV).** O conteúdo **ocupa a largura toda**
+(sem `max-width` travando) — só gutters laterais. Em telas muito grandes, **escala para cima**
+(fonte/espaçamento/altura) em vez de deixar campos largos demais ou cards minúsculos.
+
+| Tela | Largura CSS | Layout |
+|---|---|---|
+| **TV / 4K** | ≥ 2560 | Preenche tudo; densidade **"tv"** (fonte +20–30%, cards maiores) p/ leitura de longe. |
+| **27"** (QHD ~2560) | 1920–2559 | Preenche tudo; densidade **"amplo"** (fonte/espaçamento maiores). |
+| **21"** (FHD 1920) | 1680–1919 | Preenche tudo; 3 colunas completas; densidade "confortável". |
+| **14"** (Pro 14 ~1512) | 1440–1679 | 3 colunas cabem; Ocorrências visível. |
+| **13"** (~1280) | 1200–1439 | **Esconde** a sidebar de Ocorrências (vira botão); nav enxuta; main ocupa o resto. |
+| Tablet | 768–1199 | Nav vira ícones/drawer; grid reduz colunas. |
+| Mobile | < 768 | Tudo empilha em 1 coluna; sidebars viram drawer/topo. |
+
+**Regras-chave:**
+- **Esticar e escalar** nas telas grandes (não travar largura). Usar `clamp()` na fonte base e no espaçamento, atrelados a `vw`, para crescer com a tela: ex. `--fs-scale` sobe em 1920/2560.
+- **Telas pequenas (13"): priorizar o principal.** Somem elementos secundários (Ocorrências) para o main respirar; nada de scroll horizontal.
+- Sidebars com largura fixa; **só o main é fluido** (`flex:1; min-width:0`), preenchendo a sobra.
+- (Opcional) **modo "Leitura"**: um toggle que aplica `max-width:1328px` quando o conteúdo for muito textual — mas o **default é preencher**.
+
+```css
+/* esqueleto: preencher + escalar */
+.content{ width:100%; padding-inline: clamp(16px, 2vw, 40px); }   /* sem max-width travando */
+@media (min-width:1920px){ :root{ --fs-scale:1.12; --dash-row:120px; --gap-sec:28px } } /* 21"/27" */
+@media (min-width:2560px){ :root{ --fs-scale:1.28; --dash-row:140px; --gap-sec:32px } } /* TV/4K */
+@media (max-width:1439px){ .feed-occ{ display:none } }            /* 13": esconde Ocorrências */
+@media (max-width:1199px){ .nav{ /* ícones/drawer */ } }
+@media (max-width:767px){ .dash{ grid-template-columns:1fr } }    /* empilha */
+```
 
 ---
 
 ## 7. Notas para o Claude Code
 
 - Centralizar tudo em **CSS variables** no `theme.css` (já existe) usando os tokens da seção 1.
-- A coluna principal deve ser **fluida** (`flex:1; min-width:0`) com `max-width:1200px` no conteúdo — esta é a correção principal do "desproporcional".
+- A coluna principal é **fluida** (`flex:1; min-width:0`) e **preenche a largura toda** (sem `max-width` travando) — dashboard operacional / TV. Nas telas grandes, **escalar** fonte/espaçamento (não travar). O "desproporcional" se resolve pela fonte (Saira) + escala, não por travar largura.
 - Trocar `grid-auto-rows: 96px` (fixo) por `minmax(96px, auto)` + `overflow:auto` no `.body` dos cards (corrige cortes).
-- Garantir `box-sizing: border-box` global (já está) e testar em 1280, 1024 e 375px sem corte/scroll horizontal.
+- Garantir `box-sizing: border-box` global (já está) e **testar nas larguras das 4 telas: 1280 (13"), 1512 (14"), 1920 (21") e 2560 (27")** — sem corte nem scroll horizontal, e sem o conteúdo esticar nas grandes.
 - Sidebar de Ocorrências e nav só existem no layout de produção; no Lab, manter a sidebar de controle e a área de conteúdo seguindo estes tokens.
 ```

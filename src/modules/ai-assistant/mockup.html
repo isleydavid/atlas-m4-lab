@@ -1,0 +1,151 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#f26122; --orange-soft:#FDEEE7; --text:#3c3f44; --label:#8C93A1;
+    --muted:#AEB4BF; --line:#ededed; --rowbg:#F7F7F8; --green:#2E9E5B; --amber:#E0901F; --red:#E5484D;
+    --chipbg:#F1F2F4;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#f9f9f9;font-family:"Saira",-apple-system,BlinkMacSystemFont,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--text)}
+  svg{display:block}
+  .page{max-width:1180px;margin:0 auto;padding:26px 28px 40px}
+  .mono{font-family:"Geist Mono",monospace}
+  /* header */
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  h1{margin:0;font-size:26px;font-weight:700}
+  .sub{font-size:15px;color:var(--label);margin-top:5px}
+  .aiflag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--amber);background:#FBF3E2;border:1px solid #F2E2BE;padding:7px 12px;border-radius:999px;white-space:nowrap}
+  /* NL bar */
+  .nlbar{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 4.8px rgba(0,0,0,.04);padding:16px 18px}
+  .nlrow{display:flex;align-items:center;gap:12px}
+  .spark{color:var(--orange);flex:0 0 auto}
+  .nlinput{flex:1;font-size:16px;color:var(--text);border:none;outline:none;font-family:inherit;background:transparent}
+  .gen{background:var(--orange);color:#fff;border:none;border-radius:11px;padding:12px 20px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px}
+  .atalhos{display:flex;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .atalhos .lb{font-size:12.5px;color:var(--muted);margin-right:2px}
+  .chip{font-size:12.5px;font-weight:600;color:var(--text);background:var(--chipbg);padding:7px 12px;border-radius:999px}
+  /* query card */
+  .qcard{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 2px 4.8px rgba(0,0,0,.04);padding:16px 18px}
+  .qhead{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .qhead h3{margin:0;font-size:16px;font-weight:700}
+  .qhead .edit{font-size:11.5px;font-weight:600;color:var(--green);background:#E7F4EC;padding:4px 10px;border-radius:999px}
+  .qhead .conf{margin-left:auto;font-size:12px;color:var(--label)}
+  .conds{display:flex;flex-wrap:wrap;gap:9px}
+  .cond{display:flex;align-items:center;gap:8px;background:#FFF7F3;border:1px solid var(--orange-line,#F6CDB8);border-radius:10px;padding:8px 11px;font-size:13.5px}
+  .cond .k{color:var(--label)} .cond .op{color:var(--muted);font-weight:700} .cond .val{font-weight:700}
+  .cond .x{color:var(--muted);cursor:pointer;margin-left:2px}
+  .addcond{display:flex;align-items:center;gap:6px;border:1px dashed var(--muted);color:var(--label);border-radius:10px;padding:8px 11px;font-size:13px;font-weight:600;background:#fff}
+  .qfoot{display:flex;align-items:center;justify-content:space-between;margin-top:16px}
+  .qraw{font-size:12px;color:var(--muted)}
+  .run{background:var(--orange);color:#fff;border:none;border-radius:11px;padding:11px 20px;font-size:14.5px;font-weight:700;cursor:pointer}
+  /* results */
+  .rhead{display:flex;align-items:center;gap:14px;margin-top:24px}
+  .seg{display:flex;background:var(--chipbg);border-radius:10px;padding:4px;gap:3px}
+  .seg b{padding:8px 14px;border-radius:8px;font-size:13.5px;font-weight:700;color:var(--label)}
+  .seg b.on{background:var(--orange);color:#fff}
+  .count{font-size:14px;color:var(--label)}
+  .ractions{margin-left:auto;display:flex;gap:8px}
+  .act{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 13px;font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px}
+  .act.prim{background:var(--orange);color:#fff;border:none}
+  /* cohort rows */
+  .cohort{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+  .pr{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 16px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+  .pr .nm{display:flex;align-items:center;gap:9px;font-size:15.5px;font-weight:700}
+  .pr .dot{width:9px;height:9px;border-radius:50%;background:var(--orange)}
+  .pr .tag{font-size:11px;font-weight:600;color:var(--orange);background:var(--orange-soft);padding:3px 9px;border-radius:7px}
+  .pr .cpf{font-size:12.5px;color:var(--label);margin-top:6px}
+  .pr .why{margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}
+  .why .wlb{font-size:12px;color:var(--muted);margin-right:2px}
+  .fchip{font-size:11.5px;font-weight:600;color:#9a4a1f;background:#FBEDE4;border:1px solid #F3D5C2;padding:4px 9px;border-radius:7px}
+  .pr .scorebox{text-align:right;flex:0 0 auto}
+  .pr .score{font-size:20px;font-weight:800;color:var(--red)}
+  .pr .slabel{font-size:11px;font-weight:700;color:var(--red);background:#FDECEC;padding:3px 9px;border-radius:999px;margin-top:4px;display:inline-block}
+  .foot{font-size:12.5px;color:var(--muted);margin-top:18px;display:flex;align-items:center;gap:8px}
+</style></head>
+<body>
+<div class="page">
+  <div class="head">
+    <div>
+      <h1>AI Assistant</h1>
+      <div class="sub">Pergunte em linguagem natural — a IA gera uma consulta editável e devolve uma coorte explicável.</div>
+    </div>
+    <span class="aiflag">✦ Utiliza IA. Verifique os resultados.</span>
+  </div>
+
+  <!-- NL input -->
+  <div class="nlbar">
+    <div class="nlrow">
+      <span class="spark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></span>
+      <input class="nlinput" value="apostadores da vaidebet com alto volume financeiro e ganhos elevados em cassino nos últimos 30 dias, ainda sem flag de risco">
+      <button class="gen">Gerar consulta ›</button>
+    </div>
+    <div class="atalhos">
+      <span class="lb">Atalhos:</span>
+      <span class="chip">GGR negativos</span><span class="chip">Saldo em conta</span><span class="chip">Net de ontem</span><span class="chip">Chasing sem bloqueio</span><span class="chip">Acima do limite COAF</span>
+    </div>
+  </div>
+
+  <!-- Atlas Query (visível + editável) -->
+  <div class="qcard">
+    <div class="qhead">
+      <h3>Consulta estruturada (Atlas Query)</h3>
+      <span class="edit">editável</span>
+      <span class="conf">Confiança da tradução: <b style="color:var(--green)">alta</b></span>
+    </div>
+    <div class="conds">
+      <span class="cond"><span class="k">marca</span><span class="op">=</span><span class="val">vaidebet-ngx</span><span class="x">✕</span></span>
+      <span class="cond"><span class="k">volume_financeiro</span><span class="op">≥</span><span class="val">alto</span><span class="x">✕</span></span>
+      <span class="cond"><span class="k">ganhos_cassino</span><span class="op">=</span><span class="val">elevados</span><span class="x">✕</span></span>
+      <span class="cond"><span class="k">janela</span><span class="op">=</span><span class="val">últimos 30 dias</span><span class="x">✕</span></span>
+      <span class="cond"><span class="k">flag_risco</span><span class="op">=</span><span class="val">nenhuma</span><span class="x">✕</span></span>
+      <span class="addcond">+ Adicionar condição</span>
+    </div>
+    <div class="qfoot">
+      <span class="qraw mono">SELECT apostador WHERE marca='vaidebet-ngx' AND volume≥alto AND ganhos_cassino='elevados' AND janela=30d AND flag_risco IS NULL</span>
+      <button class="run">Rodar consulta</button>
+    </div>
+  </div>
+
+  <!-- Resultado -->
+  <div class="rhead">
+    <div class="seg"><b class="on">Coorte (por pessoa)</b><b>Agregado</b></div>
+    <span class="count">23 apostadores · RBAC aplicado</span>
+    <div class="ractions">
+      <span class="act">Salvar segmento</span>
+      <span class="act">Encaminhar p/ caso</span>
+      <span class="act">Agendar</span>
+      <span class="act prim">Exportar (c/ timestamp)</span>
+    </div>
+  </div>
+
+  <div class="cohort">
+    <div class="pr">
+      <div>
+        <div class="nm"><span class="dot"></span>EVANDRO P. <span class="tag">vaidebet-ngx</span></div>
+        <div class="cpf">CPF: •••.•••.•••-70 · <span class="mono">id 6a0f…c8fb</span></div>
+        <div class="why"><span class="wlb">Por quê:</span><span class="fchip">Alto volume financeiro</span><span class="fchip">Ganhos cassino +38%</span><span class="fchip">Horário atípico</span></div>
+      </div>
+      <div class="scorebox"><div class="score">82</div><span class="slabel">RISCO ALTO</span></div>
+    </div>
+    <div class="pr">
+      <div>
+        <div class="nm"><span class="dot"></span>ADIEL F. <span class="tag">vaidebet-ngx</span></div>
+        <div class="cpf">CPF: •••.•••.•••-10 · <span class="mono">id 7c21…a90b</span></div>
+        <div class="why"><span class="wlb">Por quê:</span><span class="fchip">Ganhos cassino +52%</span><span class="fchip">Conta vinculada (IP)</span></div>
+      </div>
+      <div class="scorebox"><div class="score">77</div><span class="slabel">RISCO ALTO</span></div>
+    </div>
+    <div class="pr">
+      <div>
+        <div class="nm"><span class="dot"></span>REGINALDO S. <span class="tag">vaidebet-ngx</span></div>
+        <div class="cpf">CPF: •••.•••.•••-29 · <span class="mono">id 9b03…2fa1</span></div>
+        <div class="why"><span class="wlb">Por quê:</span><span class="fchip">Alto volume financeiro</span><span class="fchip">Aceleração de depósitos</span></div>
+      </div>
+      <div class="scorebox"><div class="score">71</div><span class="slabel">RISCO ALTO</span></div>
+    </div>
+  </div>
+
+  <div class="foot"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/></svg>Consulta gerada por IA · dados mascarados (LGPD) · tudo logado com autor e timestamp.</div>
+</div>
+</body></html>

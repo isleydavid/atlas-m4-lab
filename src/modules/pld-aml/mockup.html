@@ -1,0 +1,252 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlas · M7 — PLD/AML</title>
+<link href="https://fonts.googleapis.com/css2?family=Saira:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --orange:#f26122; --orange-soft:#FDEEE7; --orange-line:#F6CDB8;
+    --text:#3c3f44; --ink:#3c3f44; --label:#8C93A1; --muted:#AEB4BF;
+    --line:#ededed; --rowbg:#F7F7F8; --card:#fff;
+    --green:#2E9E5B; --green-soft:#E7F4EC; --amber:#E0901F; --amber-soft:#FBF3E2;
+    --red:#E5484D; --red-soft:#FDECEC; --chipbg:#F1F2F4;
+    --shadow:0 2px 4.8px rgba(0,0,0,.04);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#f9f9f9;font-family:"Saira",-apple-system,BlinkMacSystemFont,Arial,sans-serif;-webkit-font-smoothing:antialiased;color:var(--text)}
+  svg{display:block}
+  .mono{font-family:"Geist Mono",monospace}
+  .page{max-width:1180px;margin:0 auto;padding:26px 28px 48px}
+  /* header */
+  .head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+  h1{margin:0;font-size:26px;font-weight:800}
+  .sub{font-size:15px;color:var(--label);margin-top:5px}
+  .hflags{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+  .flag{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:7px 12px;border-radius:999px;white-space:nowrap}
+  .flag.lock{color:var(--orange);background:var(--orange-soft);border:1px solid var(--orange-line)}
+  .flag.per{color:var(--label);background:#fff;border:1px solid var(--line)}
+  .sech{font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin:26px 0 11px}
+  /* KPIs */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:14px 15px;cursor:pointer;transition:border-color .12s}
+  .kpi:hover{border-color:var(--orange-line)}
+  .kpi .lb{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--label)}
+  .kpi .lb .i{width:16px;height:16px;border-radius:50%;border:1px solid var(--muted);color:var(--muted);font-size:10px;font-style:italic;font-weight:700;display:grid;place-items:center;flex:0 0 auto;cursor:help}
+  .kpi .val{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-top:7px}
+  .kpi .num{font-size:27px;font-weight:800;line-height:1}
+  .kpi .num.sm{font-size:19px}
+  .kpi .ft{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
+  .kpi .delta{font-size:12px;font-weight:600}
+  .kpi .open{font-size:11px;font-weight:700;color:var(--muted)}
+  .kpi:hover .open{color:var(--orange)}
+  .catbar{display:flex;height:8px;width:64px;border-radius:999px;overflow:hidden;background:var(--line)}
+  /* faixa contexto */
+  .ctx{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:15px 17px}
+  .panel h3{margin:0 0 12px;font-size:15px;font-weight:700}
+  .cdrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+  .cdrow:first-of-type{border-top:none}
+  .cdrow .who{font-size:13.5px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cdrow .tag{font-size:10.5px;font-weight:600;color:var(--orange);background:var(--orange-soft);padding:2px 8px;border-radius:6px}
+  .cdrow .left{font-size:12.5px;font-weight:700;color:var(--red);white-space:nowrap}
+  .bars{display:flex;flex-direction:column;gap:11px}
+  .barrow{display:flex;align-items:center;gap:10px}
+  .barrow .k{font-size:12.5px;color:var(--label);width:74px;flex:0 0 auto}
+  .barrow .track{flex:1;height:9px;background:var(--rowbg);border-radius:999px;overflow:hidden}
+  .barrow .track i{display:block;height:100%;border-radius:999px}
+  .barrow .n{font-size:12.5px;font-weight:700;width:24px;text-align:right}
+  /* worklist */
+  .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .filters .fl{font-size:12px;color:var(--muted);margin-right:2px}
+  .fchip{font-size:12.5px;font-weight:600;color:var(--text);background:var(--chipbg);padding:7px 12px;border-radius:999px;cursor:pointer}
+  .fchip.on{background:var(--orange);color:#fff}
+  .wl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .wl th{font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--label);text-align:left;font-weight:700;padding:11px 14px;border-bottom:1px solid var(--line);background:#FCFCFD}
+  .wl td{padding:12px 14px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+  .wl tr:last-child td{border-bottom:none}
+  .wl tr.row{cursor:pointer}
+  .wl tr.row:hover td{background:#FFFBF9}
+  .wl tr.crit td{box-shadow:inset 3px 0 0 var(--red)}
+  .uname{font-weight:700}
+  .ucpf{font-size:11px;color:var(--muted);margin-top:2px}
+  .sb{width:84px;height:6px;background:#eee;border-radius:999px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+  .sb i{display:block;height:100%;border-radius:999px}
+  .scoreN{font-weight:800}
+  .pill{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;display:inline-block}
+  .sev-crit{color:var(--red);background:var(--red-soft)} .sev-alto{color:var(--amber);background:var(--amber-soft)} .sev-med{color:#2E6FB0;background:#E8F0FA}
+  .st-aberto{color:var(--orange);background:var(--orange-soft)} .st-analise{color:var(--amber);background:var(--amber-soft)} .st-coaf{color:var(--green);background:var(--green-soft)} .st-arq{color:var(--muted);background:var(--chipbg)}
+  .sla{font-weight:700} .sla.r{color:var(--red)} .sla.a{color:var(--amber)} .sla.m{color:var(--label)}
+  .resp{color:var(--label)}
+  /* drawer */
+  .drawerwrap{margin-top:14px;position:relative;border:1px dashed var(--orange-line);border-radius:16px;padding:8px}
+  .dlabel{position:absolute;top:-10px;left:16px;background:#f9f9f9;padding:0 8px;font-size:11px;font-weight:700;color:var(--orange)}
+  .drawer{display:grid;grid-template-columns:1.3fr 1fr;gap:0;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden}
+  .dleft{padding:16px 18px}
+  .dright{padding:16px 18px;background:#FCFCFD;border-left:1px solid var(--line)}
+  .dtop{display:flex;align-items:center;gap:10px}
+  .dtop .nm{font-size:17px;font-weight:800}
+  .dtop .tag{font-size:10.5px;font-weight:600;color:var(--orange);background:var(--orange-soft);padding:3px 9px;border-radius:7px}
+  .dtop .score{margin-left:auto;font-size:20px;font-weight:800;color:var(--red)}
+  .dsub{font-size:12px;color:var(--label);margin-top:5px}
+  .mini{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+  .tl{position:relative;padding-left:16px}
+  .tl::before{content:"";position:absolute;left:4px;top:3px;bottom:3px;width:2px;background:var(--line)}
+  .tlitem{position:relative;padding:5px 0 5px 4px;font-size:12.5px}
+  .tlitem::before{content:"";position:absolute;left:-15px;top:9px;width:8px;height:8px;border-radius:50%;background:var(--orange)}
+  .tlitem .t{color:var(--muted);font-size:11px}
+  .facts{display:flex;flex-wrap:wrap;gap:7px}
+  .fact{font-size:11.5px;font-weight:600;color:#9a4a1f;background:#FBEDE4;border:1px solid #F3D5C2;padding:4px 9px;border-radius:7px}
+  .vlist{font-size:12.5px;color:var(--text);line-height:1.7}
+  .dacts{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  .btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;color:var(--text);cursor:pointer}
+  .btn.prim{background:var(--orange);color:#fff;border:none}
+  .btn.danger{color:var(--red);border-color:var(--red-soft)}
+  /* footer */
+  .drill{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:24px}
+  .drill .lb{font-size:12.5px;color:var(--muted)}
+  .dchip{font-size:12.5px;font-weight:700;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+  .dchip:hover{border-color:var(--orange-line);color:var(--orange)}
+  .rem{display:flex;flex-wrap:wrap;gap:16px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted)}
+</style></head>
+<body>
+<div class="page">
+
+  <!-- header -->
+  <div class="head">
+    <div>
+      <h1>PLD / AML</h1>
+      <div class="sub">Detectar, investigar e reportar operações suspeitas ao COAF — com trilha auditável.</div>
+    </div>
+    <div class="hflags">
+      <span class="flag lock">⚷ Acesso restrito · Compliance</span>
+      <span class="flag per">Junho/2026 · todas as marcas</span>
+    </div>
+  </div>
+
+  <!-- 1 · cabeçalho de KPIs -->
+  <div class="sech">Visão geral</div>
+  <div class="kpis">
+    <div class="kpi" title="Abrir watchlist">
+      <div class="lb">Apostadores com flag ativo <span class="i" title="Qtd. de apostadores com pelo menos 1 red flag ativo (não arquivado).">i</span></div>
+      <div class="val"><span class="num">27</span>
+        <svg width="56" height="22" viewBox="0 0 56 22"><polyline points="2,18 11,16 20,14 29,12 38,11 47,8 54,4" fill="none" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ft"><span class="delta" style="color:var(--red)">▲ +4 no período</span><span class="open">abrir watchlist ↗</span></div>
+    </div>
+    <div class="kpi" title="Abrir fila">
+      <div class="lb">Alertas gerados <span class="i" title="Total de alertas criados no período selecionado.">i</span></div>
+      <div class="val"><span class="num">38</span>
+        <svg width="56" height="22" viewBox="0 0 56 22"><polyline points="2,16 11,12 20,14 29,7 38,8 47,6 54,3" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ft"><span class="delta" style="color:var(--label)">no período</span><span class="open">abrir fila ↗</span></div>
+    </div>
+    <div class="kpi" title="Abrir fila">
+      <div class="lb">Volume sob análise <span class="i" title="Soma do volume financeiro dos apostadores atualmente em análise.">i</span></div>
+      <div class="val"><span class="num sm">R$ 1,24 mi</span>
+        <svg width="56" height="22" viewBox="0 0 56 22"><polyline points="2,18 11,15 20,16 29,11 38,9 47,7 54,4" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="ft"><span class="delta" style="color:var(--amber)">▲ +R$ 180 mil</span><span class="open">abrir fila ↗</span></div>
+    </div>
+    <div class="kpi" title="Abrir fila">
+      <div class="lb">Red flags por categoria <span class="i" title="Distribuição dos red flags ativos: estruturação, saque atípico, depósito suspeito e comportamento inconsistente.">i</span></div>
+      <div class="val"><span class="num">34</span>
+        <span class="catbar"><i style="width:41%;background:var(--red)"></i><i style="width:26%;background:var(--amber)"></i><i style="width:21%;background:var(--orange)"></i><i style="width:12%;background:var(--muted)"></i></span>
+      </div>
+      <div class="ft"><span class="delta" style="color:var(--label)">4 categorias</span><span class="open">abrir fila ↗</span></div>
+    </div>
+  </div>
+
+  <!-- 2 · contexto: countdown COAF + severidade -->
+  <div class="sech">Prazo &amp; distribuição</div>
+  <div class="ctx">
+    <div class="panel">
+      <h3>Prazo COAF — críticos (24h)</h3>
+      <div class="cdrow"><span class="who">EVANDRO P.</span><span class="tag">vaidebet-ngx</span><span class="left">faltam 3h</span></div>
+      <div class="cdrow"><span class="who">ADIEL F.</span><span class="tag">betnacional</span><span class="left">faltam 7h</span></div>
+      <div class="cdrow"><span class="who">J. SOUSA</span><span class="tag">vaidebet</span><span class="left" style="color:var(--amber)">faltam 19h</span></div>
+    </div>
+    <div class="panel">
+      <h3>Alertas por severidade</h3>
+      <div class="bars">
+        <div class="barrow"><span class="k">Crítico</span><span class="track"><i style="width:34%;background:var(--red)"></i></span><span class="n">13</span></div>
+        <div class="barrow"><span class="k">Alto</span><span class="track"><i style="width:45%;background:var(--amber)"></i></span><span class="n">17</span></div>
+        <div class="barrow"><span class="k">Médio</span><span class="track"><i style="width:21%;background:#2E6FB0"></i></span><span class="n">8</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 · WorkList -->
+  <div class="sech">Fila de alertas (WorkList)</div>
+  <div class="filters">
+    <span class="fl">Filtros:</span>
+    <span class="fchip on">Todos</span><span class="fchip">Aberto</span><span class="fchip">Em análise</span><span class="fchip">Crítico</span><span class="fchip">Estruturação</span><span class="fchip">vaidebet</span>
+  </div>
+  <table class="wl">
+    <thead><tr><th>Apostador</th><th>Marca</th><th>Red flag</th><th>Score PLD</th><th>Severidade</th><th>SLA</th><th>Status</th><th>Responsável</th></tr></thead>
+    <tbody>
+      <tr class="row crit"><td><div class="uname">EVANDRO P.</div><div class="ucpf mono">•••.•••.•••-70</div></td><td>vaidebet-ngx</td><td>Estruturação</td><td><span class="sb"><i style="width:92%;background:var(--red)"></i></span><span class="scoreN" style="color:var(--red)">92</span></td><td><span class="pill sev-crit">Crítico</span></td><td><span class="sla r">3h</span></td><td><span class="pill st-aberto">Aberto</span></td><td class="resp">—</td></tr>
+      <tr class="row crit"><td><div class="uname">ADIEL F.</div><div class="ucpf mono">•••.•••.•••-10</div></td><td>betnacional</td><td>Saque atípico</td><td><span class="sb"><i style="width:88%;background:var(--red)"></i></span><span class="scoreN" style="color:var(--red)">88</span></td><td><span class="pill sev-crit">Crítico</span></td><td><span class="sla r">7h</span></td><td><span class="pill st-analise">Em análise</span></td><td class="resp">Marina</td></tr>
+      <tr class="row"><td><div class="uname">J. SOUSA</div><div class="ucpf mono">•••.•••.•••-44</div></td><td>vaidebet</td><td>Depósito suspeito</td><td><span class="sb"><i style="width:76%;background:var(--amber)"></i></span><span class="scoreN" style="color:var(--amber)">76</span></td><td><span class="pill sev-alto">Alto</span></td><td><span class="sla a">19h</span></td><td><span class="pill st-aberto">Aberto</span></td><td class="resp">—</td></tr>
+      <tr class="row"><td><div class="uname">R. LIMA</div><div class="ucpf mono">•••.•••.•••-29</div></td><td>kto</td><td>Estruturação</td><td><span class="sb"><i style="width:71%;background:var(--amber)"></i></span><span class="scoreN" style="color:var(--amber)">71</span></td><td><span class="pill sev-alto">Alto</span></td><td><span class="sla m">1d 4h</span></td><td><span class="pill st-analise">Em análise</span></td><td class="resp">Caio</td></tr>
+      <tr class="row"><td><div class="uname">T. ALVES</div><div class="ucpf mono">•••.•••.•••-83</div></td><td>betano</td><td>Comport. inconsistente</td><td><span class="sb"><i style="width:64%;background:#2E6FB0"></i></span><span class="scoreN" style="color:#2E6FB0">64</span></td><td><span class="pill sev-med">Médio</span></td><td><span class="sla m">2d</span></td><td><span class="pill st-aberto">Aberto</span></td><td class="resp">—</td></tr>
+      <tr class="row"><td><div class="uname">M. COSTA</div><div class="ucpf mono">•••.•••.•••-05</div></td><td>vaidebet</td><td>Saque atípico</td><td><span class="sb"><i style="width:58%;background:#2E6FB0"></i></span><span class="scoreN" style="color:#2E6FB0">58</span></td><td><span class="pill sev-med">Médio</span></td><td><span class="sla m">—</span></td><td><span class="pill st-coaf">Comunicado COAF</span></td><td class="resp">Marina</td></tr>
+    </tbody>
+  </table>
+
+  <!-- 4 · drawer de investigação -->
+  <div class="sech">Investigação</div>
+  <div class="drawerwrap">
+    <span class="dlabel">Drawer — abre ao clicar numa linha da fila</span>
+    <div class="drawer">
+      <div class="dleft">
+        <div class="dtop"><span class="nm">EVANDRO P.</span><span class="tag">vaidebet-ngx</span><span class="score">92</span></div>
+        <div class="dsub mono">•••.•••.•••-70 · id 6a0f…c8fb · Crítico · SLA 3h</div>
+
+        <div class="mini">Timeline de transações</div>
+        <div class="tl">
+          <div class="tlitem">Depósito PIX R$ 1.980 <span class="t">— 09/06 14:02</span></div>
+          <div class="tlitem">Depósito PIX R$ 1.950 <span class="t">— 09/06 14:09</span></div>
+          <div class="tlitem">Depósito PIX R$ 1.990 <span class="t">— 09/06 14:21</span></div>
+          <div class="tlitem">Saque R$ 5.800 sem aposta <span class="t">— 09/06 14:35</span></div>
+        </div>
+
+        <div class="mini">Score factors (≥ 70 · obrigatório)</div>
+        <div class="facts">
+          <span class="fact">Fracionamento &lt; R$ 2.000 · ×3</span>
+          <span class="fact">Saque sem aposta</span>
+          <span class="fact">Velocidade atípica</span>
+          <span class="fact">Conta no mesmo IP de 2 contas</span>
+        </div>
+      </div>
+      <div class="dright">
+        <div class="mini">Vínculos</div>
+        <div class="vlist">• 2 contas no mesmo IP<br>• Mesma marca · dispositivo recorrente<br>• PIX de 3 remetentes distintos</div>
+
+        <div class="mini">Decisão</div>
+        <div class="vlist">Status: <b>Aberto</b> → Iniciar análise para atribuir e habilitar a comunicação.</div>
+
+        <div class="dacts">
+          <button class="btn prim">Iniciar análise</button>
+          <button class="btn">→ COAF</button>
+          <button class="btn danger">Arquivar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 · drill + lembretes -->
+  <div class="drill">
+    <span class="lb">Abrir páginas:</span>
+    <span class="dchip">Perfil do apostador</span>
+    <span class="dchip">Watchlist</span>
+    <span class="dchip">Glossário COAF</span>
+    <span class="dchip">Fluxos PLD</span>
+  </div>
+  <div class="rem">
+    <span>⚷ Trilha auditável — autor + timestamp, imutável (5 anos)</span>
+    <span>LGPD — CPF/nome/IP mascarados em tela</span>
+    <span>Anti-tipping-off — nunca exibido ao apostador</span>
+    <span>Export do RO ao COAF sem máscara (Lei 9.613, art. 11)</span>
+  </div>
+
+</div>
+</body></html>

@@ -49,24 +49,6 @@ export const MOSAICS = [
     fallback: { w: 4, h: 3 },
     density: 'confortavel',
   },
-  {
-    id: 'pld-aml',
-    name: 'PLD/AML Compliance',
-    desc: 'KPIs · sinais · fila de casos · comunicações',
-    mode: 'prefix',
-    pattern: [
-      { w: 12, h: 2 }, // kpis-pld — faixa completa
-      { w: 6,  h: 3 }, // avaliacao-risco (heatmap)
-      { w: 6,  h: 3 }, // estruturacao (histograma)
-      { w: 6,  h: 3 }, // descasamento (dispersao)
-      { w: 6,  h: 4 }, // vinculos-pld (analise_riscos)
-      { w: 8,  h: 4 }, // fila-casos (board)
-      { w: 4,  h: 6 }, // caso-drawer
-      { w: 6,  h: 4 }, // comunicacoes-coaf
-    ],
-    fallback: { w: 6, h: 3 },
-    density: 'confortavel',
-  },
 ]
 
 // Tamanho da célula para o componente na posição `index` dentro do mosaico.

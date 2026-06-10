@@ -8,7 +8,6 @@ import { InterventionTimeline, InterventionBoard } from '../modules/perfil-apost
 import IdentityCard from '../modules/perfil-apostador/charts/identity-card.jsx'
 import AnaliseRiscos from '../modules/perfil-apostador/charts/analise-riscos.jsx'
 import { VinculosTable } from '../modules/perfil-apostador/charts/vinculos.jsx'
-import Comunicacoes from '../modules/pld-aml/charts/comunicacoes.jsx'
 import Transacoes from '../modules/perfil-apostador/charts/transacoes.jsx'
 import ScoreRisco from '../modules/perfil-apostador/charts/score-risco.jsx'
 import { ActionCard, AlertsFeed, Behavioral } from '../modules/perfil-apostador/charts/profile.jsx'
@@ -44,7 +43,6 @@ const CHART_MAP = {
   alertas:           AlertsFeed,
   transacoes:        Transacoes,
   score_risco:       ScoreRisco,
-  comunicacoes:      Comunicacoes,
 }
 
 export default function ChartRenderer({ tipo, dados }) {
