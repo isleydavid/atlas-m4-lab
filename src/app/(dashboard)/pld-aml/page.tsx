@@ -442,7 +442,7 @@ function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) 
         <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 6 }}>
           Próximos a vencer
         </div>
-        {sortedAll.map((c, i) => (
+        {sortedAll.slice(0, 5).map((c, i) => (
           <div key={c.id} onClick={(e) => openPop(c, e)}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 6px', borderTop: i === 0 ? 'none' : '1px solid var(--bg)', cursor: 'pointer', borderRadius: 6 }}>
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.t < 12 ? 'var(--red)' : 'var(--amber)', flexShrink: 0 }} />
