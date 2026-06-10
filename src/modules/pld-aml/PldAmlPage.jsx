@@ -102,7 +102,7 @@ const CROSS_Y = SY(60)
 const SEV = {
   'Crítico': { c: 'var(--red)',    bg: 'var(--red-soft)'   },
   'Alto':    { c: 'var(--amber)',  bg: 'var(--amber-soft)' },
-  'Médio':   { c: 'var(--ink-2)', bg: 'var(--bg)'          },
+  'Médio':   { c: '#2E6FB0',      bg: '#E8F0FA'             },
 }
 const ST = {
   'Aberto':          { c: 'var(--orange)', bg: 'var(--orange-soft)' },
@@ -116,7 +116,7 @@ const DILIG = {
   'ok':           { c: 'var(--green)',  bg: 'var(--green-soft)'  },
 }
 
-const SCORE_COLOR = (s) => s >= 85 ? 'var(--red)' : s >= 70 ? 'var(--amber)' : 'var(--muted)'
+const SCORE_COLOR = (s) => s >= 85 ? 'var(--red)' : s >= 70 ? 'var(--amber)' : '#2E6FB0'
 const FILTERS = ['Todos', 'Aberto', 'Em análise', 'Crítico', 'Estruturação', 'vaidebet']
 
 const SP_UP   = 'M2,18 11,16 20,14 29,12 38,11 47,8 54,4'
@@ -250,7 +250,7 @@ function Drawer({ row, rowStatus, onUpdateStatus, onClose }) {
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
                   {d.factors?.map((f) => (
-                    <span key={f} style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '4px 9px', borderRadius: 7 }}>{f}</span>
+                    <span key={f} style={{ fontSize: 11.5, fontWeight: 600, color: '#9a4a1f', background: '#FBEDE4', border: '1px solid #F3D5C2', padding: '4px 9px', borderRadius: 7 }}>{f}</span>
                   ))}
                 </div>
               </>
