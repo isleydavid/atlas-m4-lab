@@ -1,69 +1,58 @@
-# Prompt p/ Claude Code — construir a página M7 (PLD/AML)
+# Prompt p/ Claude Code — M7 PLD/AML: casca de produção + verificação
 
-Você vai construir a página do módulo **M7 · PLD/AML** do Atlas a partir do design já fechado. **Fonte da verdade: o `SPEC.md` (o quê) + o `mockup.html` (como deve ficar).** Construa a página fiel ao mockup.
+## Estado atual (importante — NÃO reconstruir)
+
+A página do módulo **M7 · PLD/AML** **já existe e está no `main`**: `src/modules/pld-aml/PldAmlPage.jsx` (página bespoke, ~690 linhas), registrada como `status: 'ready'` no `src/modules/registry.js`. Os arquivos parciais antigos (`charts/kpis.jsx`, `charts/case-drawer.jsx`, `HANDOFF.md`) **já foram removidos**. O `src/theme.css` **já foi alinhado ao Figma** (texto #242424, muted #7d7573, bordas faint/default/strong, fundo #fafafa, base 14px) — **não reverter**.
+
+Portanto, **não recrie a página nem apague nada do módulo**. O trabalho agora é só: (1) remover a casca do Lab, (2) criar a barra superior global, (3) verificar/ajustar a página existente contra o mockup.
 
 ## Fontes (leia primeiro)
 
-- `@src/modules/pld-aml/SPEC.md` — visão da página inteira, anatomia, telas, guardrails, faseamento.
-- `@src/modules/pld-aml/mockup.html` — **o visual a reproduzir** (layout, ordem das faixas, estilos).
-- `@src/modules/pld-aml/BRIEFING.md` e `@src/modules/pld-aml/PESQUISA.md` — referência regulatória (manter; não apagar).
-- `@DESIGN_SYSTEM.md` e `@src/theme.css` — tokens e regras de responsividade obrigatórios.
+- `@src/modules/pld-aml/PldAmlPage.jsx` — a página atual (a ser verificada/ajustada, não reconstruída).
+- `@src/modules/pld-aml/mockup.html` — o visual de referência (deve bater com a página).
+- `@src/modules/pld-aml/SPEC.md` — anatomia e guardrails.
+- `@BARRA_SUPERIOR.md` — spec da barra superior global.
+- `@DESIGN_SYSTEM.md` e `@src/theme.css` — tokens e responsividade obrigatórios.
 
-## Antes de tudo — branch novo
-
-Trabalhe em um branch isolado para que a limpeza e a reconstrução sejam fáceis de revisar e reverter:
+## Branch
 
 ```bash
-git checkout -b m7-pld-aml
+git checkout -b m7-producao
 ```
 
-Faça todos os commits (remoções + nova página) nesse branch. Não trabalhe direto na branch principal.
+Commits separados por passo. Não trabalhar direto no `main`.
 
-## Limpeza (antes de construir)
+## Passo 1 — remover a casca do Lab (global, commit próprio)
 
-A abordagem mudou de "componente a componente" para "página inteira". Remova o trabalho parcial que foi substituído:
+O app ainda é um "Lab" de mosaicos. Remover as ferramentas do Lab (escopo "só a casca" — **NÃO apagar o motor de mosaico**, só ocultar/desligar os pontos de edição):
 
-- **Apagar** `src/modules/pld-aml/charts/kpis.jsx`
-- **Apagar** `src/modules/pld-aml/charts/case-drawer.jsx`
-- **Apagar** `src/modules/pld-aml/HANDOFF.md`
-- **Manter** `SPEC.md`, `mockup.html`, `BRIEFING.md`, `PESQUISA.md`, e este `PROMPT.md`.
+- Em `src/app/ModulePage.jsx`: remover do header os controles do Lab — **Leitura/TV**, **Aprovar página**, **Exportar HTML**, link **resetar**, o selo **Rascunho/Aprovada**, e o subtítulo "*Mosaico … troque o tipo pelo ⋮ · X de Y visíveis*". Trocar `<h1>… · Mosaico de Componentes</h1>` pelo **título real do módulo**. Esse header dá lugar à barra superior (passo 2).
+- Ocultar as ferramentas de edição: **kebab ⋮ por card** (`src/ui/Kebab.jsx`), **HiddenMenu** "X de Y visíveis" (`src/ui/HiddenMenu.jsx`) e o **editor de mosaico** do painel lateral (`src/ui/ControlPanel.jsx` / `src/ui/MosaicEditor.jsx`). Manter a **navegação** (sidebar de módulos) e os componentes renderizando.
 
-## O que construir
+## Passo 2 — barra superior global (Layout, commit próprio)
 
-A página M7 fiel ao `mockup.html`, com dados **mockados** (sem backend), na ordem de leitura do SPEC:
+Implementar a barra superior descrita em `@BARRA_SUPERIOR.md` na `src/app/Layout.jsx` (topo do `.canvas`, acima do conteúdo do módulo). Global a todos os módulos. Esquerda: seletor de organização + "Atualizado às HH:MM". Direita: notificações (+99), tema, Ajuda, Docs, Upgrade. Só tokens do `theme.css`.
 
-1. Header com flag "Acesso restrito · Compliance" + período.
-2. **4 KPIs** (apostadores com flag ativo · alertas gerados · volume sob análise R$ · red flags por categoria) — tiles com mini-tendência (sparkline), o de categoria com barra de distribuição, tooltip leve no "i", e link "abrir → página".
-3. Faixa de contexto: **countdown COAF (24h) dos críticos** + **alertas por severidade**.
-4. **WorkList** (fila de alertas): tabela com Apostador (mascarado), Marca, Red flag, Score PLD (barra), Severidade, SLA, Status, Responsável. Filtros por status/severidade/tipo/marca. Críticos (score ≥ 85) no topo, com marca vermelha à esquerda. Clique na linha abre o drawer.
-5. **Drawer de investigação** (overlay): timeline de transações, `score_factors[]`, vínculos, e ações **Iniciar análise → → COAF (modal de RO) / Arquivar (justificativa)**.
-6. Rodapé com drills (Perfil, Watchlist, Glossário COAF, Fluxos PLD) e lembretes de compliance.
+## Passo 3 — verificar/ajustar a página existente (NÃO reconstruir)
 
-## Integração no app
+Abrir `PldAmlPage.jsx` e comparar com `mockup.html`. **Ajustar apenas divergências** — não reescrever. Confirme que a página tem, na ordem:
 
-- Reaproveite o design system: **somente tokens do `theme.css`** (cores, `--font-head` Exo 2, `--font-body` Saira, `--font-mono` Geist Mono, raio 16, sombras). Nada de cor hard-coded fora dos tokens.
-- A página M7 é **bespoke e interativa** (tabela, filtros, drawer) — implemente como **página/rota dedicada** do módulo (não force no sistema de mosaico do `module.md`, que é para os módulos de cards). Registre o M7 na navegação/`src/modules/registry.js` (hoje há um placeholder `risco-fraude` que pode ser substituído por `pld-aml`).
-- Respeite a responsividade do `DESIGN_SYSTEM.md` (sidebar colapsa, conteúdo fluido, sem corte nas larguras 1280/1512/1920/2560).
+1. **Indicadores** (ajustar ao estilo do Figma): trocar os cards arredondados por uma **faixa plana única** com 4 colunas separadas por linha fina (`--border-faint`), cada coluna = rótulo (muted, com "i") → número grande (`--font-head`, semibold) → legenda curta. **Sem** card por métrica, **sem** sparkline e **sem** barra de categoria. Manter os dados (apostadores com flag ativo · alertas gerados · volume sob análise R$ · red flags por categoria), o tooltip "i" e o drill por clique (coluna inteira clicável). Ver o bloco "Indicadores" no `mockup.html`. (Estrutura/visual = Figma; dados = nossos.)
+2. **Prazo COAF — vencimentos** (ajustar): trocar a lista de barras por uma **timeline empilhada (beeswarm)** num horizonte de 48h — cada caso é um ponto posicionado pelo tempo restante; pontos próximos **empilham verticalmente** (não sobrepõem), formando colunas de densidade; zona crítica (<12h) sombreada e linha do prazo de 24h tracejada; cor por severidade (crítico <12h vermelho, alto âmbar). **Abaixo**, uma lista "Próximos a vencer" com os mais urgentes (severidade + nome + ID + marca + tempo). Ver o bloco "Prazo COAF" no `mockup.html` (a lógica de empilhamento está no script). Ponto/linha clicável → drawer.
+3. **PEP**: quadrante exposição × risco (ponto = pessoa, cor por tipo de vínculo) + **ficha individual** ao clicar (cargo/esfera, aging 5 anos, comportamento financeiro, vínculos, status da DD).
+4. **WorkList**: tabela (apostador mascarado, marca, red flag, score, severidade, SLA, status, responsável); filtros; críticos no topo; clique abre o drawer.
+5. **Drawer de investigação**: timeline, `score_factors[]`, vínculos, ações (Iniciar análise / → COAF com justificativa / Arquivar com justificativa).
+6. **Rodapé**: drills (Perfil, Watchlist, Glossário, Fluxos) + lembretes de compliance.
 
-## Guardrails de produto (não negociáveis)
+Se algum desses estiver faltando ou diferente do mockup, ajuste; se já estiver igual, não mexa.
 
-- **RBAC**: só `org_admin`, `compliance`, `risk_analyst` acessam; `risk_analyst` **não** exporta RO.
-- **LGPD**: CPF/nome/IP/e-mail mascarados em 100% das telas; **exceção**: o export do RO ao COAF vai sem máscara (base legal Lei 9.613, art. 11).
-- **Audit trail**: toda ação logada com autor + timestamp, append-only/imutável.
-- **Anti-tipping-off**: nunca exibir status de investigação ao apostador.
-- **Explicabilidade**: `score_factors[]` é obrigatório para score ≥ 70.
-- **Base regulatória adotada**: COAF Resolução 36/2021 — threshold **R$ 2.000** e prazo **24h** para críticos; trate esses dois valores como **parametrizáveis** (há divergência com a Portaria 1.143/2024 anotada no BRIEFING, pendente de validação jurídica).
-- Notificação: crítico sem ação > 20h → e-mail ao Diretor de Compliance.
+## Guardrails de produto (manter na verificação)
 
-## Critério de aceite
-
-- [ ] Página M7 abre na navegação e reproduz o `mockup.html` (mesmas faixas, ordem e estilo).
-- [ ] 4 KPIs com tendência/tooltip/drill; WorkList com filtros, SLA e críticos no topo.
-- [ ] Drawer abre ao clicar na linha, com timeline, score_factors e ações (análise/COAF/arquivar).
-- [ ] Justificativa obrigatória ao arquivar (mín. 50 chars) e ao escalar p/ COAF.
-- [ ] RBAC e mascaramento LGPD aplicados; audit trail registra ações.
-- [ ] Arquivos antigos removidos; só tokens do `theme.css`; sem corte nas 4 larguras.
+- **RBAC**: só `org_admin`, `compliance`, `risk_analyst`; `risk_analyst` não exporta RO.
+- **LGPD**: CPF/nome/IP/e-mail mascarados em tela; export do RO ao COAF sem máscara (Lei 9.613, art. 11).
+- **Audit trail** append-only; **anti-tipping-off** (nunca exibir investigação ao apostador); `score_factors[]` para score ≥ 70.
+- **Base COAF 36/2021**: threshold R$ 2.000 e prazo 24h parametrizáveis (divergência c/ Portaria 1.143/2024 anotada no BRIEFING).
 
 ## Como trabalhar
 
-Primeiro me apresente um **plano** (arquivos a criar/editar/remover) e só depois implemente. Rode `npm run dev` para validar visualmente contra o `mockup.html` ao longo do caminho.
+Apresente o **plano** (arquivos a editar por passo) antes de implementar. Rode `npm run dev` e compare a tela com o `mockup.html`. Só tokens do `theme.css`; sem corte nas larguras 1280/1512/1920/2560.

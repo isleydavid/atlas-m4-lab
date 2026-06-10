@@ -43,17 +43,16 @@
   .ctx{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:15px 17px}
   .panel h3{margin:0 0 12px;font-size:15px;font-weight:700}
-  .cdrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
-  .cdrow:first-of-type{border-top:none}
-  .cdrow .who{font-size:13.5px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .cdrow .tag{font-size:10.5px;font-weight:600;color:var(--orange);background:var(--orange-soft);padding:2px 8px;border-radius:6px}
-  .cdrow .left{font-size:12.5px;font-weight:700;color:var(--red);white-space:nowrap}
-  .bars{display:flex;flex-direction:column;gap:11px}
-  .barrow{display:flex;align-items:center;gap:10px}
-  .barrow .k{font-size:12.5px;color:var(--label);width:74px;flex:0 0 auto}
-  .barrow .track{flex:1;height:9px;background:var(--rowbg);border-radius:999px;overflow:hidden}
-  .barrow .track i{display:block;height:100%;border-radius:999px}
-  .barrow .n{font-size:12.5px;font-weight:700;width:24px;text-align:right}
+  .cdp{padding:11px 0 3px;border-top:1px solid var(--line)}
+  .cdp:first-of-type{border-top:none}
+  .cdp-top{display:flex;align-items:center;gap:10px}
+  .cdp-top .who{font-size:14px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .cdtag{font-size:10.5px;font-weight:600;color:var(--orange);background:var(--orange-soft);padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .cdleft{font-size:13px;font-weight:700;white-space:nowrap}
+  .cdleft.r{color:var(--red)} .cdleft.a{color:var(--amber)}
+  .cdp-bar{margin-top:8px;height:6px;background:var(--rowbg);border-radius:999px;overflow:hidden}
+  .cdp-bar i{display:block;height:100%;border-radius:999px}
+  .cdnote{font-size:11.5px;color:var(--muted);margin-top:13px}
   /* worklist */
   .filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
   .filters .fl{font-size:12px;color:var(--muted);margin-right:2px}
@@ -122,55 +121,164 @@
     </div>
   </div>
 
-  <!-- 1 · cabeçalho de KPIs -->
-  <div class="sech">Visão geral</div>
-  <div class="kpis">
-    <div class="kpi" title="Abrir watchlist">
-      <div class="lb">Apostadores com flag ativo <span class="i" title="Qtd. de apostadores com pelo menos 1 red flag ativo (não arquivado).">i</span></div>
-      <div class="val"><span class="num">27</span>
-        <svg width="56" height="22" viewBox="0 0 56 22"><polyline points="2,18 11,16 20,14 29,12 38,11 47,8 54,4" fill="none" stroke="var(--red)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="ft"><span class="delta" style="color:var(--red)">▲ +4 no período</span><span class="open">abrir watchlist ↗</span></div>
+  <!-- 1 · Indicadores (estilo Figma — faixa plana, colunas com divisor; sem cards/sparkline) -->
+  <div class="sech">Indicadores</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border:1px solid var(--border-default);border-radius:16px;overflow:hidden;">
+    <button title="Abrir watchlist" style="text-align:left;font:inherit;cursor:pointer;background:#fff;border:none;border-right:1px solid var(--border-faint);padding:16px 18px;display:flex;flex-direction:column;gap:9px;">
+      <span style="font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px;">Apostadores com flag ativo <span class="i" title="Qtd. de apostadores com pelo menos 1 red flag ativo (não arquivado).">i</span></span>
+      <span style="font-family:var(--font-head);font-weight:800;font-size:30px;line-height:1;color:var(--ink);">27</span>
+      <span style="font-size:13px;color:var(--red);">▲ +4 no período</span>
+    </button>
+    <button title="Abrir fila" style="text-align:left;font:inherit;cursor:pointer;background:#fff;border:none;border-right:1px solid var(--border-faint);padding:16px 18px;display:flex;flex-direction:column;gap:9px;">
+      <span style="font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px;">Alertas gerados <span class="i" title="Total de alertas criados no período selecionado.">i</span></span>
+      <span style="font-family:var(--font-head);font-weight:800;font-size:30px;line-height:1;color:var(--ink);">38</span>
+      <span style="font-size:13px;color:var(--muted);">no período</span>
+    </button>
+    <button title="Abrir fila" style="text-align:left;font:inherit;cursor:pointer;background:#fff;border:none;border-right:1px solid var(--border-faint);padding:16px 18px;display:flex;flex-direction:column;gap:9px;">
+      <span style="font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px;">Volume sob análise <span class="i" title="Soma do volume financeiro dos apostadores atualmente em análise.">i</span></span>
+      <span style="font-family:var(--font-head);font-weight:800;font-size:24px;line-height:1;color:var(--ink);">R$ 1,24 mi</span>
+      <span style="font-size:13px;color:var(--amber);">▲ +R$ 180 mil</span>
+    </button>
+    <button title="Abrir fila" style="text-align:left;font:inherit;cursor:pointer;background:#fff;border:none;padding:16px 18px;display:flex;flex-direction:column;gap:9px;">
+      <span style="font-size:14px;color:var(--muted);display:flex;align-items:center;gap:6px;">Red flags por categoria <span class="i" title="Distribuição dos red flags ativos: estruturação, saque atípico, depósito suspeito e comportamento inconsistente.">i</span></span>
+      <span style="font-family:var(--font-head);font-weight:800;font-size:30px;line-height:1;color:var(--ink);">34</span>
+      <span style="font-size:13px;color:var(--muted);">4 categorias</span>
+    </button>
+  </div>
+
+  <!-- 2 · Prazo COAF — vencimentos (timeline empilhada + lista de próximos) -->
+  <div class="sech">Prazo COAF</div>
+  <div class="panel">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <h3 style="margin:0;">Prazo COAF — vencimentos (48h)</h3>
+      <span style="font-size:11px;font-weight:700;color:var(--red);background:var(--red-soft);padding:3px 9px;border-radius:999px;">9 vencendo · 4 críticos</span>
     </div>
-    <div class="kpi" title="Abrir fila">
-      <div class="lb">Alertas gerados <span class="i" title="Total de alertas criados no período selecionado.">i</span></div>
-      <div class="val"><span class="num">38</span>
-        <svg width="56" height="22" viewBox="0 0 56 22"><polyline points="2,16 11,12 20,14 29,7 38,8 47,6 54,3" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="ft"><span class="delta" style="color:var(--label)">no período</span><span class="open">abrir fila ↗</span></div>
+    <div id="coaf-bs"></div>
+    <div style="display:flex;align-items:center;gap:16px;margin:2px 0 4px;font-size:11px;color:var(--muted);">
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--red);"></span>crítico (&lt;12h)</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:var(--amber);"></span>alto</span>
     </div>
-    <div class="kpi" title="Abrir fila">
-      <div class="lb">Volume sob análise <span class="i" title="Soma do volume financeiro dos apostadores atualmente em análise.">i</span></div>
-      <div class="val"><span class="num sm">R$ 1,24 mi</span>
-        <svg width="56" height="22" viewBox="0 0 56 22"><polyline points="2,18 11,15 20,16 29,11 38,9 47,7 54,4" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="ft"><span class="delta" style="color:var(--amber)">▲ +R$ 180 mil</span><span class="open">abrir fila ↗</span></div>
+    <div style="border-top:1px solid var(--border-faint);margin-top:8px;padding-top:10px;">
+      <div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted-2);margin-bottom:6px;">Próximos a vencer</div>
+      <div id="coaf-list"></div>
     </div>
-    <div class="kpi" title="Abrir fila">
-      <div class="lb">Red flags por categoria <span class="i" title="Distribuição dos red flags ativos: estruturação, saque atípico, depósito suspeito e comportamento inconsistente.">i</span></div>
-      <div class="val"><span class="num">34</span>
-        <span class="catbar"><i style="width:41%;background:var(--red)"></i><i style="width:26%;background:var(--amber)"></i><i style="width:21%;background:var(--orange)"></i><i style="width:12%;background:var(--muted)"></i></span>
+  </div>
+  <script>
+  (function(){
+    var C=[
+      {id:"AML-2026-0046",nome:"R. FERREIRA",marca:"vaidebet-ngx",t:6.5,tl:"6h 30min",sev:"CRÍTICO"},
+      {id:"AML-2026-0047",nome:"C. ROCHA",marca:"betnacional",t:9,tl:"9h",sev:"CRÍTICO"},
+      {id:"AML-2026-0048",nome:"M. DIAS",marca:"vaidebet",t:10,tl:"10h",sev:"CRÍTICO"},
+      {id:"AML-2026-0045",nome:"P. SANTOS",marca:"betnacional",t:11,tl:"11h",sev:"CRÍTICO"},
+      {id:"AML-2026-0044",nome:"L. ALMEIDA",marca:"vaidebet",t:13,tl:"13h",sev:"ALTO"},
+      {id:"AML-2026-0043",nome:"T. OLIVEIRA",marca:"kto",t:19.7,tl:"19h 40min",sev:"ALTO"},
+      {id:"AML-2026-0042",nome:"J. SOUSA",marca:"vaidebet",t:22,tl:"22h",sev:"ALTO"},
+      {id:"AML-2026-0041",nome:"R. LIMA",marca:"betano",t:27.7,tl:"27h 40min",sev:"ALTO"},
+      {id:"AML-2026-0040",nome:"G. SANTOS",marca:"kto",t:33,tl:"33h",sev:"ALTO"}
+    ];
+    function colr(t){return t<12?"var(--red)":"var(--amber)";}
+    function bgr(t){return t<12?"var(--red-soft)":"var(--amber-soft)";}
+    var W=700,H=132,padL=46,padR=26,base=104,step=13,r=6,gap=14,MAX=48;
+    function X(t){return padL+t/MAX*(W-padL-padR);}
+    var placed=[];
+    C.slice().sort(function(a,b){return a.t-b.t;}).forEach(function(o){
+      var x=X(o.t),lvl=0;
+      while(placed.some(function(p){return p.lvl===lvl && Math.abs(p.x-x)<gap;})) lvl++;
+      placed.push({x:x,lvl:lvl,t:o.t});
+    });
+    var p=['<svg width="100%" viewBox="0 0 '+W+' '+H+'" font-family="Saira, sans-serif">'];
+    p.push('<rect x="'+X(0)+'" y="14" width="'+(X(12)-X(0))+'" height="'+(base-14)+'" fill="var(--red-soft)" opacity="0.6"/>');
+    p.push('<line x1="'+X(24)+'" y1="14" x2="'+X(24)+'" y2="'+base+'" stroke="var(--border-strong)" stroke-dasharray="4 4"/><text x="'+X(24)+'" y="11" text-anchor="middle" font-size="10" fill="var(--muted)">prazo 24h</text>');
+    p.push('<line x1="'+padL+'" y1="'+base+'" x2="'+(W-padR)+'" y2="'+base+'" stroke="var(--border-default)" stroke-width="2"/>');
+    ['0|agora','12|12h','24|24h','36|36h','48|+48h'].forEach(function(s){var a=s.split('|');p.push('<text x="'+X(+a[0])+'" y="'+(base+17)+'" text-anchor="middle" font-size="10" fill="var(--muted-2)">'+a[1]+'</text>');});
+    placed.forEach(function(d){var y=base-8-d.lvl*step;p.push('<circle cx="'+d.x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+colr(d.t)+'" fill-opacity="0.92" stroke="#fff" stroke-width="1.5"/>');});
+    p.push('</svg>');
+    document.getElementById('coaf-bs').innerHTML=p.join('');
+    document.getElementById('coaf-list').innerHTML=C.slice(0,5).map(function(o){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border-faint);cursor:pointer;">'
+        +'<span style="width:8px;height:8px;border-radius:50%;background:'+colr(o.t)+';flex:0 0 auto;"></span>'
+        +'<span style="font-size:14px;font-weight:600;min-width:120px;">'+o.nome+'</span>'
+        +'<span style="font-size:11px;color:var(--muted-2);font-family:var(--font-mono);">'+o.id+'</span>'
+        +'<span style="flex:1;"></span>'
+        +'<span style="font-size:10.5px;font-weight:600;color:var(--orange);background:var(--orange-soft);padding:2px 8px;border-radius:6px;">'+o.marca+'</span>'
+        +'<span style="font-size:12.5px;font-weight:700;color:'+colr(o.t)+';background:'+bgr(o.t)+';padding:3px 9px;border-radius:6px;min-width:78px;text-align:center;">'+o.tl+'</span>'
+        +'</div>';
+    }).join("")+'<div style="font-size:11.5px;color:var(--muted-2);margin-top:8px;">+4 outros vencendo em 48h · ver todos ↗</div>';
+  })();
+  </script>
+
+  <!-- 2b · PEP — quadrante geral + ficha (substitui o antigo painel de severidade) -->
+  <div class="sech">Pessoas politicamente expostas (PEP)</div>
+  <div class="panel">
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:6px;">
+      <div>
+        <h3 style="margin:0;">PEP — exposição × risco (geral)</h3>
+        <div style="font-size:12px;color:var(--label);margin-top:2px;">Brasil · 11 PEP · cada ponto é uma pessoa · clique para abrir a ficha ↓</div>
       </div>
-      <div class="ft"><span class="delta" style="color:var(--label)">4 categorias</span><span class="open">abrir fila ↗</span></div>
+      <span style="margin-left:auto;font-size:10.5px;color:var(--muted);">tipo/cargo/aging conforme provedor de listas</span>
+    </div>
+    <svg width="100%" viewBox="0 0 720 286" font-family="Saira, sans-serif">
+      <rect x="438" y="14" width="268" height="83" fill="#FDECEC" opacity="0.7"/>
+      <text x="702" y="28" text-anchor="end" font-size="10" fill="#E5484D">ação prioritária</text>
+      <line x1="36" y1="252" x2="706" y2="252" stroke="#ededed"/>
+      <line x1="36" y1="14" x2="36" y2="252" stroke="#ededed"/>
+      <line x1="438" y1="14" x2="438" y2="252" stroke="#e3e4e7" stroke-dasharray="4 4"/>
+      <line x1="36" y1="97" x2="706" y2="97" stroke="#e3e4e7" stroke-dasharray="4 4"/>
+      <text x="706" y="274" text-anchor="end" font-size="10" fill="#AEB4BF">exposição PEP →</text>
+      <text x="40" y="26" font-size="10" fill="#AEB4BF">↑ risco / score PLD</text>
+      <circle cx="532" cy="81"  r="6" fill="#2E6FB0" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="639" cy="93"  r="6" fill="#f26122" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="405" cy="62"  r="6" fill="#2E6FB0" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="304" cy="145" r="6" fill="#2E6FB0" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="237" cy="181" r="6" fill="#8C93A1" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="465" cy="157" r="6" fill="#7C5CD0" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="358" cy="114" r="6" fill="#2E6FB0" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="505" cy="174" r="6" fill="#f26122" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="271" cy="104" r="6" fill="#7C5CD0" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="170" cy="133" r="6" fill="#2E6FB0" fill-opacity="0.9" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="585" cy="43"  r="8" fill="#f26122" stroke="#3c3f44" stroke-width="2.5"/>
+    </svg>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--label);">
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#f26122;"></span>Titular do cargo</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#2E6FB0;"></span>Familiar (2º grau)</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#7C5CD0;"></span>Representante</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:50%;background:#8C93A1;"></span>Colaborador</span>
     </div>
   </div>
 
-  <!-- 2 · contexto: countdown COAF + severidade -->
-  <div class="sech">Prazo &amp; distribuição</div>
-  <div class="ctx">
-    <div class="panel">
-      <h3>Prazo COAF — críticos (24h)</h3>
-      <div class="cdrow"><span class="who">EVANDRO P.</span><span class="tag">vaidebet-ngx</span><span class="left">faltam 3h</span></div>
-      <div class="cdrow"><span class="who">ADIEL F.</span><span class="tag">betnacional</span><span class="left">faltam 7h</span></div>
-      <div class="cdrow"><span class="who">J. SOUSA</span><span class="tag">vaidebet</span><span class="left" style="color:var(--amber)">faltam 19h</span></div>
+  <div class="panel" style="margin-top:12px;">
+    <div style="font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Ficha PEP — pessoa selecionada</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:18px;font-weight:800;">EVANDRO P.</span>
+      <span style="width:9px;height:9px;border-radius:50%;background:#f26122;"></span>
+      <span style="font-size:11.5px;font-weight:600;color:#3c3f44;background:#F1F2F4;padding:4px 9px;border-radius:7px;">Titular do cargo</span>
+      <span style="margin-left:auto;font-size:20px;font-weight:800;color:var(--red);">88</span>
+      <span style="font-size:11px;color:var(--label);">score PLD</span>
     </div>
-    <div class="panel">
-      <h3>Alertas por severidade</h3>
-      <div class="bars">
-        <div class="barrow"><span class="k">Crítico</span><span class="track"><i style="width:34%;background:var(--red)"></i></span><span class="n">13</span></div>
-        <div class="barrow"><span class="k">Alto</span><span class="track"><i style="width:45%;background:var(--amber)"></i></span><span class="n">17</span></div>
-        <div class="barrow"><span class="k">Médio</span><span class="track"><i style="width:21%;background:#2E6FB0"></i></span><span class="n">8</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;">
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--label);margin-bottom:8px;">Condição PEP</div>
+        <div style="font-size:13px;line-height:1.8;">Cargo: <b>Secretário municipal</b><br>Esfera: <b>Municipal</b><br>Categoria: <b>Titular do cargo</b></div>
+        <div style="margin-top:10px;font-size:11.5px;color:var(--label);">Condição ativa · expira em <b style="color:var(--ink);">22 meses</b> <span style="color:var(--muted);">(regra dos 5 anos)</span></div>
+        <div style="margin-top:6px;height:6px;background:var(--rowbg);border-radius:999px;overflow:hidden;"><i style="display:block;height:100%;width:63%;background:var(--orange);border-radius:999px;"></i></div>
       </div>
+      <div style="border:1px solid var(--line);border-radius:12px;padding:12px 14px;">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--label);margin-bottom:8px;">Comportamento financeiro</div>
+        <div style="display:flex;gap:16px;">
+          <div><div style="font-size:10.5px;color:var(--label);">Volume</div><div style="font-size:15px;font-weight:800;">R$ 420 mil</div></div>
+          <div><div style="font-size:10.5px;color:var(--label);">Depósitos</div><div style="font-size:15px;font-weight:800;">R$ 420 mil</div></div>
+          <div><div style="font-size:10.5px;color:var(--label);">Turnover</div><div style="font-size:15px;font-weight:800;color:var(--red);">8%</div></div>
+        </div>
+        <div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;">
+          <span style="font-size:11.5px;font-weight:600;color:#9a4a1f;background:#FBEDE4;border:1px solid #F3D5C2;padding:4px 9px;border-radius:7px;">Volume incompatível com renda</span>
+          <span style="font-size:11.5px;font-weight:600;color:#9a4a1f;background:#FBEDE4;border:1px solid #F3D5C2;padding:4px 9px;border-radius:7px;">Aportes de 5 terceiros</span>
+          <span style="font-size:11.5px;font-weight:600;color:#9a4a1f;background:#FBEDE4;border:1px solid #F3D5C2;padding:4px 9px;border-radius:7px;">Saque &gt; apostado</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);">
+      <span style="font-size:12px;color:var(--label);">Vínculos: <b style="color:var(--ink);">—</b></span>
+      <span style="margin-left:auto;font-size:11px;font-weight:700;color:var(--amber);background:var(--amber-soft);padding:4px 11px;border-radius:999px;">Diligência reforçada: pendente</span>
     </div>
   </div>
 

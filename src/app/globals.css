@@ -1,0 +1,195 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+
+  /* Atlas DS fonts */
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-display);
+  --font-mono: "Courier New", monospace;
+
+  /* Atlas DS color utilities */
+  --color-atlas-brand-primary: var(--atlas-color-brand-primary);
+  --color-atlas-brand-accent: var(--atlas-color-brand-accent);
+  --color-atlas-success: var(--atlas-color-status-success);
+  --color-atlas-error: var(--atlas-color-status-error);
+  --color-atlas-info: var(--atlas-color-status-info);
+  --color-atlas-bg-soft: var(--atlas-color-neutral-background-soft);
+  --color-atlas-graffitte: var(--atlas-color-neutral-graffitte);
+  --color-atlas-text-secondary: var(--atlas-color-neutral-text-secondary);
+}
+
+:root {
+  --radius: 1rem;
+
+  /* shadcn/ui semantic tokens — mapped to Atlas Design System */
+  --background: oklch(0.98 0 0);
+  --foreground: oklch(0.14 0 0);
+  --card: oklch(0.97 0 0);
+  --card-foreground: oklch(0.14 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.14 0 0);
+  --primary: oklch(0.633 0.17 35.3);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.35 0 0);
+  --muted: oklch(0.94 0 0);
+  --muted-foreground: oklch(0.63 0 0);
+  --accent: oklch(0.96 0.03 40);
+  --accent-foreground: oklch(0.633 0.17 35.3);
+  --destructive: oklch(0.594 0.18 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.90 0 0);
+  --input: oklch(0.90 0 0);
+  --ring: oklch(0.633 0.17 35.3);
+  --sidebar: oklch(0.97 0 0);
+  --sidebar-foreground: oklch(0.14 0 0);
+  --sidebar-primary: oklch(0.633 0.17 35.3);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.96 0.03 40);
+  --sidebar-accent-foreground: oklch(0.633 0.17 35.3);
+  --sidebar-border: oklch(0.90 0 0);
+  --sidebar-ring: oklch(0.633 0.17 35.3);
+
+  /* ── Legacy semantic aliases — bridge for migrated JSX components ── */
+  --ink: var(--atlas-color-neutral-graffitte);
+  --ink-2: var(--atlas-color-neutral-text-secondary);
+  --muted-text: #7d7573;
+  --muted-2: #AEB4BF;
+  --orange: var(--atlas-color-brand-primary);
+  --orange-soft: #FDEDE6;
+  --orange-line: #F6CDB8;
+  --red: var(--atlas-color-status-error);
+  --red-soft: #FBE7E7;
+  --green: var(--atlas-color-status-success);
+  --green-soft: #E7F4EC;
+  --amber: #E0901F;
+  --amber-soft: #FBF0DD;
+  --line: var(--atlas-color-neutral-border-divider);
+  --border-default: var(--atlas-color-neutral-border-divider);
+  --bg: #fafafa;
+  --font-head: var(--font-display);
+  --shadow-card: 0 2px 4.8px rgba(0, 0, 0, 0.04);
+
+  /* Atlas Design System canonical tokens */
+  --atlas-font-display: var(--font-display);
+  --atlas-font-body: var(--font-body);
+  --atlas-color-brand-primary: #F26122;
+  --atlas-color-brand-accent: #F95F19;
+  --atlas-color-neutral-white: #ffffff;
+  --atlas-color-neutral-graffitte: #1A1A1A;
+  --atlas-color-neutral-text-secondary: #4B4B4B;
+  --atlas-color-neutral-border-divider: #E5E5E5;
+  --atlas-color-neutral-background-soft: #FFFFE9;
+  --atlas-color-neutral-card: #F7F7F7;
+  --atlas-color-status-success: #3BA776;
+  --atlas-color-status-error: #E54848;
+  --atlas-color-status-info: #A0A0A0;
+}
+
+.dark {
+  --background: oklch(0.14 0 0);
+  --foreground: oklch(0.97 0 0);
+  --card: oklch(0.18 0 0);
+  --card-foreground: oklch(0.97 0 0);
+  --popover: oklch(0.18 0 0);
+  --popover-foreground: oklch(0.97 0 0);
+  --primary: oklch(0.633 0.17 35.3);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.22 0 0);
+  --secondary-foreground: oklch(0.97 0 0);
+  --muted: oklch(0.22 0 0);
+  --muted-foreground: oklch(0.63 0 0);
+  --accent: oklch(0.25 0.04 35);
+  --accent-foreground: oklch(0.80 0.12 35);
+  --destructive: oklch(0.70 0.19 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.633 0.17 35.3);
+  --sidebar: oklch(0.18 0 0);
+  --sidebar-foreground: oklch(0.97 0 0);
+  --sidebar-primary: oklch(0.633 0.17 35.3);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.25 0.04 35);
+  --sidebar-accent-foreground: oklch(0.80 0.12 35);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.633 0.17 35.3);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+
+  /* Legacy utility classes for migrated components */
+  .canvas {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+    background: var(--bg);
+  }
+  .btn-ghost {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink-2);
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .btn-primary {
+    border: none;
+    background: var(--orange);
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+}
