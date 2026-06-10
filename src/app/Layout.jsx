@@ -4,6 +4,7 @@ import { MODULES } from '../modules/registry.js'
 import { MOSAICS } from '../mosaics.js'
 import MiniPreview from '../ui/MiniPreview.jsx'
 import FeedSidebar from '../ui/FeedSidebar.jsx'
+import TopBar from './TopBar.jsx'
 import { useModuleState, MOSAIC_KEY } from './useModuleState.js'
 
 const NAV = [
@@ -150,8 +151,11 @@ export default function Layout() {
           <button className="collapse-btn" onClick={() => setCollapsed(false)} title="Expandir">☰</button>
         </aside>
         {showFeed && <FeedSidebar {...feedProps} />}
-        <Outlet context={outletContext} />
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <TopBar />
+          <Outlet context={outletContext} />
         </div>
+      </div>
     )
   }
 
@@ -166,7 +170,10 @@ export default function Layout() {
         <button className="collapse-btn" onClick={() => setCollapsed(true)}>◀ Recolher · {activeCount} ativos</button>
       </aside>
       {showFeed && <FeedSidebar {...feedProps} />}
-      <Outlet context={outletContext} />
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <TopBar />
+        <Outlet context={outletContext} />
+      </div>
     </div>
   )
 }
