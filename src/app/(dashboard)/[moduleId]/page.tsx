@@ -22,11 +22,9 @@ export default async function ModulePage({ params }: Props) {
   }
 
   return (
-    <div className="p-6">
-      <div className="pb-4 mb-6 border-b border-border">
-        <h1 className="font-heading text-xl font-bold text-foreground">{mod.nome}</h1>
-      </div>
-      <p className="text-sm text-muted-foreground">Migração em andamento — Fase 3</p>
+    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 opacity-40">
+      <span className="text-5xl">{mod.icone}</span>
+      <span className="font-heading text-xl">{mod.nome} — Em breve</span>
     </div>
   )
 }

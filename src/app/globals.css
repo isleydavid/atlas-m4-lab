@@ -55,7 +55,7 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 1rem;
 
   /* shadcn/ui semantic tokens — mapped to Atlas Design System */
   --background: oklch(0.98 0 0);
@@ -85,6 +85,26 @@
   --sidebar-accent-foreground: oklch(0.633 0.17 35.3);
   --sidebar-border: oklch(0.90 0 0);
   --sidebar-ring: oklch(0.633 0.17 35.3);
+
+  /* ── Legacy semantic aliases — bridge for migrated JSX components ── */
+  --ink: var(--atlas-color-neutral-graffitte);
+  --ink-2: var(--atlas-color-neutral-text-secondary);
+  --muted-text: #7d7573;
+  --muted-2: #AEB4BF;
+  --orange: var(--atlas-color-brand-primary);
+  --orange-soft: #FDEDE6;
+  --orange-line: #F6CDB8;
+  --red: var(--atlas-color-status-error);
+  --red-soft: #FBE7E7;
+  --green: var(--atlas-color-status-success);
+  --green-soft: #E7F4EC;
+  --amber: #E0901F;
+  --amber-soft: #FBF0DD;
+  --line: var(--atlas-color-neutral-border-divider);
+  --border-default: var(--atlas-color-neutral-border-divider);
+  --bg: #fafafa;
+  --font-head: var(--font-display);
+  --shadow-card: 0 2px 4.8px rgba(0, 0, 0, 0.04);
 
   /* Atlas Design System canonical tokens */
   --atlas-font-display: var(--font-display);
@@ -141,5 +161,35 @@
   }
   html {
     @apply font-sans;
+  }
+
+  /* Legacy utility classes for migrated components */
+  .canvas {
+    flex: 1;
+    min-width: 0;
+    overflow: auto;
+    background: var(--bg);
+  }
+  .btn-ghost {
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink-2);
+    border-radius: 10px;
+    padding: 9px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .btn-primary {
+    border: none;
+    background: var(--orange);
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: var(--font-body);
   }
 }

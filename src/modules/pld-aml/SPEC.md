@@ -23,10 +23,11 @@ Operadores são **sujeitos obrigados** (Lei 9.613/1998) a comunicar operações 
 A página é uma **visão geral operacional que abre páginas dedicadas** — cada bloco resume e faz drill-down.
 
 1. **Cabeçalho — 4 KPIs** (já construído): apostadores com flag ativo · alertas gerados (período) · volume sob análise (R$) · red flags por categoria. Cada tile com mini-tendência (o de categoria com barra), tooltip leve no "i", e link "abrir → página".
-2. **Distribuição + countdown** (faixa de contexto): gráfico de red flags por categoria/severidade e o **countdown COAF** (alertas críticos se aproximando do prazo de 24h).
-3. **Fila de Alertas (WorkList) — o coração:** tabela com status (ABERTO · EM_ANÁLISE · COMUNICADO_COAF · ARQUIVADO), severidade (Médio/Alto/Crítico), score bar, badge de SLA, responsável e marca; filtros por status/severidade/tipo/marca. Críticos (score ≥ 85) sobem ao topo. Clique na linha → drawer.
-4. **Drawer de Investigação** (overlay): timeline de transações, `score_factors[]` (obrigatório p/ score ≥ 70), vínculos (IP/marca). Ações: Iniciar análise → **Escalar p/ COAF** (modal de RO, justificativa obrigatória) ou **Arquivar** (justificativa mín. 50 chars). Tudo grava no audit trail.
-5. **Atalhos/drill para páginas dedicadas:** Perfil do Apostador (scores 3D), **Watchlist**, **Glossário COAF** (14 termos), **Fluxos PLD** (4 árvores de decisão).
+2. **Prazo COAF (24h)** (faixa inteira): countdown dos alertas críticos se aproximando das 24h, com **barra de urgência por caso** (tempo decorrido; crítico ao restar < 8h). A distribuição por categoria já vive no 4º KPI do cabeçalho.
+3. **PEP — exposição × risco + ficha** (no lugar do antigo painel de severidade): quadrante geral dos PEP (cada ponto uma pessoa, cor por tipo de vínculo — titular/familiar 2º grau/representante/colaborador; zona de ação = alta exposição + alto risco) e, ao clicar num ponto, a **ficha individual** da pessoa (cargo/esfera, aging dos 5 anos, comportamento financeiro, vínculos, status da DD). *Tipo/cargo/aging dependem do feed do provedor; o eixo de risco roda com dado interno (M4/M5).*
+4. **Fila de Alertas (WorkList) — o coração:** tabela com status (ABERTO · EM_ANÁLISE · COMUNICADO_COAF · ARQUIVADO), severidade (Médio/Alto/Crítico), score bar, badge de SLA, responsável e marca; filtros por status/severidade/tipo/marca. Críticos (score ≥ 85) sobem ao topo. Clique na linha → drawer.
+5. **Drawer de Investigação** (overlay): timeline de transações, `score_factors[]` (obrigatório p/ score ≥ 70), vínculos (IP/marca). Ações: Iniciar análise → **Escalar p/ COAF** (modal de RO, justificativa obrigatória) ou **Arquivar** (justificativa mín. 50 chars). Tudo grava no audit trail.
+6. **Atalhos/drill para páginas dedicadas:** Perfil do Apostador (scores 3D), **Watchlist**, **Glossário COAF** (14 termos), **Fluxos PLD** (4 árvores de decisão).
 
 Leitura da página num relance: *"o que chegou (KPIs) → o que está perto do prazo (countdown) → o que eu trabalho agora (WorkList) → investigo e decido (drawer) → registro com prova (audit/RO)."*
 
