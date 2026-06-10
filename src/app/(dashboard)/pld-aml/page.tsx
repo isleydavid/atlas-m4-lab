@@ -502,17 +502,24 @@ function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) 
 }
 
 // ---------------------------------------------------------------------------
-// PEP — quadrante + ficha
+// PEP — quadrante (flex: 1) + modal de ficha
 // ---------------------------------------------------------------------------
 function PepSection({ selectedPep: p, setSelectedPep }: { selectedPep: PepPoint | null; setSelectedPep: (p: PepPoint) => void }) {
+  const [pepModal, setPepModal] = useState(false)
+
+  function selectPep(pt: PepPoint) {
+    setSelectedPep(pt)
+    setPepModal(true)
+  }
+
   const sc         = p ? SCORE_COLOR(p.score) : null
   const pepColor   = p ? PEP_COLORS[p.tipo]   : null
   const diligStyle = p ? (DILIG[p.diligencia] || DILIG['pendente']) : null
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* quadrante */}
-      <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 16px' }}>
+    <>
+      {/* quadrante — flex: 1 para igualar altura com coluna COAF */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
           <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
             Quadrante PEP — exposição × risco
@@ -526,7 +533,8 @@ function PepSection({ selectedPep: p, setSelectedPep }: { selectedPep: PepPoint 
             ))}
           </div>
         </div>
-        <div style={{ height: 186, overflow: 'visible' }}>
+        {/* SVG cresce para preencher o espaço disponível */}
+        <div style={{ flex: 1, minHeight: 160, overflow: 'visible' }}>
           <svg viewBox="0 0 500 280" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', overflow: 'visible' }}>
             <rect x={CROSS_X} y={40} width={450 - CROSS_X} height={CROSS_Y - 40} fill="rgba(226,59,59,.05)" />
             <text x={449} y={54} fontSize={9} fill="var(--red)" fontWeight={700} textAnchor="end">Ação</text>
@@ -548,7 +556,7 @@ function PepSection({ selectedPep: p, setSelectedPep }: { selectedPep: PepPoint 
               const isSel = p && pt.id === p.id
               const col   = PEP_COLORS[pt.tipo]
               return (
-                <g key={pt.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedPep(pt)}>
+                <g key={pt.id} style={{ cursor: 'pointer' }} onClick={() => selectPep(pt)}>
                   <circle cx={SX(pt.x)} cy={SY(pt.y)} r={isSel ? 10 : 7}
                     fill={col} fillOpacity={isSel ? 1 : 0.72}
                     stroke={isSel ? 'var(--ink)' : 'none'} strokeWidth={2} />
@@ -563,83 +571,85 @@ function PepSection({ selectedPep: p, setSelectedPep }: { selectedPep: PepPoint 
           </svg>
         </div>
         <div style={{ marginTop: 4, fontSize: 11, color: 'var(--muted-text)' }}>
-          {p ? `${p.nome} selecionado(a) · clique em outro ponto para trocar.` : 'Clique em um ponto para ver a ficha individual. Zona "Ação" = alta exposição + alto risco.'}
+          {p ? `${p.nome} selecionado(a) · clique para ver a ficha ou em outro ponto.` : 'Clique em um ponto para ver a ficha. Zona "Ação" = alta exposição + alto risco.'}
         </div>
       </div>
 
-      {/* ficha */}
-      {p ? (
-        <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 16px' }}>
-          <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 10 }}>
-            Ficha PEP — pessoa selecionada
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', paddingBottom: 10, borderBottom: '1px solid var(--line)' }}>
-            <span style={{ width: 30, height: 30, borderRadius: '50%', background: pepColor ?? undefined, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 11, flexShrink: 0 }}>
-              {p.nome[0]}
-            </span>
-            <span style={{ fontSize: 15, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{p.nome}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, color: pepColor ?? undefined, background: 'var(--bg)' }}>{p.cat}</span>
-            <span style={{ marginLeft: 'auto', fontSize: 19, fontWeight: 800, fontFamily: 'var(--font-mono)', color: sc ?? undefined }}>{p.score}</span>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14, marginTop: 12 }}>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Condição PEP</div>
-              {[['Cargo', p.cargo], ['Esfera', p.esfera], ['Categoria', p.cat]].map(([k, v]) => (
-                <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', borderBottom: '1px solid var(--bg)' }}>
-                  <span style={{ color: 'var(--muted-text)' }}>{k}</span>
-                  <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{v}</span>
-                </div>
-              ))}
-              <div style={{ marginTop: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
-                  <span style={{ color: 'var(--muted-text)' }}>Aging (5 anos)</span>
-                  <span style={{ fontWeight: 700, color: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-text)', fontFamily: 'var(--font-mono)' }}>
-                    {p.agingMeses}mo / {p.agingMax}mo
-                  </span>
-                </div>
-                <div style={{ height: 5, background: 'var(--line)', borderRadius: 999, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 999, width: `${Math.round(p.agingMeses / p.agingMax * 100)}%`, background: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-2)' }} />
-                </div>
-                <div style={{ fontSize: 10.5, color: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-text)', marginTop: 3 }}>
-                  {p.agingMeses <= 12 ? '⚠ Exposição recente — máxima atenção' : 'Status ativo · monitoramento contínuo'}
-                </div>
-              </div>
+      {/* Modal — ficha PEP */}
+      {pepModal && p && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,24,31,.45)', display: 'grid', placeItems: 'center', zIndex: 200, padding: 20 }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setPepModal(false) }}>
+          <div style={{ background: 'var(--card)', borderRadius: 'var(--radius)', width: 500, maxWidth: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 16px 48px rgba(16,24,40,.22)' }}>
+            {/* Cabeçalho */}
+            <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', position: 'sticky', top: 0, background: 'var(--card)', zIndex: 1 }}>
+              <span style={{ width: 32, height: 32, borderRadius: '50%', background: pepColor ?? undefined, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 12, flexShrink: 0 }}>
+                {p.nome[0]}
+              </span>
+              <span style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', flex: 1 }}>{p.nome}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, color: pepColor ?? undefined, background: 'var(--bg)' }}>{p.cat}</span>
+              <span style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-mono)', color: sc ?? undefined }}>{p.score}</span>
+              <button onClick={() => setPepModal(false)}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--muted-text)', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}>×</button>
             </div>
-            <div>
-              <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Comportamento financeiro</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 10 }}>
-                {[{ label:'Volume', v:p.vol, alert:false }, { label:'Depósitos', v:p.dep, alert:false }, { label:'Giro', v:p.giro, alert:p.giroAlto }].map((k) => (
-                  <div key={k.label} style={{ textAlign: 'center', background: k.alert ? 'var(--red-soft)' : 'var(--bg)', borderRadius: 8, padding: '6px 4px' }}>
-                    <div style={{ fontSize: 9.5, color: k.alert ? 'var(--red)' : 'var(--muted-text)', fontWeight: 700, marginBottom: 3 }}>{k.label}</div>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: k.alert ? 'var(--red)' : 'var(--ink)' }}>{k.v}</div>
+            {/* Corpo */}
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Condição PEP</div>
+                  {[['Cargo', p.cargo], ['Esfera', p.esfera], ['Categoria', p.cat]].map(([k, v]) => (
+                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', borderBottom: '1px solid var(--bg)' }}>
+                      <span style={{ color: 'var(--muted-text)' }}>{k}</span>
+                      <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{v}</span>
+                    </div>
+                  ))}
+                  <div style={{ marginTop: 10 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
+                      <span style={{ color: 'var(--muted-text)' }}>Aging (5 anos)</span>
+                      <span style={{ fontWeight: 700, color: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-text)', fontFamily: 'var(--font-mono)' }}>
+                        {p.agingMeses}mo / {p.agingMax}mo
+                      </span>
+                    </div>
+                    <div style={{ height: 5, background: 'var(--line)', borderRadius: 999, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', borderRadius: 999, width: `${Math.round(p.agingMeses / p.agingMax * 100)}%`, background: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-2)' }} />
+                    </div>
+                    <div style={{ fontSize: 10.5, color: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-text)', marginTop: 3 }}>
+                      {p.agingMeses <= 12 ? '⚠ Exposição recente — máxima atenção' : 'Status ativo · monitoramento contínuo'}
+                    </div>
                   </div>
-                ))}
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Comportamento financeiro</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 10 }}>
+                    {[{ label:'Volume', v:p.vol, alert:false }, { label:'Depósitos', v:p.dep, alert:false }, { label:'Giro', v:p.giro, alert:p.giroAlto }].map((k) => (
+                      <div key={k.label} style={{ textAlign: 'center', background: k.alert ? 'var(--red-soft)' : 'var(--bg)', borderRadius: 8, padding: '6px 4px' }}>
+                        <div style={{ fontSize: 9.5, color: k.alert ? 'var(--red)' : 'var(--muted-text)', fontWeight: 700, marginBottom: 3 }}>{k.label}</div>
+                        <div style={{ fontSize: 12, fontWeight: 800, color: k.alert ? 'var(--red)' : 'var(--ink)' }}>{k.v}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                    {p.fatores.map((f) => (
+                      <span key={f} style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '2px 7px', borderRadius: 6 }}>
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                {p.fatores.map((f) => (
-                  <span key={f} style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '2px 7px', borderRadius: 6 }}>
-                    {f}
-                  </span>
-                ))}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--line)', flexWrap: 'wrap', gap: 6 }}>
+                <span style={{ fontSize: 12, color: 'var(--muted-text)' }}>
+                  Vínculos: <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{p.vinculos}</span>
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>Diligência reforçada:</span>
+                  {diligStyle && <Pill c={diligStyle.c} bg={diligStyle.bg}>{p.diligencia}</Pill>}
+                </div>
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--line)', flexWrap: 'wrap', gap: 6 }}>
-            <span style={{ fontSize: 12, color: 'var(--muted-text)' }}>
-              Vínculos: <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{p.vinculos}</span>
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>Diligência reforçada:</span>
-              {diligStyle && <Pill c={diligStyle.c} bg={diligStyle.bg}>{p.diligencia}</Pill>}
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div style={{ display: 'grid', placeItems: 'center', minHeight: 120, background: 'var(--bg)', borderRadius: 'var(--radius)', border: '1px dashed var(--muted-2)', color: 'var(--muted-text)', fontSize: 13, textAlign: 'center', padding: 24 }}>
-          Clique em um ponto<br />para ver a ficha individual
         </div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -722,8 +732,8 @@ export default function PldAmlPage() {
               <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
               <CoafTimeline onInvestigate={(row) => { setSelected(row); setTimeout(() => document.getElementById('pld-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
             </div>
-            <div style={{ flex: '1 1 460px', minWidth: 0 }}>
-              <Sech style={{ margin: '0 0 11px' }}>Pessoas politicamente expostas (PEP)</Sech>
+            <div style={{ flex: '1 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+              <Sech style={{ margin: '0 0 11px', flexShrink: 0 }}>Pessoas politicamente expostas (PEP)</Sech>
               <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
             </div>
           </div>
