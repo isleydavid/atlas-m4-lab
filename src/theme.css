@@ -1,8 +1,13 @@
 :root{
   /* cores — Atlas oficial */
   --orange:#f26122; --orange-2:#F08A52; --orange-soft:#FDEDE6; --orange-line:#F6CDB8;
-  --text:#3c3f44; --ink:#3c3f44; --ink-2:#5a5e65; --muted:#8A92A3; --muted-2:#AEB4BF;
-  --line:#ededed; --border:#ededed; --border-2:#f0f0f0; --bg:#f9f9f9; --card:#FFFFFF;
+  --text:#242424; --ink:#242424; --ink-2:#5a5e65; --muted:#7d7573; --muted-2:#AEB4BF;
+  --line:#eaeaea; --border:#eaeaea; --border-2:#f0f0f0; --bg:#fafafa; --card:#FFFFFF;
+  /* alinhado ao Figma — Atlas by Lifters */
+  --border-faint:#f0f0f0; --border-default:#eaeaea; --border-strong:#c7c7c7;
+  --foreground:#242424; --muted-foreground:#7d7573; --sidebar-bg:#fafafa;
+  --heat-4:#f261220a; --heat-8:#f2612214; --heat-16:#f2612229; --heat-60:#f2612299;
+  --black-4:#0000000a; --black-16:#00000029; --black-24:#0000003d; --black-40:#00000066; --black-60:#00000099;
   --green:#2E9E5B; --green-soft:#E7F4EC; --amber:#E0901F; --amber-soft:#FBF0DD;
   --red:#E23B3B; --red-soft:#FBE7E7;
   --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 18px rgba(16,24,40,.05);
@@ -11,6 +16,9 @@
   --font-body:"Saira",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
   --font-head:"Exo 2",var(--font-body);
   --font-mono:"Geist Mono",ui-monospace,monospace;
+  /* escala tipográfica do Figma */
+  --fs-12:12px; --lh-12:16px; --fs-14:14px; --lh-14:20px; --fs-20:20px; --lh-20:28px; --fs-24:24px; --lh-24:32px;
+  --fw-regular:400; --fw-medium:500; --fw-semibold:600;
   /* espaçamento / forma */
   --shadow-card:0 2px 4.8px rgba(0,0,0,.04);
   --border-hair:.625px solid var(--border);
@@ -24,7 +32,7 @@
 html,body,#root{margin:0;height:100%}
 body{background:var(--bg);color:var(--text);
   font-family:var(--font-body);
-  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
+  -webkit-font-smoothing:antialiased;font-size:14px;line-height:1.45}
 svg{display:block}
 button{font-family:inherit}
 
@@ -317,4 +325,8 @@ button{font-family:inherit}
   .dash .cell{grid-column:span 1!important;grid-row:span 1!important}
   .modal.wide{width:100%}
   .canvas-head .hidden-wrap{display:none}
+}
+/* topbar: colapsa rótulos Ajuda/Docs em telas estreitas */
+@media(max-width:900px){
+  .tb-label{display:none}
 }

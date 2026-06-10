@@ -3,8 +3,8 @@ import { useParams, Outlet, NavLink } from 'react-router-dom'
 import { MODULES } from '../modules/registry.js'
 import { MOSAICS } from '../mosaics.js'
 import MiniPreview from '../ui/MiniPreview.jsx'
-import MosaicEditor from '../ui/MosaicEditor.jsx'
 import FeedSidebar from '../ui/FeedSidebar.jsx'
+import TopBar from './TopBar.jsx'
 import { useModuleState, MOSAIC_KEY } from './useModuleState.js'
 
 const NAV = [
@@ -64,13 +64,11 @@ export default function Layout() {
 
   const { slotState, slotSections, orderedSlots, mosaic, setMosaic, setType, toggle, hide, setAll, reset, moveSlot, moveToSection, aprovada, dataAprovacao, aprovar } = useModuleState(moduleId, slots)
   const [custom, setCustom] = useState(loadCustom)
-  const [editing, setEditing] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [feedCollapsed, setFeedCollapsed] = useState(() => localStorage.getItem(FEED_KEY) === 'true')
   const [ocorrencias, setOcorrencias] = useState(SEED_OCORRENCIAS)
   const nextId = useRef(SEED_OCORRENCIAS.length + 1)
 
-  useEffect(() => { setEditing(false) }, [moduleId])
   useEffect(() => { localStorage.setItem(MOSAIC_KEY, JSON.stringify(custom)) }, [custom])
   useEffect(() => { localStorage.setItem(FEED_KEY, String(feedCollapsed)) }, [feedCollapsed])
 
@@ -109,7 +107,6 @@ export default function Layout() {
     moveToSection(slotId, sectionName, targetIds)
   }
 
-  const saveMosaic = (m) => { setCustom((prev) => [...prev.filter((x) => x.id !== m.id), m]); setMosaic(m.id); setEditing(false) }
   const deleteMosaic = (id) => {
     setCustom((prev) => prev.filter((x) => x.id !== id))
     setMosaic((cur) => (cur === id ? DEFAULT_MOSAIC : cur))
@@ -144,57 +141,6 @@ export default function Layout() {
         </div>
       ))}
 
-      {isReady && (
-        <>
-          <div className="cat" style={{ marginTop: 12 }}>Mosaico da página</div>
-          <div className="mosaics">
-            {allMosaics.map((m) => (
-              <div key={m.id} className={`mosaic ${activeMosaic.id === m.id ? 'on' : ''}`} onClick={() => setMosaic(m.id)} role="button">
-                <div className="mosaic-thumb"><MiniPreview mosaic={m} active={activeMosaic.id === m.id} /></div>
-                <div className="mosaic-meta"><b>{m.name}</b><small>{m.desc}</small></div>
-                {m.custom && (
-                  <button className="mosaic-del" title="Excluir mosaico"
-                    onClick={(e) => { e.stopPropagation(); deleteMosaic(m.id) }}>✕</button>
-                )}
-              </div>
-            ))}
-            <button className="mosaic-new" onClick={() => setEditing(true)}>+ Criar mosaico</button>
-          </div>
-        </>
-      )}
-
-      {isReady && slots.length > 0 && (
-        <>
-          <div className="cat" style={{ marginTop: 8 }}>Componentes</div>
-          <div className="p-actions">
-            <button onClick={() => setAll(true)}>Ativar tudo</button>
-            <button onClick={() => setAll(false)}>Desativar tudo</button>
-          </div>
-          {sidebarGroups.map(([cat, groupSlots]) => (
-            <div key={cat}>
-              <div className="cat sub">{cat}</div>
-              {groupSlots.map((s) => {
-                const on = slotState[s.id]?.visible
-                return (
-                  <div className={`toggle-row ${on ? '' : 'off'}`} key={s.id}>
-                    <span className={`sw ${on ? 'on' : ''}`} onClick={() => toggle(s.id)} />
-                    <div className="nm">{s.title}<small>{on ? currentLabel(s) : 'inativo'}</small></div>
-                  </div>
-                )
-              })}
-            </div>
-          ))}
-          {ungroupedInOrder.map((s) => {
-            const on = slotState[s.id]?.visible
-            return (
-              <div className={`toggle-row ${on ? '' : 'off'}`} key={s.id}>
-                <span className={`sw ${on ? 'on' : ''}`} onClick={() => toggle(s.id)} />
-                <div className="nm">{s.title}<small>{on ? currentLabel(s) : 'inativo'}</small></div>
-              </div>
-            )
-          })}
-        </>
-      )}
     </div>
   )
 
@@ -205,8 +151,10 @@ export default function Layout() {
           <button className="collapse-btn" onClick={() => setCollapsed(false)} title="Expandir">☰</button>
         </aside>
         {showFeed && <FeedSidebar {...feedProps} />}
-        <Outlet context={outletContext} />
-        {editing && <MosaicEditor onSave={saveMosaic} onClose={() => setEditing(false)} />}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <TopBar />
+          <Outlet context={outletContext} />
+        </div>
       </div>
     )
   }
@@ -222,8 +170,10 @@ export default function Layout() {
         <button className="collapse-btn" onClick={() => setCollapsed(true)}>◀ Recolher · {activeCount} ativos</button>
       </aside>
       {showFeed && <FeedSidebar {...feedProps} />}
-      <Outlet context={outletContext} />
-      {editing && <MosaicEditor onSave={saveMosaic} onClose={() => setEditing(false)} />}
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <TopBar />
+        <Outlet context={outletContext} />
+      </div>
     </div>
   )
 }

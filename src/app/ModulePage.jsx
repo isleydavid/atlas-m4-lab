@@ -1,119 +1,28 @@
-import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import Dashboard from '../ui/Dashboard.jsx'
-import themeCss from '../theme.css?raw'
-
-function fmtData(iso) {
-  if (!iso) return ''
-  const d = new Date(iso)
-  const dd = String(d.getDate()).padStart(2, '0')
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const hh = String(d.getHours()).padStart(2, '0')
-  const mi = String(d.getMinutes()).padStart(2, '0')
-  return `${dd}/${mm} · ${hh}:${mi}`
-}
 
 export default function ModulePage() {
   const { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType, onHide, onReset, aprovada, dataAprovacao, aprovar, onMoveSlot, onMoveToSection, sections } = useOutletContext()
-  const [leitura, setLeitura] = useState(false)
-
-  function handleExport() {
-    const dash = document.querySelector('.dash')
-    if (!dash) return
-    const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${activeModule.nome}</title>
-<style>
-${themeCss}
-</style>
-</head>
-<body style="margin:0;padding:clamp(16px,2vw,40px);background:var(--bg)">
-${dash.outerHTML}
-</body>
-</html>`
-    const blob = new Blob([html], { type: 'text/html' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    const today = new Date()
-    const stamp = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
-    a.download = `${activeModule.id}-${stamp}.html`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-  }
 
   if (!activeModule || activeModule.status === 'soon') {
     return (
       <main className="canvas">
-        <div className="cv-top">
-          <div>
-            <h1>{activeModule ? activeModule.nome : 'Módulo'}</h1>
-            <p>Este módulo está em desenvolvimento.</p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 16, opacity: 0.35 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 16, opacity: 0.35, paddingTop: 80 }}>
           <span style={{ fontSize: 48 }}>{activeModule?.icone ?? '🔜'}</span>
-          <span style={{ fontSize: 22 }}>Em breve</span>
+          <span style={{ fontSize: 22 }}>{activeModule?.nome ?? 'Módulo'} — Em breve</span>
         </div>
       </main>
     )
   }
-  const visibleCount = slots.filter((s) => slotState[s.id]?.visible).length
 
   return (
     <main className="canvas">
-      <div
-        className="cv-top"
-        style={aprovada ? { background: 'rgba(46,158,91,0.06)', borderBottomColor: 'rgba(46,158,91,0.18)' } : undefined}
-      >
-        <div>
-          <h1>{activeModule.nome} · Mosaico de Componentes</h1>
-          <p>Mosaico "{activeMosaic.name}" · os componentes se adaptam às células · troque o tipo pelo ⋮. {visibleCount} de {slots.length} visíveis.</p>
-        </div>
-        <span style={{
-          fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 999,
-          background: aprovada ? 'var(--green)' : 'var(--amber-soft)',
-          color: aprovada ? '#fff' : 'var(--amber)',
-          whiteSpace: 'nowrap', flexShrink: 0,
-        }}>
-          {aprovada ? `Aprovada · ${fmtData(dataAprovacao)}` : 'Rascunho'}
-        </span>
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <button
-            onClick={() => setLeitura((v) => !v)}
-            className="btn-ghost"
-            title={leitura ? 'Modo TV: preenche a tela' : 'Modo Leitura: limita a 1328px'}
-            style={leitura ? { color: 'var(--orange)', borderColor: 'var(--orange-line)' } : undefined}
-          >
-            {leitura ? 'TV' : 'Leitura'}
-          </button>
-          <button
-            onClick={aprovar}
-            className="btn-ghost"
-            style={aprovada ? { color: 'var(--red)', borderColor: 'var(--red-soft)' } : undefined}
-          >
-            {aprovada ? 'Revogar aprovação' : 'Aprovar página'}
-          </button>
-          <button
-            disabled={!aprovada}
-            className="btn-ghost"
-            title={aprovada ? 'Exportar HTML autocontido' : 'Aprove a página para exportar'}
-            onClick={aprovada ? handleExport : undefined}
-          >
-            Exportar HTML
-          </button>
-          <a href="#" onClick={(e) => { e.preventDefault(); onReset() }}
-            style={{ color: 'var(--orange)', textDecoration: 'none', fontWeight: 700, fontSize: 12, alignSelf: 'center' }}>
-            resetar
-          </a>
-        </div>
+      <div style={{ padding: '18px 22px 10px', borderBottom: '1px solid var(--line)' }}>
+        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+          {activeModule.nome}
+        </h1>
       </div>
-      <Dashboard slots={slots} state={slotState} mosaic={activeMosaic} leitura={leitura} onChangeType={onChangeType} onHide={onHide} onMoveSlot={onMoveSlot} onMoveToSection={onMoveToSection} sections={sections} />
+      <Dashboard slots={slots} state={slotState} mosaic={activeMosaic} leitura={false} onChangeType={onChangeType} onHide={onHide} onMoveSlot={onMoveSlot} onMoveToSection={onMoveToSection} sections={sections} />
     </main>
   )
 }
