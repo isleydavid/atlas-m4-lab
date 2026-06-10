@@ -1,22 +1,45 @@
 :root{
-  /* cores — Atlas oficial */
-  --orange:#f26122; --orange-2:#F08A52; --orange-soft:#FDEDE6; --orange-line:#F6CDB8;
-  --text:#242424; --ink:#242424; --ink-2:#5a5e65; --muted:#7d7573; --muted-2:#AEB4BF;
-  --line:#eaeaea; --border:#eaeaea; --border-2:#f0f0f0; --bg:#fafafa; --card:#FFFFFF;
-  /* alinhado ao Figma — Atlas by Lifters */
-  --border-faint:#f0f0f0; --border-default:#eaeaea; --border-strong:#c7c7c7;
-  --foreground:#242424; --muted-foreground:#7d7573; --sidebar-bg:#fafafa;
+  /* ── Atlas Design System — tokens canônicos (fonte: Figma) ── */
+  --atlas-color-brand-primary:#F26122;
+  --atlas-color-brand-accent:#F95F19;
+  --atlas-color-neutral-white:#FFFFFF;
+  --atlas-color-neutral-graffitte:#1A1A1A;
+  --atlas-color-neutral-text-secondary:#4B4B4B;
+  --atlas-color-neutral-border-divider:#E5E5E5;
+  --atlas-color-neutral-background-soft:#FFFFE9;
+  --atlas-color-neutral-card:#F7F7F7;
+  --atlas-color-status-success:#3BA776;
+  --atlas-color-status-error:#E54848;
+  --atlas-color-status-info:#A0A0A0;
+
+  /* ── Aliases semânticos (mapeados para os tokens acima) ── */
+  --orange:var(--atlas-color-brand-primary);
+  --orange-2:#F08A52; --orange-soft:#FDEDE6; --orange-line:#F6CDB8;
+  --text:var(--atlas-color-neutral-graffitte);
+  --ink:var(--atlas-color-neutral-graffitte);
+  --ink-2:var(--atlas-color-neutral-text-secondary);
+  --muted:#7d7573; --muted-2:#AEB4BF;
+  --line:var(--atlas-color-neutral-border-divider);
+  --border:var(--atlas-color-neutral-border-divider);
+  --border-2:#f0f0f0; --bg:#fafafa;
+  --card:var(--atlas-color-neutral-card);
+  --border-faint:#f0f0f0;
+  --border-default:var(--atlas-color-neutral-border-divider);
+  --border-strong:#c7c7c7;
+  --foreground:var(--atlas-color-neutral-graffitte);
+  --muted-foreground:#7d7573; --sidebar-bg:#fafafa;
   --heat-4:#f261220a; --heat-8:#f2612214; --heat-16:#f2612229; --heat-60:#f2612299;
   --black-4:#0000000a; --black-16:#00000029; --black-24:#0000003d; --black-40:#00000066; --black-60:#00000099;
-  --green:#2E9E5B; --green-soft:#E7F4EC; --amber:#E0901F; --amber-soft:#FBF0DD;
-  --red:#E23B3B; --red-soft:#FBE7E7;
+  --green:var(--atlas-color-status-success); --green-soft:#E7F4EC;
+  --amber:#E0901F; --amber-soft:#FBF0DD;
+  --red:var(--atlas-color-status-error); --red-soft:#FBE7E7;
   --shadow:0 1px 2px rgba(16,24,40,.04),0 6px 18px rgba(16,24,40,.05);
   --radius:16px;
   /* tipografia */
   --font-body:"Saira",-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
   --font-head:"Exo 2",var(--font-body);
   --font-mono:"Geist Mono",ui-monospace,monospace;
-  /* escala tipográfica do Figma */
+  /* escala tipográfica */
   --fs-12:12px; --lh-12:16px; --fs-14:14px; --lh-14:20px; --fs-20:20px; --lh-20:28px; --fs-24:24px; --lh-24:32px;
   --fw-regular:400; --fw-medium:500; --fw-semibold:600;
   /* espaçamento / forma */
