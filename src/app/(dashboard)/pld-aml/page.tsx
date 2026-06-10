@@ -381,9 +381,8 @@ function Drawer({ row, rowStatus, onUpdateStatus, onClose }: {
 // COAF Timeline — beeswarm + popover
 // ---------------------------------------------------------------------------
 function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) {
-  const [popCase,   setPopCase]   = useState<CoafCase | null>(null)
-  const [popPos,    setPopPos]    = useState<{ x: number; y: number }>({ x: 0, y: 0 })
-  const [listOpen,  setListOpen]  = useState(false)
+  const [popCase, setPopCase] = useState<CoafCase | null>(null)
+  const [popPos,  setPopPos]  = useState<{ x: number; y: number }>({ x: 0, y: 0 })
 
   function openPop(c: CoafCase, e: React.MouseEvent) {
     e.stopPropagation()
@@ -438,53 +437,24 @@ function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) 
         </svg>
       </div>
 
-      {/* Link "Próximos a vencer" → modal */}
-      <div style={{ marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 11, color: 'var(--muted-text)' }}>
-          <span style={{ fontWeight: 700, color: 'var(--ink)' }}>{sortedAll[0]?.nome}</span>
-          {' '}vence em {sortedAll[0]?.tl} · +{sortedAll.length - 1} casos
-        </span>
-        <button onClick={() => setListOpen(true)}
-          className="btn-ghost"
-          style={{ fontSize: 12, padding: '5px 12px' }}>
-          Próximos a vencer ({COAF_CASES.length}) →
-        </button>
-      </div>
-
-      {/* Modal — lista completa */}
-      {listOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,24,31,.45)', display: 'grid', placeItems: 'center', zIndex: 200, padding: 20 }}
-          onMouseDown={(e) => { if (e.target === e.currentTarget) setListOpen(false) }}>
-          <div style={{ background: 'var(--card)', borderRadius: 'var(--radius)', width: 560, maxWidth: '100%', maxHeight: '80vh', display: 'flex', flexDirection: 'column', boxShadow: '0 16px 48px rgba(16,24,40,.22)' }}>
-            <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>Próximos a vencer</div>
-                <div style={{ fontSize: 12, color: 'var(--muted-text)', marginTop: 3 }}>
-                  {critCount} críticos &lt; 12h · horizonte {BMAX}h · clique para investigar
-                </div>
-              </div>
-              <button onClick={() => setListOpen(false)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--muted-text)', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}>×</button>
-            </div>
-            <div style={{ overflowY: 'auto', padding: '8px 0' }}>
-              {sortedAll.map((c, i) => (
-                <div key={c.id} onClick={(e) => { openPop(c, e); setListOpen(false) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 20px', borderTop: i === 0 ? 'none' : '1px solid var(--bg)', cursor: 'pointer' }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.t < 12 ? 'var(--red)' : 'var(--amber)', flexShrink: 0 }} />
-                  <span style={{ fontSize: 13, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ink)' }}>{c.nome}</span>
-                  <span style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{c.id}</span>
-                  <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '2px 7px', borderRadius: 6, flexShrink: 0 }}>{c.marca}</span>
-                  <Pill c={c.t < 12 ? 'var(--red)' : 'var(--amber)'}
-                        bg={c.t < 12 ? 'var(--red-soft)' : 'var(--amber-soft)'}>{c.sev}</Pill>
-                  <span style={{ fontSize: 12.5, fontWeight: 800, color: c.t < 12 ? 'var(--red)' : 'var(--amber)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
-                    {c.tl}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+      {/* Próximos a vencer */}
+      <div style={{ marginTop: 14, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 6 }}>
+          Próximos a vencer
         </div>
-      )}
+        {sortedAll.map((c, i) => (
+          <div key={c.id} onClick={(e) => openPop(c, e)}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 6px', borderTop: i === 0 ? 'none' : '1px solid var(--bg)', cursor: 'pointer', borderRadius: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.t < 12 ? 'var(--red)' : 'var(--amber)', flexShrink: 0 }} />
+            <span style={{ fontSize: 13, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ink)' }}>{c.nome}</span>
+            <span style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{c.id}</span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '2px 7px', borderRadius: 6, flexShrink: 0 }}>{c.marca}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: c.t < 12 ? 'var(--red)' : 'var(--amber)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+              faltam {c.tl}
+            </span>
+          </div>
+        ))}
+      </div>
 
       {/* Popover */}
       {popCase && (
