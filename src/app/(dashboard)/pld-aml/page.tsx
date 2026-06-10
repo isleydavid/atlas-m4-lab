@@ -22,6 +22,9 @@ interface PepPoint {
   fatores: string[]; vinculos: string; diligencia: string
 }
 interface StyleToken { c: string; bg: string }
+interface CoafCase {
+  id: string; nome: string; marca: string; t: number; tl: string; sev: 'CRÍTICO' | 'ALTO'
+}
 
 // ---------------------------------------------------------------------------
 // Dados mock — WorkList
@@ -83,6 +86,64 @@ const DRAWER_DATA: Record<number, DrawerEntry> = {
 }
 
 // ---------------------------------------------------------------------------
+// Dados mock — COAF (9 casos · do mockup)
+// ---------------------------------------------------------------------------
+const COAF_CASES: CoafCase[] = [
+  { id: 'AML-2026-0046', nome: 'R. FERREIRA', marca: 'vaidebet-ngx', t: 6.5,  tl: '6h 30min', sev: 'CRÍTICO' },
+  { id: 'AML-2026-0047', nome: 'C. ROCHA',    marca: 'betnacional',  t: 9,    tl: '9h',        sev: 'CRÍTICO' },
+  { id: 'AML-2026-0048', nome: 'M. DIAS',     marca: 'vaidebet',     t: 10,   tl: '10h',       sev: 'CRÍTICO' },
+  { id: 'AML-2026-0045', nome: 'P. SANTOS',   marca: 'betnacional',  t: 11,   tl: '11h',       sev: 'CRÍTICO' },
+  { id: 'AML-2026-0044', nome: 'L. ALMEIDA',  marca: 'vaidebet',     t: 13,   tl: '13h',       sev: 'ALTO'    },
+  { id: 'AML-2026-0043', nome: 'T. OLIVEIRA', marca: 'kto',          t: 19.7, tl: '19h 40min', sev: 'ALTO'    },
+  { id: 'AML-2026-0042', nome: 'J. SOUSA',    marca: 'vaidebet',     t: 22,   tl: '22h',       sev: 'ALTO'    },
+  { id: 'AML-2026-0041', nome: 'R. LIMA',     marca: 'betano',       t: 27.7, tl: '27h 40min', sev: 'ALTO'    },
+  { id: 'AML-2026-0040', nome: 'G. SANTOS',   marca: 'kto',          t: 33,   tl: '33h',       sev: 'ALTO'    },
+]
+
+// ---------------------------------------------------------------------------
+// Dados mock — KPIs (faixa plana)
+// ---------------------------------------------------------------------------
+const KPI_DATA = [
+  { label: 'Apostadores com flag ativo', tooltip: 'Qtd. de apostadores com pelo menos 1 red flag ativo (não arquivado).', value: '27',        delta: '▲ +4 no período', deltaColor: 'var(--red)'   as string | undefined },
+  { label: 'Alertas gerados',            tooltip: 'Total de alertas criados no período selecionado.',                       value: '38',        delta: 'no período',       deltaColor: undefined                              },
+  { label: 'Volume sob análise',         tooltip: 'Soma do volume financeiro dos apostadores atualmente em análise.',       value: 'R$ 1,24 mi', delta: '▲ +R$ 180 mil',   deltaColor: 'var(--amber)' as string | undefined },
+  { label: 'Red flags por categoria',    tooltip: 'Estruturação · saque atípico · depósito suspeito · comportamento inconsistente.', value: '34', delta: '4 categorias',  deltaColor: undefined                              },
+]
+
+// ---------------------------------------------------------------------------
+// Beeswarm layout (algoritmo do mockup.html)
+// ---------------------------------------------------------------------------
+const BW = 700, BH = 132, BPL = 46, BPR = 26, BY = 104, BSTEP = 13, BR = 6, BGAP = 14, BMAX = 48
+function beeX(t: number) { return BPL + (t / BMAX) * (BW - BPL - BPR) }
+type BeePoint = CoafCase & { x: number; cy: number }
+const BEE_LAYOUT: BeePoint[] = (() => {
+  const placed: Array<{ x: number; lvl: number }> = []
+  return [...COAF_CASES].sort((a, b) => a.t - b.t).map((c) => {
+    const x = beeX(c.t)
+    let lvl = 0
+    while (placed.some(p => p.lvl === lvl && Math.abs(p.x - x) < BGAP)) lvl++
+    placed.push({ x, lvl })
+    return { ...c, x, cy: BY - 8 - lvl * BSTEP }
+  })
+})()
+
+function coafToRow(c: CoafCase): Row {
+  const match = ROWS.find(r => r.nome === c.nome)
+  if (match) return match
+  return {
+    id: -(COAF_CASES.findIndex(x => x.id === c.id) + 1),
+    nome: c.nome, cpf: '•••.•••.•••-••', marca: c.marca,
+    flag: 'Estruturação',
+    score: c.sev === 'CRÍTICO' ? 88 : 71,
+    sev: c.sev === 'CRÍTICO' ? 'Crítico' : 'Alto',
+    sla: c.tl, slaH: c.t,
+    slaC: c.t < 12 ? 'r' : 'a',
+    status: 'Aberto', resp: '—',
+    crit: c.sev === 'CRÍTICO',
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Dados mock — PEP
 // ---------------------------------------------------------------------------
 const PEP_COLORS: Record<string, string> = {
@@ -136,27 +197,9 @@ const SCORE_COLOR = (s: number) =>
 
 const FILTERS = ['Todos', 'Aberto', 'Em análise', 'Crítico', 'Estruturação', 'vaidebet']
 
-const SP_UP   = 'M2,18 11,16 20,14 29,12 38,11 47,8 54,4'
-const SP_FLAT = 'M2,16 11,12 20,14 29,7 38,8 47,6 54,3'
-const SP_MID  = 'M2,18 11,15 20,16 29,11 38,9 47,7 54,4'
-
-const COAF_ROWS = [
-  { nome: 'EVANDRO P.', marca: 'vaidebet-ngx', remaining: 3  },
-  { nome: 'ADIEL F.',   marca: 'betnacional',  remaining: 7  },
-  { nome: 'J. SOUSA',   marca: 'vaidebet',     remaining: 19 },
-]
-
 // ---------------------------------------------------------------------------
 // Atoms
 // ---------------------------------------------------------------------------
-function Spark({ points, color = 'var(--muted-text)' }: { points: string; color?: string }) {
-  return (
-    <svg width="56" height="22" viewBox="0 0 56 22" style={{ flexShrink: 0 }}>
-      <polyline points={points} fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
 function Pill({ c, bg, children }: { c: string; bg: string; children: React.ReactNode }) {
   return (
     <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 999, display: 'inline-block', whiteSpace: 'nowrap', color: c, background: bg }}>
@@ -264,7 +307,9 @@ function Drawer({ row, rowStatus, onUpdateStatus, onClose }: {
             </div>
             <div style={{ position: 'relative', paddingLeft: 16 }}>
               <div style={{ position: 'absolute', left: 4, top: 3, bottom: 3, width: 2, background: 'var(--line)' }} />
-              {d.timeline.map((t, i) => (
+              {d.timeline.length === 0 ? (
+                <div style={{ fontSize: 12, color: 'var(--muted-text)', padding: '5px 0 5px 4px' }}>Sem registros disponíveis.</div>
+              ) : d.timeline.map((t, i) => (
                 <div key={i} style={{ position: 'relative', padding: '5px 0 5px 4px', fontSize: 12.5, color: 'var(--ink)' }}>
                   <span style={{ position: 'absolute', left: -15, top: 9, width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', display: 'block' }} />
                   {t.desc} <span style={{ color: 'var(--muted-text)', fontSize: 11 }}>— {t.ts}</span>
@@ -277,7 +322,9 @@ function Drawer({ row, rowStatus, onUpdateStatus, onClose }: {
                   Score factors (≥ 70 · obrigatório)
                 </div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-                  {d.factors.map((f) => (
+                  {d.factors.length === 0 ? (
+                    <span style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>Aguardando análise.</span>
+                  ) : d.factors.map((f) => (
                     <span key={f} style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '4px 9px', borderRadius: 7 }}>{f}</span>
                   ))}
                 </div>
@@ -288,7 +335,9 @@ function Drawer({ row, rowStatus, onUpdateStatus, onClose }: {
           <div style={{ padding: '16px 18px', background: 'var(--bg)', borderLeft: '1px solid var(--line)' }}>
             <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Vínculos</div>
             <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.75 }}>
-              {d.vinculos.map((v, i) => <div key={i}>• {v}</div>)}
+              {d.vinculos.length === 0
+                ? <span style={{ color: 'var(--muted-text)' }}>Sem vínculos identificados.</span>
+                : d.vinculos.map((v, i) => <div key={i}>• {v}</div>)}
             </div>
             <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '16px 0 8px' }}>Decisão</div>
             <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6 }}>
@@ -328,28 +377,124 @@ function Drawer({ row, rowStatus, onUpdateStatus, onClose }: {
 }
 
 // ---------------------------------------------------------------------------
-// KPI tile
+// COAF Timeline — beeswarm + popover
 // ---------------------------------------------------------------------------
-function KpiCard({ label, tooltip, value, small, delta, deltaColor, drill, sparkPoints, sparkColor, children }: {
-  label: string; tooltip: string; value: string; small?: boolean
-  delta: string; deltaColor?: string; drill: string
-  sparkPoints?: string; sparkColor?: string; children?: React.ReactNode
-}) {
+function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) {
+  const [popCase, setPopCase] = useState<CoafCase | null>(null)
+  const [popPos,  setPopPos]  = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+
+  function openPop(c: CoafCase, e: React.MouseEvent) {
+    e.stopPropagation()
+    setPopCase(c)
+    setPopPos({ x: e.clientX, y: e.clientY })
+  }
+
+  const critCount = COAF_CASES.filter(c => c.t < 12).length
+  const listTop5  = [...COAF_CASES].sort((a, b) => a.t - b.t).slice(0, 5)
+
   return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 15px', cursor: 'pointer' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12.5, color: 'var(--muted-text)', lineHeight: 1.3 }}>
-        {label}
-        <span title={tooltip} style={{ width: 16, height: 16, borderRadius: '50%', border: '1px solid var(--line)', color: 'var(--muted-text)', fontSize: 10, fontStyle: 'italic', fontWeight: 700, display: 'inline-grid', placeItems: 'center', flexShrink: 0, cursor: 'help', fontFamily: 'serif' }}>i</span>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '15px 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+          Prazo COAF — horizonte 48h
+        </h3>
+        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'var(--red-soft)', color: 'var(--red)' }}>
+          {critCount} críticos &lt; 12h
+        </span>
       </div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 8, marginTop: 7 }}>
-        <span style={{ fontSize: small ? 19 : 27, fontWeight: 800, lineHeight: 1, color: 'var(--ink)' }}>{value}</span>
-        {sparkPoints && <Spark points={sparkPoints} color={sparkColor} />}
-        {children}
+
+      {/* SVG beeswarm */}
+      <div style={{ overflowX: 'auto' }}>
+        <svg width={BW} height={BH} viewBox={`0 0 ${BW} ${BH}`} style={{ display: 'block' }}>
+          {/* Zona crítica */}
+          <rect x={BPL} y={0} width={beeX(12) - BPL} height={BY + 10} fill="var(--red-soft)" opacity={0.55} rx={4} />
+          {/* Linha 24h tracejada */}
+          <line x1={beeX(24)} y1={8} x2={beeX(24)} y2={BY + 8} stroke="var(--muted-text)" strokeWidth={1.5} strokeDasharray="4 3" />
+          {/* Eixo base */}
+          <line x1={BPL} y1={BY + 9} x2={BW - BPR} y2={BY + 9} stroke="var(--line)" strokeWidth={1} />
+          {/* Labels de eixo */}
+          <text x={BPL}      y={BH - 2} fontSize={9.5} fill="var(--muted-text)" textAnchor="middle">0h</text>
+          <text x={beeX(12)} y={BH - 2} fontSize={9.5} fill="var(--red)" fontWeight={700} textAnchor="middle">12h</text>
+          <text x={beeX(24)} y={BH - 2} fontSize={9.5} fill="var(--muted-text)" fontWeight={600} textAnchor="middle">24h</text>
+          <text x={beeX(36)} y={BH - 2} fontSize={9.5} fill="var(--muted-text)" textAnchor="middle">36h</text>
+          <text x={BW - BPR} y={BH - 2} fontSize={9.5} fill="var(--muted-text)" textAnchor="middle">48h</text>
+          {/* Rótulo zona crítica */}
+          <text x={BPL + (beeX(12) - BPL) / 2} y={14} fontSize={8.5} fill="var(--red)" fontWeight={700} textAnchor="middle">CRÍTICO</text>
+          {/* Rótulo 24h */}
+          <text x={beeX(24) + 4} y={20} fontSize={8.5} fill="var(--muted-text)" textAnchor="start">prazo 24h</text>
+          {/* Pontos */}
+          {BEE_LAYOUT.map((pt) => (
+            <g key={pt.id} style={{ cursor: 'pointer' }} onClick={(e) => openPop(pt, e)}>
+              <circle cx={pt.x} cy={pt.cy} r={BR + 4} fill="transparent" />
+              <circle cx={pt.x} cy={pt.cy} r={BR}
+                fill={pt.t < 12 ? 'var(--red)' : 'var(--amber)'}
+                stroke="var(--card)" strokeWidth={1.5} />
+              <title>{pt.nome} — {pt.tl}</title>
+            </g>
+          ))}
+        </svg>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 8 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: deltaColor || 'var(--muted-text)' }}>{delta}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted-text)' }}>{drill} ↗</span>
+
+      {/* Próximos a vencer */}
+      <div style={{ marginTop: 14, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 6 }}>
+          Próximos a vencer
+        </div>
+        {listTop5.map((c, i) => (
+          <div key={c.id} onClick={(e) => openPop(c, e)}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 6px', borderTop: i === 0 ? 'none' : '1px solid var(--bg)', cursor: 'pointer', borderRadius: 6 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.t < 12 ? 'var(--red)' : 'var(--amber)', flexShrink: 0 }} />
+            <span style={{ fontSize: 13, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ink)' }}>{c.nome}</span>
+            <span style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{c.id}</span>
+            <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '2px 7px', borderRadius: 6, flexShrink: 0 }}>{c.marca}</span>
+            <span style={{ fontSize: 12.5, fontWeight: 800, color: c.t < 12 ? 'var(--red)' : 'var(--amber)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
+              faltam {c.tl}
+            </span>
+          </div>
+        ))}
       </div>
+
+      {/* Popover */}
+      {popCase && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 149 }} onClick={() => setPopCase(null)} />
+          <div style={{
+            position: 'fixed',
+            left: Math.min(popPos.x + 10, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 280),
+            top:  Math.max(popPos.y - 30, 8),
+            zIndex: 150,
+            background: 'var(--card)',
+            border: '1px solid var(--line)',
+            borderRadius: 12,
+            boxShadow: '0 8px 32px rgba(16,24,40,.18)',
+            padding: '14px 16px',
+            width: 260,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{popCase.nome}</span>
+              <button onClick={() => setPopCase(null)}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--muted-text)', lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
+            </div>
+            <div style={{ fontSize: 10.5, fontFamily: 'var(--font-mono)', color: 'var(--muted-text)', marginBottom: 10 }}>{popCase.id}</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+              <Pill c={popCase.t < 12 ? 'var(--red)' : 'var(--amber)'}
+                    bg={popCase.t < 12 ? 'var(--red-soft)' : 'var(--amber-soft)'}>
+                {popCase.sev}
+              </Pill>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '3px 9px', borderRadius: 999, display: 'inline-block', whiteSpace: 'nowrap' }}>
+                {popCase.marca}
+              </span>
+            </div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: popCase.t < 12 ? 'var(--red)' : 'var(--amber)', fontFamily: 'var(--font-mono)', marginBottom: 14 }}>
+              ⏱ faltam {popCase.tl}
+            </div>
+            <button className="btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block' }}
+              onClick={() => { onInvestigate(coafToRow(popCase)); setPopCase(null) }}>
+              Investigar →
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -523,9 +668,6 @@ export default function PldAmlPage() {
     })
     .sort((a, b) => (b.crit ? 1 : 0) - (a.crit ? 1 : 0))
 
-  const urgPct = (remaining: number) => Math.round((24 - remaining) / 24 * 100)
-  const urgCol = (remaining: number) => remaining <= 8 ? 'var(--red)' : 'var(--amber)'
-
   return (
     <main className="canvas">
       <div style={{ padding: 'clamp(16px,2vw,40px)', paddingBottom: 56 }}>
@@ -549,75 +691,32 @@ export default function PldAmlPage() {
             </div>
           </div>
 
-          {/* 4 KPIs */}
+          {/* Indicadores — faixa plana */}
           <Sech>Visão geral</Sech>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14 }}>
-            <KpiCard label="Apostadores com flag ativo"
-              tooltip="Qtd. de apostadores com pelo menos 1 red flag ativo (não arquivado)."
-              value="27" sparkPoints={SP_UP} sparkColor="var(--red)"
-              delta="▲ +4 no período" deltaColor="var(--red)" drill="abrir watchlist" />
-            <KpiCard label="Alertas gerados"
-              tooltip="Total de alertas criados no período selecionado."
-              value="38" sparkPoints={SP_FLAT} sparkColor="var(--muted-text)"
-              delta="no período" drill="abrir fila" />
-            <KpiCard label="Volume sob análise"
-              tooltip="Soma do volume financeiro dos apostadores atualmente em análise."
-              value="R$ 1,24 mi" small sparkPoints={SP_MID} sparkColor="var(--muted-text)"
-              delta="▲ +R$ 180 mil" deltaColor="var(--amber)" drill="abrir fila" />
-            <KpiCard label="Red flags por categoria"
-              tooltip="Estruturação · saque atípico · depósito suspeito · comportamento inconsistente."
-              value="34" delta="4 categorias" drill="abrir fila">
-              <div style={{ display: 'flex', height: 8, width: 64, borderRadius: 999, overflow: 'hidden', alignSelf: 'center', background: 'var(--line)' }}>
-                <span style={{ width: '41%', background: 'var(--red)' }} />
-                <span style={{ width: '26%', background: 'var(--amber)' }} />
-                <span style={{ width: '21%', background: 'var(--orange)' }} />
-                <span style={{ width: '12%', background: 'var(--muted-text)' }} />
-              </div>
-            </KpiCard>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+            {KPI_DATA.map((kpi, i) => (
+              <button key={kpi.label}
+                style={{ textAlign: 'left', background: 'none', border: 'none', borderRight: i < 3 ? '1px solid var(--line)' : 'none', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 9, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                <span style={{ fontSize: 13, color: 'var(--muted-text)', display: 'flex', alignItems: 'center', gap: 5, lineHeight: 1.3 }}>
+                  {kpi.label}
+                  <span title={kpi.tooltip}
+                    style={{ width: 15, height: 15, borderRadius: '50%', border: '1px solid var(--line)', color: 'var(--muted-text)', fontSize: 9.5, fontStyle: 'italic', fontWeight: 700, display: 'inline-grid', placeItems: 'center', flexShrink: 0, cursor: 'help', fontFamily: 'serif' }}>
+                    i
+                  </span>
+                </span>
+                <span style={{ fontSize: 30, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', lineHeight: 1 }}>
+                  {kpi.value}
+                </span>
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: kpi.deltaColor || 'var(--muted-text)' }}>
+                  {kpi.delta}
+                </span>
+              </button>
+            ))}
           </div>
 
-          {/* Prazo COAF */}
+          {/* Prazo COAF — beeswarm */}
           <Sech>Prazo COAF (24h)</Sech>
-          <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '15px 18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-              <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-                Prazo COAF — críticos
-              </h3>
-              <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'var(--red-soft)', color: 'var(--red)' }}>
-                3 dentro de 24h
-              </span>
-            </div>
-            {COAF_ROWS.map((item, i) => {
-              const pct = urgPct(item.remaining)
-              const col = urgCol(item.remaining)
-              return (
-                <div key={i} style={{ borderTop: i === 0 ? 'none' : '1px solid var(--line)', padding: '11px 0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 7 }}>
-                    <span style={{ fontSize: 13.5, fontWeight: 600, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ink)' }}>
-                      {item.nome}
-                    </span>
-                    <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '2px 8px', borderRadius: 6, flexShrink: 0 }}>
-                      {item.marca}
-                    </span>
-                    <span style={{ fontSize: 12.5, fontWeight: 800, color: col, whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
-                      faltam {item.remaining}h
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ flex: 1, height: 5, background: 'var(--line)', borderRadius: 999, overflow: 'hidden' }}>
-                      <span style={{ display: 'block', height: '100%', width: `${pct}%`, borderRadius: 999, background: col }} />
-                    </div>
-                    <span style={{ fontSize: 10, color: 'var(--muted-text)', width: 42, textAlign: 'right', flexShrink: 0, fontFamily: 'var(--font-mono)' }}>
-                      {pct}% elapsed
-                    </span>
-                  </div>
-                </div>
-              )
-            })}
-            <div style={{ marginTop: 10, fontSize: 11, color: 'var(--muted-text)' }}>
-              Barra = tempo decorrido das 24h · Crítico quando restam &lt; 8h · Clique para investigar ↗
-            </div>
-          </div>
+          <CoafTimeline onInvestigate={(row) => { setSelected(row); setTimeout(() => document.getElementById('pld-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
 
           {/* PEP */}
           <Sech>Pessoas politicamente expostas (PEP)</Sech>
@@ -682,9 +781,11 @@ export default function PldAmlPage() {
           </div>
 
           {/* Drawer */}
-          {selected && (
-            <Drawer row={selected} rowStatus={rowStatus} onUpdateStatus={updateStatus} onClose={() => setSelected(null)} />
-          )}
+          <div id="pld-drawer">
+            {selected && (
+              <Drawer row={selected} rowStatus={rowStatus} onUpdateStatus={updateStatus} onClose={() => setSelected(null)} />
+            )}
+          </div>
 
           {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 28 }}>
