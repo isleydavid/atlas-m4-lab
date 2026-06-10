@@ -113,7 +113,8 @@ const KPI_DATA = [
 // ---------------------------------------------------------------------------
 // Beeswarm layout (algoritmo do mockup.html)
 // ---------------------------------------------------------------------------
-const BW = 700, BH = 132, BPL = 46, BPR = 26, BY = 104, BSTEP = 13, BR = 6, BGAP = 14, BMAX = 48
+const BW = 700, BH = 132, BPL = 46, BPR = 26, BY = 104, BSTEP = 13, BR = 6, BGAP = 14
+const BMAX = Math.ceil(Math.max(...COAF_CASES.map(c => c.t)) / 6) * 6  // rounds up to nearest 6h above last case
 function beeX(t: number) { return BPL + (t / BMAX) * (BW - BPL - BPR) }
 type BeePoint = CoafCase & { x: number; cy: number }
 const BEE_LAYOUT: BeePoint[] = (() => {
@@ -208,9 +209,9 @@ function Pill({ c, bg, children }: { c: string; bg: string; children: React.Reac
   )
 }
 
-function Sech({ children }: { children: React.ReactNode }) {
+function Sech({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.7px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '26px 0 11px' }}>
+    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.7px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '26px 0 11px', ...style }}>
       {children}
     </div>
   )
@@ -393,10 +394,10 @@ function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) 
   const listTop5  = [...COAF_CASES].sort((a, b) => a.t - b.t).slice(0, 5)
 
   return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '15px 18px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '12px 14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-          Prazo COAF — horizonte 48h
+          Prazo COAF — horizonte {BMAX}h
         </h3>
         <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'var(--red-soft)', color: 'var(--red)' }}>
           {critCount} críticos &lt; 12h
@@ -404,20 +405,21 @@ function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) 
       </div>
 
       {/* SVG beeswarm */}
-      <div style={{ overflowX: 'auto' }}>
-        <svg width={BW} height={BH} viewBox={`0 0 ${BW} ${BH}`} style={{ display: 'block' }}>
+      <div>
+        <svg viewBox={`0 0 ${BW} ${BH}`} width="100%" style={{ display: 'block' }} preserveAspectRatio="xMinYMid meet">
           {/* Zona crítica */}
           <rect x={BPL} y={0} width={beeX(12) - BPL} height={BY + 10} fill="var(--red-soft)" opacity={0.55} rx={4} />
           {/* Linha 24h tracejada */}
           <line x1={beeX(24)} y1={8} x2={beeX(24)} y2={BY + 8} stroke="var(--muted-text)" strokeWidth={1.5} strokeDasharray="4 3" />
           {/* Eixo base */}
           <line x1={BPL} y1={BY + 9} x2={BW - BPR} y2={BY + 9} stroke="var(--line)" strokeWidth={1} />
-          {/* Labels de eixo */}
-          <text x={BPL}      y={BH - 2} fontSize={9.5} fill="var(--muted-text)" textAnchor="middle">0h</text>
-          <text x={beeX(12)} y={BH - 2} fontSize={9.5} fill="var(--red)" fontWeight={700} textAnchor="middle">12h</text>
-          <text x={beeX(24)} y={BH - 2} fontSize={9.5} fill="var(--muted-text)" fontWeight={600} textAnchor="middle">24h</text>
-          <text x={beeX(36)} y={BH - 2} fontSize={9.5} fill="var(--muted-text)" textAnchor="middle">36h</text>
-          <text x={BW - BPR} y={BH - 2} fontSize={9.5} fill="var(--muted-text)" textAnchor="middle">48h</text>
+          {/* Labels de eixo — geradas dinamicamente de 0 a BMAX em intervalos de 6h */}
+          {Array.from({ length: BMAX / 6 + 1 }, (_, i) => i * 6).map(h => (
+            <text key={h} x={h === 0 ? BPL : h === BMAX ? BW - BPR : beeX(h)} y={BH - 2}
+              fontSize={9.5} textAnchor="middle"
+              fill={h === 12 ? 'var(--red)' : 'var(--muted-text)'}
+              fontWeight={h === 12 || h === 24 ? 700 : undefined}>{h}h</text>
+          ))}
           {/* Rótulo zona crítica */}
           <text x={BPL + (beeX(12) - BPL) / 2} y={14} fontSize={8.5} fill="var(--red)" fontWeight={700} textAnchor="middle">CRÍTICO</text>
           {/* Rótulo 24h */}
@@ -579,7 +581,7 @@ function PepSection({ selectedPep: p, setSelectedPep }: { selectedPep: PepPoint 
             <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, color: pepColor ?? undefined, background: 'var(--bg)' }}>{p.cat}</span>
             <span style={{ marginLeft: 'auto', fontSize: 19, fontWeight: 800, fontFamily: 'var(--font-mono)', color: sc ?? undefined }}>{p.score}</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 14, marginTop: 12 }}>
             <div>
               <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Condição PEP</div>
               {[['Cargo', p.cargo], ['Esfera', p.esfera], ['Categoria', p.cat]].map(([k, v]) => (
@@ -714,13 +716,17 @@ export default function PldAmlPage() {
             ))}
           </div>
 
-          {/* Prazo COAF — beeswarm */}
-          <Sech>Prazo COAF (24h)</Sech>
-          <CoafTimeline onInvestigate={(row) => { setSelected(row); setTimeout(() => document.getElementById('pld-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
-
-          {/* PEP */}
-          <Sech>Pessoas politicamente expostas (PEP)</Sech>
-          <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
+          {/* COAF + PEP — 2 colunas, empilha abaixo de ~1100px via flex wrap */}
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>
+            <div style={{ flex: '1 1 460px', minWidth: 0 }}>
+              <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
+              <CoafTimeline onInvestigate={(row) => { setSelected(row); setTimeout(() => document.getElementById('pld-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
+            </div>
+            <div style={{ flex: '1 1 460px', minWidth: 0 }}>
+              <Sech style={{ margin: '0 0 11px' }}>Pessoas politicamente expostas (PEP)</Sech>
+              <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
+            </div>
+          </div>
 
           {/* WorkList */}
           <Sech>Fila de alertas (WorkList)</Sech>
