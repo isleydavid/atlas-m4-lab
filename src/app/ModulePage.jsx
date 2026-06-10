@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import Dashboard from '../ui/Dashboard.jsx'
+import themeCss from '../theme.css?raw'
 
 function fmtData(iso) {
   if (!iso) return ''
@@ -15,6 +16,36 @@ function fmtData(iso) {
 export default function ModulePage() {
   const { slots, slotState, allMosaics, activeMosaic, activeModule, onChangeType, onHide, onReset, aprovada, dataAprovacao, aprovar, onMoveSlot, onMoveToSection, sections } = useOutletContext()
   const [leitura, setLeitura] = useState(false)
+
+  function handleExport() {
+    const dash = document.querySelector('.dash')
+    if (!dash) return
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${activeModule.nome}</title>
+<style>
+${themeCss}
+</style>
+</head>
+<body style="margin:0;padding:clamp(16px,2vw,40px);background:var(--bg)">
+${dash.outerHTML}
+</body>
+</html>`
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    const today = new Date()
+    const stamp = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+    a.download = `${activeModule.id}-${stamp}.html`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
 
   if (!activeModule || activeModule.status === 'soon') {
     return (
@@ -71,7 +102,8 @@ export default function ModulePage() {
           <button
             disabled={!aprovada}
             className="btn-ghost"
-            title={aprovada ? 'Exportar HTML' : 'Aprove a página para exportar'}
+            title={aprovada ? 'Exportar HTML autocontido' : 'Aprove a página para exportar'}
+            onClick={aprovada ? handleExport : undefined}
           >
             Exportar HTML
           </button>
