@@ -1,5 +1,6 @@
 "use client"
 import { useState } from 'react'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -455,9 +456,9 @@ function Modal({ type, justificativa, setJustificativa, onConfirm, onClose }: {
 }
 
 // ---------------------------------------------------------------------------
-// Drawer de investigação
+// Drawer de investigação — painel lateral
 // ---------------------------------------------------------------------------
-function Drawer({ row, rowStatus, onUpdateStatus, onClose }: {
+function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
   row: Row
   rowStatus: Record<number, string>
   onUpdateStatus: (id: number, newStatus: string) => void
@@ -475,89 +476,104 @@ function Drawer({ row, rowStatus, onUpdateStatus, onClose }: {
     setModal(null); setJustif('')
   }
 
+  const SecLabel = ({ children }: { children: React.ReactNode }) => (
+    <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '20px 0 8px', fontFamily: 'var(--font-body)' }}>
+      {children}
+    </div>
+  )
+
   return (
     <>
-      <div style={{ marginTop: 14, position: 'relative', border: '1px dashed var(--orange-line)', borderRadius: 'var(--radius)', padding: 8 }}>
-        <span style={{ position: 'absolute', top: -10, left: 16, background: 'var(--bg)', padding: '0 8px', fontSize: 11, fontWeight: 700, color: 'var(--orange)' }}>
-          Drawer — investigação
-        </span>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-          {/* Esquerda */}
-          <div style={{ padding: '16px 18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <span style={{ fontSize: 17, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{row.nome}</span>
-              <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '3px 9px', borderRadius: 7 }}>{row.marca}</span>
+      {/* Cabeçalho */}
+      <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{row.nome}</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '3px 9px', borderRadius: 7, whiteSpace: 'nowrap' }}>{row.marca}</span>
               <span style={{ marginLeft: 'auto', fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-mono)', color: sc }}>{row.score}</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--muted-text)', marginTop: 5, fontFamily: 'var(--font-mono)' }}>
+            <div style={{ fontSize: 11.5, color: 'var(--muted-text)', marginTop: 5, fontFamily: 'var(--font-mono)', lineHeight: 1.4 }}>
               {row.cpf} · {row.flag} · {row.sev} · SLA {row.sla}
             </div>
-            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '16px 0 8px' }}>
-              Timeline de transações
-            </div>
-            <div style={{ position: 'relative', paddingLeft: 16 }}>
-              <div style={{ position: 'absolute', left: 4, top: 3, bottom: 3, width: 2, background: 'var(--line)' }} />
-              {d.timeline.length === 0 ? (
-                <div style={{ fontSize: 12, color: 'var(--muted-text)', padding: '5px 0 5px 4px' }}>Sem registros disponíveis.</div>
-              ) : d.timeline.map((t, i) => (
-                <div key={i} style={{ position: 'relative', padding: '5px 0 5px 4px', fontSize: 12.5, color: 'var(--ink)' }}>
-                  <span style={{ position: 'absolute', left: -15, top: 9, width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', display: 'block' }} />
-                  {t.desc} <span style={{ color: 'var(--muted-text)', fontSize: 11 }}>— {t.ts}</span>
-                </div>
-              ))}
-            </div>
-            {row.score >= 70 && (
-              <>
-                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '16px 0 8px' }}>
-                  Score factors (≥ 70 · obrigatório)
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-                  {d.factors.length === 0 ? (
-                    <span style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>Aguardando análise.</span>
-                  ) : d.factors.map((f) => (
-                    <span key={f} style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '4px 9px', borderRadius: 7 }}>{f}</span>
-                  ))}
-                </div>
-              </>
-            )}
           </div>
-          {/* Direita */}
-          <div style={{ padding: '16px 18px', background: 'var(--bg)', borderLeft: '1px solid var(--line)' }}>
-            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Vínculos</div>
-            <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.75 }}>
-              {d.vinculos.length === 0
-                ? <span style={{ color: 'var(--muted-text)' }}>Sem vínculos identificados.</span>
-                : d.vinculos.map((v, i) => <div key={i}>• {v}</div>)}
-            </div>
-            <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '16px 0 8px' }}>Decisão</div>
-            <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6 }}>
-              Status: <b>{status}</b>
-              {status === 'Aberto' && (
-                <span style={{ color: 'var(--muted-text)', display: 'block', marginTop: 4, fontSize: 12 }}>
-                  → Inicie a análise para habilitar a comunicação.
-                </span>
-              )}
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginTop: 16, flexWrap: 'wrap' }}>
-              {status === 'Aberto' && (
-                <button className="btn-primary" onClick={() => onUpdateStatus(row.id, 'Em análise')}>Iniciar análise</button>
-              )}
-              {status === 'Em análise' && (
-                <button className="btn-ghost" onClick={() => setModal('coaf')}>→ COAF</button>
-              )}
-              {(status === 'Aberto' || status === 'Em análise') && (
-                <button className="btn-ghost" style={{ color: 'var(--red)', borderColor: 'var(--red-soft)' }} onClick={() => setModal('arquivar')}>
-                  Arquivar
-                </button>
-              )}
-              <button className="btn-ghost" onClick={onClose}>Fechar</button>
-            </div>
-            <div style={{ marginTop: 20, fontSize: 11, color: 'var(--muted-text)', lineHeight: 1.6, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-              ⚷ Ações registradas em trilha auditável — autor + timestamp, imutável (art. 32)
-            </div>
-          </div>
+          <button onClick={onClose} aria-label="Fechar"
+            style={{ flexShrink: 0, width: 28, height: 28, borderRadius: 8, border: '1px solid var(--line)', background: 'var(--bg)', cursor: 'pointer', display: 'grid', placeItems: 'center', fontSize: 13, color: 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>
+            ✕
+          </button>
         </div>
       </div>
+
+      {/* Corpo — rolável */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
+        <SecLabel>Timeline de transações</SecLabel>
+        <div style={{ position: 'relative', paddingLeft: 18 }}>
+          <div style={{ position: 'absolute', left: 5, top: 4, bottom: 4, width: 2, background: 'var(--line)', borderRadius: 2 }} />
+          {d.timeline.length === 0
+            ? <div style={{ fontSize: 12, color: 'var(--muted-text)', padding: '4px 0' }}>Sem registros disponíveis.</div>
+            : d.timeline.map((t, i) => (
+              <div key={i} style={{ position: 'relative', padding: '6px 0', fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.4 }}>
+                <span style={{ position: 'absolute', left: -17, top: 9, width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', display: 'block' }} />
+                {t.desc}
+                <span style={{ color: 'var(--muted-text)', fontSize: 11, marginLeft: 6 }}>— {t.ts}</span>
+              </div>
+            ))
+          }
+        </div>
+
+        {row.score >= 70 && (
+          <>
+            <SecLabel>Score factors (≥ 70 · obrigatório)</SecLabel>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+              {d.factors.length === 0
+                ? <span style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>Aguardando análise.</span>
+                : d.factors.map((f) => (
+                  <span key={f} style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '4px 10px', borderRadius: 7 }}>{f}</span>
+                ))
+              }
+            </div>
+          </>
+        )}
+
+        <SecLabel>Vínculos</SecLabel>
+        <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.8 }}>
+          {d.vinculos.length === 0
+            ? <span style={{ color: 'var(--muted-text)' }}>Sem vínculos identificados.</span>
+            : d.vinculos.map((v, i) => <div key={i}>• {v}</div>)
+          }
+        </div>
+
+        <SecLabel>Decisão</SecLabel>
+        <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6 }}>
+          Status: <b>{status}</b>
+          {status === 'Aberto' && (
+            <div style={{ color: 'var(--muted-text)', marginTop: 4, fontSize: 12 }}>
+              → Inicie a análise para habilitar a comunicação ao COAF.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Rodapé com ações */}
+      <div style={{ padding: '14px 20px', borderTop: '1px solid var(--line)', flexShrink: 0, background: 'var(--bg)' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {status === 'Aberto' && (
+            <button className="btn-primary" onClick={() => onUpdateStatus(row.id, 'Em análise')}>Iniciar análise</button>
+          )}
+          {status === 'Em análise' && (
+            <button className="btn-ghost" onClick={() => setModal('coaf')}>→ COAF</button>
+          )}
+          {(status === 'Aberto' || status === 'Em análise') && (
+            <button className="btn-ghost" style={{ color: 'var(--red)', borderColor: 'var(--red-soft)' }} onClick={() => setModal('arquivar')}>
+              Arquivar
+            </button>
+          )}
+        </div>
+        <div style={{ marginTop: 12, fontSize: 11, color: 'var(--muted-text)', lineHeight: 1.6 }}>
+          ⚷ Ações registradas em trilha auditável — autor + timestamp, imutável (art. 32)
+        </div>
+      </div>
+
       {modal && (
         <Modal type={modal} justificativa={justif} setJustificativa={setJustif} onConfirm={confirm}
           onClose={() => { setModal(null); setJustif('') }} />
@@ -946,7 +962,7 @@ export default function PldAmlPage() {
               <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>
                 <div style={{ flex: '1 1 460px', minWidth: 0 }}>
                   <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
-                  <CoafTimeline onInvestigate={(row) => { setSelected(row); setTimeout(() => document.getElementById('pld-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
+                  <CoafTimeline onInvestigate={(row) => setSelected(row)} />
                 </div>
                 <div style={{ flex: '1 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                   <Sech style={{ margin: '0 0 11px', flexShrink: 0 }}>Pessoas politicamente expostas (PEP)</Sech>
@@ -1018,12 +1034,15 @@ export default function PldAmlPage() {
             </>
           )}
 
-          {/* Drawer — overlay compartilhado entre abas */}
-          <div id="pld-drawer">
-            {selected && (
-              <Drawer row={selected} rowStatus={rowStatus} onUpdateStatus={updateStatus} onClose={() => setSelected(null)} />
-            )}
-          </div>
+          {/* Drawer de investigação — painel lateral compartilhado entre abas */}
+          <Sheet open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null) }}>
+            <SheetContent side="right" showCloseButton={false}
+              style={{ background: 'var(--card)', padding: 0, gap: 0, maxWidth: 440, display: 'flex', flexDirection: 'column' }}>
+              {selected && (
+                <DrawerPanel key={selected.id} row={selected} rowStatus={rowStatus} onUpdateStatus={updateStatus} onClose={() => setSelected(null)} />
+              )}
+            </SheetContent>
+          </Sheet>
 
           {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 28 }}>
