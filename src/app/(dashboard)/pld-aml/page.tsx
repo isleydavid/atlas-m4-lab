@@ -258,42 +258,49 @@ function RedFlagsDonut() {
   })
 
   return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--border-default)', borderRadius: 16, padding: '20px 24px', boxShadow: 'var(--shadow-card)', display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
-      {/* Anel SVG */}
-      <div style={{ flexShrink: 0, position: 'relative', width: 128, height: 128 }}>
-        <svg width="128" height="128" viewBox="0 0 128 128" aria-hidden="true">
-          {/* trilha cinza */}
-          <circle cx={CX} cy={CY} r={R} fill="none" stroke="var(--line)" strokeWidth={20} />
-          {/* segmentos */}
-          {segments.map(seg => (
-            <circle key={seg.label}
-              cx={CX} cy={CY} r={R}
-              fill="none"
-              stroke={seg.color}
-              strokeWidth={20}
-              strokeLinecap="butt"
-              strokeDasharray={`${seg.arcLen} ${C}`}
-              strokeDashoffset={seg.dashOffset}
-              transform={`rotate(-90 ${CX} ${CY})`}
-            />
-          ))}
-        </svg>
-        {/* total no centro */}
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-          <span style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', lineHeight: 1 }}>{total}</span>
-          <span style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 3, fontFamily: 'var(--font-body)' }}>ativos</span>
-        </div>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border-default)', borderRadius: 16, padding: '20px 24px 14px', boxShadow: 'var(--shadow-card)', display: 'flex', flexDirection: 'column' }}>
+      {/* Cabeçalho */}
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.7px', textTransform: 'uppercase', color: 'var(--muted-text)', fontFamily: 'var(--font-body)', lineHeight: 1, marginBottom: 16 }}>
+        Red flags por categoria
       </div>
-      {/* Legenda */}
-      <div style={{ flex: '1 1 160px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {segments.map(seg => (
-          <div key={seg.label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: 13, color: 'var(--ink-2)', fontFamily: 'var(--font-body)', lineHeight: 1.3 }}>{seg.label}</span>
-            <span style={{ fontSize: 13.5, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', marginLeft: 6 }}>{seg.count}</span>
-            <span style={{ fontSize: 12, color: 'var(--muted-text)', width: 38, textAlign: 'right', fontFamily: 'var(--font-body)' }}>{seg.pct}%</span>
+      {/* Corpo: donut + legenda */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 28, flex: 1 }}>
+        {/* Anel SVG */}
+        <div style={{ flexShrink: 0, position: 'relative', width: 128, height: 128 }}>
+          <svg width="128" height="128" viewBox="0 0 128 128" aria-hidden="true">
+            {/* trilha cinza */}
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="var(--line)" strokeWidth={20} />
+            {/* segmentos */}
+            {segments.map(seg => (
+              <circle key={seg.label}
+                cx={CX} cy={CY} r={R}
+                fill="none"
+                stroke={seg.color}
+                strokeWidth={20}
+                strokeLinecap="butt"
+                strokeDasharray={`${seg.arcLen} ${C}`}
+                strokeDashoffset={seg.dashOffset}
+                transform={`rotate(-90 ${CX} ${CY})`}
+              />
+            ))}
+          </svg>
+          {/* total no centro */}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+            <span style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', lineHeight: 1 }}>{total}</span>
+            <span style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 3, fontFamily: 'var(--font-body)' }}>ativos</span>
           </div>
-        ))}
+        </div>
+        {/* Legenda */}
+        <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {segments.map(seg => (
+            <div key={seg.label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
+              <span style={{ flex: 1, fontSize: 13, color: 'var(--ink-2)', fontFamily: 'var(--font-body)', lineHeight: 1.3 }}>{seg.label}</span>
+              <span style={{ fontSize: 13.5, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', marginLeft: 6 }}>{seg.count}</span>
+              <span style={{ fontSize: 12, color: 'var(--muted-text)', width: 38, textAlign: 'right', fontFamily: 'var(--font-body)' }}>{seg.pct}%</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
@@ -947,13 +954,11 @@ export default function PldAmlPage() {
                 ))}
               </div>
 
-              {/* Red flags por categoria — donut */}
-              <Sech>Red flags por categoria</Sech>
-              <RedFlagsDonut />
-
-              {/* Volume sob análise — área */}
-              <Sech>Volume sob análise</Sech>
-              <VolumeTrend />
+              {/* Red flags + Volume — grid 2 colunas, mesma altura */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 26 }}>
+                <RedFlagsDonut />
+                <VolumeTrend />
+              </div>
 
               {/* COAF + PEP — 2 colunas */}
               <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>
