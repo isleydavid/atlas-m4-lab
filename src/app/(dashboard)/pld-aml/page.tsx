@@ -876,26 +876,8 @@ export default function PldAmlPage() {
       <div style={{ padding: 'clamp(16px,2vw,40px)', paddingBottom: 56 }}>
         <div style={{ maxWidth: 1180, margin: '0 auto' }}>
 
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap', marginBottom: 4 }}>
-            <div>
-              <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>PLD / AML</h1>
-              <div style={{ fontSize: 14, color: 'var(--muted-text)', marginTop: 5, lineHeight: 1.4 }}>
-                Detectar, investigar e reportar operações suspeitas ao COAF — com trilha auditável.
-              </div>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, padding: '7px 13px', borderRadius: 999, color: 'var(--orange)', background: 'var(--orange-soft)', border: '1px solid var(--orange-line)', whiteSpace: 'nowrap' }}>
-                ⚷ Acesso restrito · Compliance
-              </span>
-              <span style={{ fontSize: 12, fontWeight: 600, padding: '7px 13px', borderRadius: 999, color: 'var(--muted-text)', background: 'var(--card)', border: '1px solid var(--line)', whiteSpace: 'nowrap' }}>
-                Junho/2026 · todas as marcas
-              </span>
-            </div>
-          </div>
-
           {/* Linha de Período */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginTop: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               {PERIODOS.map((p) => (
                 <button key={p} onClick={() => setPeriodo(p)}
