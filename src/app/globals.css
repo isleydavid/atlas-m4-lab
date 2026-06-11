@@ -60,7 +60,7 @@
   /* shadcn/ui semantic tokens — mapped to Atlas Design System */
   --background: oklch(0.98 0 0);
   --foreground: oklch(0.14 0 0);
-  --card: oklch(0.97 0 0);
+  --card: #ffffff;
   --card-foreground: oklch(0.14 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.14 0 0);

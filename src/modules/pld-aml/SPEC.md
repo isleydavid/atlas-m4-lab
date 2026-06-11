@@ -2,6 +2,8 @@
 **Spec de módulo · padrão Atlas** · Plataforma de Data Intelligence para iGaming · Lifters / TWInfo
 v0.1 · Discovery → Definição · Junho/2026
 
+> **Implementação ativa:** `src/app/(dashboard)/pld-aml/page.tsx` (Next.js App Router · `main`)
+
 | Status | Plano | Personas | Roles (RBAC) |
 | :-- | :-- | :-- | :-- |
 | Planejado (H1) → em definição; bloqueado no menu (disponível H1/2026) | Enterprise | Compliance (Diretor + Analista), Risco | `org_admin`, `compliance`, `risk_analyst` |

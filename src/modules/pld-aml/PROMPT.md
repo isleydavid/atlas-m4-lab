@@ -1,5 +1,11 @@
 # Prompt p/ Claude Code — M7 PLD/AML: casca de produção + verificação
 
+> **⚠️ ARQUIVADO** — `PldAmlPage.jsx` foi removido. A página live está em:
+> **`src/app/(dashboard)/pld-aml/page.tsx`** (Next.js 15 App Router, branch `main`).
+> Este arquivo é mantido apenas como histórico do processo de migração Vite → Next.js.
+
+---
+
 ## Estado atual (importante — NÃO reconstruir)
 
 A página do módulo **M7 · PLD/AML** **já existe e está no `main`**: `src/modules/pld-aml/PldAmlPage.jsx` (página bespoke, ~690 linhas), registrada como `status: 'ready'` no `src/modules/registry.js`. Os arquivos parciais antigos (`charts/kpis.jsx`, `charts/case-drawer.jsx`, `HANDOFF.md`) **já foram removidos**. O `src/theme.css` **já foi alinhado ao Figma** (texto #242424, muted #7d7573, bordas faint/default/strong, fundo #fafafa, base 14px) — **não reverter**.
