@@ -203,6 +203,16 @@ const REDFLAG_CATS = [
   { label: 'Comportamento inconsistente', count: 3, color: 'var(--purple)' },
 ] as const
 
+const VOLUME_DATA = [
+  { day: 'Sex', v: 1.05 },
+  { day: 'Sáb', v: 1.15 },
+  { day: 'Dom', v: 0.98 },
+  { day: 'Seg', v: 1.28 },
+  { day: 'Ter', v: 1.40 },
+  { day: 'Qua', v: 1.62 },
+  { day: 'Qui', v: 1.85 },
+] as const
+
 const FILTERS  = ['Todos', 'Aberto', 'Em análise', 'Crítico', 'Estruturação', 'vaidebet']
 const PERIODOS = ['Hoje', 'Ontem', '7 dias', '15 dias', 'MTD', 'Trimestre']
 const ABAS     = [
@@ -285,6 +295,106 @@ function RedFlagsDonut() {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Volume Trend (área 7 dias)
+// ---------------------------------------------------------------------------
+function VolumeTrend() {
+  const W = 560, H = 148, PL = 6, PR = 6, PT = 38, PB = 28
+  const CW = W - PL - PR
+  const CH = H - PT - PB
+  const n  = VOLUME_DATA.length
+  const todayIdx = n - 1
+
+  const vals = VOLUME_DATA.map(d => d.v)
+  const maxV = Math.max(...vals)
+  const minV = Math.min(...vals)
+  const pad  = (maxV - minV) * 0.22
+  const lo   = minV - pad * 0.5
+  const hi   = maxV + pad
+
+  const px = (i: number) => PL + (i / (n - 1)) * CW
+  const py = (v: number) => PT + CH * (1 - (v - lo) / (hi - lo))
+  const base = PT + CH
+
+  const pts = VOLUME_DATA.map((d, i) => ({ x: px(i), y: py(d.v), day: d.day, v: d.v }))
+
+  function buildPath(): string {
+    let d = `M ${pts[0].x.toFixed(1)},${pts[0].y.toFixed(1)}`
+    for (let i = 0; i < n - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)]
+      const p1 = pts[i]
+      const p2 = pts[i + 1]
+      const p3 = pts[Math.min(n - 1, i + 2)]
+      const cp1x = (p1.x + (p2.x - p0.x) / 6).toFixed(1)
+      const cp1y = (p1.y + (p2.y - p0.y) / 6).toFixed(1)
+      const cp2x = (p2.x - (p3.x - p1.x) / 6).toFixed(1)
+      const cp2y = (p2.y - (p3.y - p1.y) / 6).toFixed(1)
+      d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`
+    }
+    return d
+  }
+
+  const linePath = buildPath()
+  const areaPath = `${linePath} L ${pts[n - 1].x.toFixed(1)},${base} L ${pts[0].x.toFixed(1)},${base} Z`
+  const peakIdx  = vals.findIndex(v => v === maxV)
+  const peak     = pts[peakIdx]
+  const fmtM     = (v: number) => `R$ ${v.toFixed(2).replace('.', ',')}M`
+
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border-default)', borderRadius: 16, padding: '20px 24px 14px', boxShadow: 'var(--shadow-card)' }}>
+      {/* Cabeçalho */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 10, gap: 12 }}>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.7px', textTransform: 'uppercase', color: 'var(--muted-text)', fontFamily: 'var(--font-body)', lineHeight: 1 }}>
+            Volume sob análise · 7 dias
+          </div>
+          <div style={{ marginTop: 6, display: 'flex', alignItems: 'baseline', gap: 7 }}>
+            <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--orange)', fontFamily: 'var(--font-body)', textTransform: 'uppercase', letterSpacing: '.5px' }}>hoje</span>
+            <span style={{ fontSize: 28, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', lineHeight: 1 }}>R$ 1,85M</span>
+          </div>
+        </div>
+      </div>
+      {/* SVG */}
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
+        <defs>
+          <linearGradient id="vol-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   style={{ stopColor: 'var(--orange-soft)', stopOpacity: 0.9  }} />
+            <stop offset="100%" style={{ stopColor: 'var(--orange-soft)', stopOpacity: 0.05 }} />
+          </linearGradient>
+        </defs>
+        {/* Área preenchida */}
+        <path d={areaPath} fill="url(#vol-grad)" />
+        {/* Linha */}
+        <path d={linePath} fill="none" stroke="var(--orange)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {/* Marcadores */}
+        {pts.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y}
+            r={i === todayIdx ? 5 : 3.5}
+            fill={i === todayIdx ? 'var(--orange)' : 'var(--card)'}
+            stroke="var(--orange)" strokeWidth="2"
+          />
+        ))}
+        {/* Rótulos dos dias */}
+        {pts.map((p, i) => (
+          <text key={i} x={p.x} y={H - 4} textAnchor="middle"
+            style={{ fontSize: i === todayIdx ? 11.5 : 11, fontWeight: i === todayIdx ? 800 : 600,
+              fill: i === todayIdx ? 'var(--orange)' : 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>
+            {p.day}
+          </text>
+        ))}
+        {/* Anotação do pico */}
+        <line x1={peak.x} y1={peak.y - 7} x2={peak.x} y2={peak.y - 18}
+          stroke="var(--orange)" strokeWidth="1.5" strokeDasharray="2 2" />
+        <text x={peak.x} y={peak.y - 22}
+          textAnchor={peakIdx >= n - 2 ? 'end' : peakIdx <= 1 ? 'start' : 'middle'}
+          style={{ fontSize: 11, fontWeight: 700, fill: 'var(--orange)', fontFamily: 'var(--font-body)' }}>
+          ▲ {fmtM(maxV)}
+        </text>
+      </svg>
     </div>
   )
 }
@@ -840,6 +950,10 @@ export default function PldAmlPage() {
               {/* Red flags por categoria — donut */}
               <Sech>Red flags por categoria</Sech>
               <RedFlagsDonut />
+
+              {/* Volume sob análise — área */}
+              <Sech>Volume sob análise</Sech>
+              <VolumeTrend />
 
               {/* COAF + PEP — 2 colunas */}
               <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>
