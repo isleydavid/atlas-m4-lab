@@ -32,6 +32,11 @@ interface WatchRow {
   motivo: string; marca: string; ultima: string
   status: 'Em observação' | 'Escalado' | 'Removido'
 }
+interface FluxoPoint {
+  id: string; conta: string; volume: number; pctSemJogo: number
+  padrao: 'pass-through' | 'saques-recorrentes' | 'normal'
+  saquesRepetidos: number; ip: string; contasVinculadas: string
+}
 
 // ---------------------------------------------------------------------------
 // Dados mock — WorkList
@@ -151,6 +156,23 @@ function coafToRow(c: CoafCase): Row {
   }
 }
 
+function fluxoToRow(f: FluxoPoint): Row {
+  const score = f.padrao === 'pass-through' ? 89 : f.padrao === 'saques-recorrentes' ? 74 : 32
+  const vinculo = f.contasVinculadas !== '—' ? ' · Vínculos: ' + f.contasVinculadas : ''
+  return {
+    id: parseInt(f.id.replace('fx-', '')) + 200,
+    nome: f.conta, cpf: f.conta, marca: '—',
+    flag: f.padrao === 'pass-through'
+      ? `Estruturação — IP: ${f.ip}${vinculo}`
+      : f.padrao === 'saques-recorrentes'
+      ? `Saque atípico — ${f.saquesRepetidos} saques recorrentes${vinculo}`
+      : 'Comportamento normal',
+    score, sev: score >= 85 ? 'Crítico' : score >= 70 ? 'Alto' : 'Médio',
+    sla: '—', slaH: null, slaC: 'm',
+    status: 'Aberto', resp: '—', crit: score >= 85,
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Dados mock — PEP
 // ---------------------------------------------------------------------------
@@ -179,6 +201,10 @@ const SX = (v: number) => 50 + (v / 100) * 400
 const SY = (v: number) => 240 - (v / 100) * 200
 const CROSS_X = SX(60)
 const CROSS_Y = SY(60)
+
+// Fluxo chart: X = volume R$0–500k; Y = % sem jogo 0–100 (viewBox 640×260)
+const FX = (v: number) => 70 + (Math.min(v, 500000) / 500000) * 550
+const FY = (v: number) => 220 - (v / 100) * 190
 
 // ---------------------------------------------------------------------------
 // Token maps
@@ -229,6 +255,30 @@ const VOLUME_DATA = [
   { day: 'Qua', v: 1.62 },
   { day: 'Qui', v: 1.85 },
 ] as const
+
+// ---------------------------------------------------------------------------
+// Dados mock — Fluxo financeiro × jogo
+// ---------------------------------------------------------------------------
+const FLUXO_DATA: FluxoPoint[] = [
+  // pass-through: alto volume, quase sem jogo → canto superior direito
+  { id: 'fx-1',  conta: '•••.•••.•••-14', volume: 420000, pctSemJogo: 96, padrao: 'pass-through',       saquesRepetidos: 1,  ip: '177.32.xx.xx', contasVinculadas: 'J. COSTA'  },
+  { id: 'fx-2',  conta: '•••.•••.•••-37', volume: 480000, pctSemJogo: 98, padrao: 'pass-through',       saquesRepetidos: 1,  ip: '200.18.xx.xx', contasVinculadas: '—'         },
+  { id: 'fx-3',  conta: '•••.•••.•••-88', volume: 310000, pctSemJogo: 94, padrao: 'pass-through',       saquesRepetidos: 2,  ip: '45.67.xx.xx',  contasVinculadas: 'D. MELO'   },
+  // saques-recorrentes: baixo volume individual, muitos saques de valor semelhante → canto superior esquerdo
+  { id: 'fx-4',  conta: '•••.•••.•••-52', volume: 65000,  pctSemJogo: 92, padrao: 'saques-recorrentes', saquesRepetidos: 12, ip: '192.0.xx.xx',  contasVinculadas: '—'         },
+  { id: 'fx-5',  conta: '•••.•••.•••-09', volume: 45000,  pctSemJogo: 95, padrao: 'saques-recorrentes', saquesRepetidos: 9,  ip: '10.20.xx.xx',  contasVinculadas: 'F. ROCHA'  },
+  { id: 'fx-6',  conta: '•••.•••.•••-73', volume: 80000,  pctSemJogo: 89, padrao: 'saques-recorrentes', saquesRepetidos: 6,  ip: '172.16.xx.xx', contasVinculadas: '—'         },
+  // normais: jogou de forma regular → espalhados na base
+  { id: 'fx-7',  conta: '•••.•••.•••-21', volume: 30000,  pctSemJogo: 18, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
+  { id: 'fx-8',  conta: '•••.•••.•••-65', volume: 120000, pctSemJogo: 25, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
+  { id: 'fx-9',  conta: '•••.•••.•••-03', volume: 240000, pctSemJogo: 30, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
+  { id: 'fx-10', conta: '•••.•••.•••-47', volume: 170000, pctSemJogo: 12, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
+]
+const FLUXO_COLORS: Record<string, string> = {
+  'pass-through':       'var(--red)',
+  'saques-recorrentes': 'var(--purple)',
+  'normal':             'var(--muted-2)',
+}
 
 const WATCH_DATA: WatchRow[] = [
   { id: 101, nome: 'J. COSTA',    cpf: '•••.•••.•••-14', score: 93, classe: 'Alto',  motivo: 'PEP',          marca: 'vaidebet',     ultima: 'há 1h',  status: 'Em observação' },
@@ -888,6 +938,136 @@ function PepSection({ selectedPep: p, setSelectedPep }: { selectedPep: PepPoint 
 }
 
 // ---------------------------------------------------------------------------
+// Fluxo financeiro × jogo — scatter landscape
+// ---------------------------------------------------------------------------
+const FX_LABELS = [
+  { v: 0,      label: 'R$0'    },
+  { v: 100000, label: 'R$100k' },
+  { v: 200000, label: 'R$200k' },
+  { v: 300000, label: 'R$300k' },
+  { v: 400000, label: 'R$400k' },
+  { v: 500000, label: 'R$500k+' },
+]
+
+function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void }) {
+  const [selFx, setSelFx] = useState<FluxoPoint | null>(null)
+
+  const ptCount  = FLUXO_DATA.filter(f => f.padrao === 'pass-through').length
+  const srCount  = FLUXO_DATA.filter(f => f.padrao === 'saques-recorrentes').length
+  const nrmCount = FLUXO_DATA.filter(f => f.padrao === 'normal').length
+  const ptVol    = FLUXO_DATA.filter(f => f.padrao === 'pass-through').reduce((s, f) => s + f.volume, 0)
+  const srAvgSaq = Math.round(FLUXO_DATA.filter(f => f.padrao === 'saques-recorrentes').reduce((s, f) => s + f.saquesRepetidos, 0) / srCount)
+
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 16px' }}>
+      {/* Legenda no cabeçalho */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+          Scatter: volume movimentado × % sem jogo
+        </h3>
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {([
+            ['pass-through',       'var(--red)',    'Entra e sai sem jogar'],
+            ['saques-recorrentes', 'var(--purple)', 'Saques recorrentes · quantias semelhantes'],
+            ['normal',             'var(--muted-2)','Jogou normalmente'],
+          ] as const).map(([, cor, label]) => (
+            <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
+              <span style={{ width: 9, height: 9, borderRadius: '50%', background: cor, flexShrink: 0 }} />
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* SVG scatter */}
+      <svg viewBox="0 0 640 260" width="100%" style={{ display: 'block', overflow: 'visible' }} preserveAspectRatio="xMidYMid meet">
+        {/* Banda de risco (pctSemJogo ≥ 75) */}
+        <rect x={70} y={FY(100)} width={550} height={FY(75) - FY(100)} fill="var(--amber-soft)" opacity={0.6} />
+        {/* Eixo X */}
+        <line x1={70} y1={220} x2={620} y2={220} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
+        {/* Eixo Y */}
+        <line x1={70} y1={30}  x2={70}  y2={220} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
+        {/* Grade Y + labels */}
+        {[0, 25, 50, 75, 100].map((v) => (
+          <g key={v}>
+            <line x1={68} y1={FY(v)} x2={620} y2={FY(v)}
+              style={{ stroke: v === 0 ? 'none' : 'var(--line)' }}
+              strokeWidth={1} strokeDasharray={v > 0 ? '4 3' : undefined} />
+            <text x={63} y={FY(v) + 3} fontSize={8} style={{ fill: 'var(--muted-text)' }} textAnchor="end">{v}%</text>
+          </g>
+        ))}
+        {/* Grade X + labels */}
+        {FX_LABELS.map(({ v, label }) => (
+          <g key={v}>
+            <line x1={FX(v)} y1={30} x2={FX(v)} y2={222}
+              style={{ stroke: 'var(--line)' }}
+              strokeWidth={1} strokeDasharray={v > 0 ? '4 3' : undefined} />
+            <text x={FX(v)} y={234} fontSize={8} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">{label}</text>
+          </g>
+        ))}
+        {/* Labels dos eixos */}
+        <text x={345} y={248} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">→ volume movimentado (R$)</text>
+        <text x={16}  y={128} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle" transform="rotate(-90,16,128)">% sem jogo ↑</text>
+        {/* Labels de zona */}
+        <text x={180} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--purple)' }} fontWeight={700} textAnchor="middle">saques recorrentes · quantias semelhantes</text>
+        <text x={490} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--red)' }}    fontWeight={700} textAnchor="middle">entra e sai sem jogar</text>
+        {/* Bolhas */}
+        {FLUXO_DATA.map((f) => {
+          const isSel = selFx?.id === f.id
+          const col   = FLUXO_COLORS[f.padrao]
+          const r     = f.padrao === 'saques-recorrentes' ? 5 + f.saquesRepetidos * 0.7 : 8
+          const rFinal = isSel ? r + 3 : r
+          return (
+            <g key={f.id} style={{ cursor: 'pointer' }} onClick={() => { setSelFx(f); onInvestigate(fluxoToRow(f)) }}>
+              <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal + 5} fill="transparent" />
+              <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal}
+                style={{ fill: col, stroke: isSel ? 'var(--ink)' : 'none' }}
+                fillOpacity={isSel ? 1 : 0.75}
+                strokeWidth={2} />
+              {isSel && (
+                <text x={FX(f.volume)} y={FY(f.pctSemJogo) - rFinal - 5} fontSize={8.5}
+                  style={{ fill: 'var(--ink)' }} fontWeight={700} textAnchor="middle">
+                  {f.conta}
+                </text>
+              )}
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* Faixa de estatísticas por padrão */}
+      <div style={{ display: 'flex', gap: 0, marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+        {[
+          {
+            col:   'var(--red)',
+            label: 'Entra e sai sem jogar',
+            detail: `${ptCount} contas · R$ ${(ptVol / 1000).toFixed(0)}k movimentado · ~3% jogado`,
+          },
+          {
+            col:   'var(--purple)',
+            label: 'Saques · quantias semelhantes',
+            detail: `${srCount} contas · ~${srAvgSaq} saques de valor semelhante · ~7% jogado`,
+          },
+          {
+            col:   'var(--muted-2)',
+            label: 'Jogou normalmente',
+            detail: `${nrmCount} contas — sem anomalia`,
+          },
+        ].map(({ col, label, detail }, i) => (
+          <div key={label} style={{ flex: 1, padding: '0 14px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>{label}</span>
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>{detail}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Página principal
 // ---------------------------------------------------------------------------
 export default function PldAmlPage() {
@@ -1026,6 +1206,12 @@ export default function PldAmlPage() {
                   <Sech style={{ margin: '0 0 11px', flexShrink: 0 }}>Pessoas politicamente expostas (PEP)</Sech>
                   <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
                 </div>
+              </div>
+
+              {/* Fluxo financeiro × jogo */}
+              <div style={{ marginTop: 26 }}>
+                <Sech style={{ margin: '0 0 11px' }}>Fluxo financeiro × jogo</Sech>
+                <FluxoFinanceiro onInvestigate={(row) => setSelected(row)} />
               </div>
             </>
           )}
