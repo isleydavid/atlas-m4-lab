@@ -36,6 +36,8 @@ interface FluxoPoint {
   id: string; conta: string; volume: number; pctSemJogo: number
   padrao: 'pass-through' | 'saques-recorrentes' | 'normal'
   saquesRepetidos: number; ip: string; contasVinculadas: string
+  entradas: number; saidas: number; jogouV: number; rendaMedia: string
+  valorSaque?: number
 }
 
 // ---------------------------------------------------------------------------
@@ -261,18 +263,18 @@ const VOLUME_DATA = [
 // ---------------------------------------------------------------------------
 const FLUXO_DATA: FluxoPoint[] = [
   // pass-through: alto volume, quase sem jogo → canto superior direito
-  { id: 'fx-1',  conta: '•••.•••.•••-14', volume: 420000, pctSemJogo: 96, padrao: 'pass-through',       saquesRepetidos: 1,  ip: '177.32.xx.xx', contasVinculadas: 'J. COSTA'  },
-  { id: 'fx-2',  conta: '•••.•••.•••-37', volume: 480000, pctSemJogo: 98, padrao: 'pass-through',       saquesRepetidos: 1,  ip: '200.18.xx.xx', contasVinculadas: '—'         },
-  { id: 'fx-3',  conta: '•••.•••.•••-88', volume: 310000, pctSemJogo: 94, padrao: 'pass-through',       saquesRepetidos: 2,  ip: '45.67.xx.xx',  contasVinculadas: 'D. MELO'   },
+  { id: 'fx-1',  conta: '•••.•••.•••-14', volume: 420000, pctSemJogo: 96, padrao: 'pass-through',       saquesRepetidos: 1,  ip: '177.32.xx.xx', contasVinculadas: 'J. COSTA', entradas: 442000, saidas: 418000, jogouV:  17000, rendaMedia: 'R$ 4.200/mês' },
+  { id: 'fx-2',  conta: '•••.•••.•••-37', volume: 480000, pctSemJogo: 98, padrao: 'pass-through',       saquesRepetidos: 1,  ip: '200.18.xx.xx', contasVinculadas: '—',        entradas: 492000, saidas: 478000, jogouV:   9000, rendaMedia: 'R$ 3.800/mês' },
+  { id: 'fx-3',  conta: '•••.•••.•••-88', volume: 310000, pctSemJogo: 94, padrao: 'pass-through',       saquesRepetidos: 2,  ip: '45.67.xx.xx',  contasVinculadas: 'D. MELO',  entradas: 318000, saidas: 303000, jogouV:  18000, rendaMedia: 'R$ 5.100/mês' },
   // saques-recorrentes: baixo volume individual, muitos saques de valor semelhante → canto superior esquerdo
-  { id: 'fx-4',  conta: '•••.•••.•••-52', volume: 65000,  pctSemJogo: 92, padrao: 'saques-recorrentes', saquesRepetidos: 12, ip: '192.0.xx.xx',  contasVinculadas: '—'         },
-  { id: 'fx-5',  conta: '•••.•••.•••-09', volume: 45000,  pctSemJogo: 95, padrao: 'saques-recorrentes', saquesRepetidos: 9,  ip: '10.20.xx.xx',  contasVinculadas: 'F. ROCHA'  },
-  { id: 'fx-6',  conta: '•••.•••.•••-73', volume: 80000,  pctSemJogo: 89, padrao: 'saques-recorrentes', saquesRepetidos: 6,  ip: '172.16.xx.xx', contasVinculadas: '—'         },
+  { id: 'fx-4',  conta: '•••.•••.•••-52', volume: 65000,  pctSemJogo: 92, padrao: 'saques-recorrentes', saquesRepetidos: 12, ip: '192.0.xx.xx',  contasVinculadas: '—',        entradas:  68000, saidas:  60000, jogouV:   5000, rendaMedia: 'R$ 1.800/mês', valorSaque:  5000 },
+  { id: 'fx-5',  conta: '•••.•••.•••-09', volume: 45000,  pctSemJogo: 95, padrao: 'saques-recorrentes', saquesRepetidos: 9,  ip: '10.20.xx.xx',  contasVinculadas: 'F. ROCHA', entradas:  48000, saidas:  43000, jogouV:   2000, rendaMedia: 'R$ 1.500/mês', valorSaque:  4800 },
+  { id: 'fx-6',  conta: '•••.•••.•••-73', volume: 80000,  pctSemJogo: 89, padrao: 'saques-recorrentes', saquesRepetidos: 6,  ip: '172.16.xx.xx', contasVinculadas: '—',        entradas:  83000, saidas:  74000, jogouV:   9000, rendaMedia: 'R$ 2.400/mês', valorSaque: 12300 },
   // normais: jogou de forma regular → espalhados na base
-  { id: 'fx-7',  conta: '•••.•••.•••-21', volume: 30000,  pctSemJogo: 18, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
-  { id: 'fx-8',  conta: '•••.•••.•••-65', volume: 120000, pctSemJogo: 25, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
-  { id: 'fx-9',  conta: '•••.•••.•••-03', volume: 240000, pctSemJogo: 30, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
-  { id: 'fx-10', conta: '•••.•••.•••-47', volume: 170000, pctSemJogo: 12, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—' },
+  { id: 'fx-7',  conta: '•••.•••.•••-21', volume:  30000, pctSemJogo: 18, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—', entradas:  32000, saidas:  6000, jogouV:  25000, rendaMedia: 'R$ 3.200/mês' },
+  { id: 'fx-8',  conta: '•••.•••.•••-65', volume: 120000, pctSemJogo: 25, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—', entradas: 125000, saidas: 28000, jogouV:  90000, rendaMedia: 'R$ 8.500/mês' },
+  { id: 'fx-9',  conta: '•••.•••.•••-03', volume: 240000, pctSemJogo: 30, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—', entradas: 252000, saidas: 72000, jogouV: 168000, rendaMedia: 'R$ 22.000/mês' },
+  { id: 'fx-10', conta: '•••.•••.•••-47', volume: 170000, pctSemJogo: 12, padrao: 'normal',             saquesRepetidos: 1,  ip: '—', contasVinculadas: '—', entradas: 175000, saidas: 21000, jogouV: 150000, rendaMedia: 'R$ 15.000/mês' },
 ]
 const FLUXO_COLORS: Record<string, string> = {
   'pass-through':       'var(--red)',
@@ -949,6 +951,15 @@ const FX_LABELS = [
   { v: 500000, label: 'R$500k+' },
 ]
 
+// Variações determinísticas para simular saques de valor semelhante (sem Math.random)
+const SAQUE_VARS = [0, 0.012, -0.008, 0.005, -0.014, 0.009, 0.002, -0.011, 0.018, -0.005, 0.007, -0.016]
+
+function fmtK(v: number) {
+  if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`
+  if (v >= 1000)    return `R$ ${(v / 1000).toFixed(0)}k`
+  return `R$ ${v}`
+}
+
 function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void }) {
   const [selFx, setSelFx] = useState<FluxoPoint | null>(null)
 
@@ -957,6 +968,102 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
   const nrmCount = FLUXO_DATA.filter(f => f.padrao === 'normal').length
   const ptVol    = FLUXO_DATA.filter(f => f.padrao === 'pass-through').reduce((s, f) => s + f.volume, 0)
   const srAvgSaq = Math.round(FLUXO_DATA.filter(f => f.padrao === 'saques-recorrentes').reduce((s, f) => s + f.saquesRepetidos, 0) / srCount)
+
+  // Simulação de cada cenário
+  function renderScenario(f: FluxoPoint) {
+    if (f.padrao === 'pass-through') {
+      const apostPct = Math.round((f.jogouV / f.entradas) * 100)
+      const saidaPct = Math.round((f.saidas  / f.entradas) * 100)
+      return (
+        <div>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--ink)', marginBottom: 10 }}>Fluxo de dinheiro</div>
+          {([
+            { label: 'Entradas', v: f.entradas, pct: 100,       col: 'var(--green)' },
+            { label: 'Apostado', v: f.jogouV,   pct: apostPct,  col: 'var(--amber)' },
+            { label: 'Saídas',   v: f.saidas,   pct: saidaPct,  col: 'var(--red)'   },
+          ] as const).map(({ label, v, pct, col }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+              <span style={{ width: 58, fontSize: 11, color: 'var(--muted-text)', textAlign: 'right', flexShrink: 0 }}>{label}</span>
+              <div style={{ flex: 1, height: 9, background: 'var(--line)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${pct}%`, background: col, borderRadius: 99 }} />
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)', width: 58, flexShrink: 0 }}>{fmtK(v)}</span>
+              <span style={{ fontSize: 10.5, color: 'var(--muted-text)', width: 28, textAlign: 'right', flexShrink: 0 }}>{pct}%</span>
+            </div>
+          ))}
+          <div style={{ marginTop: 10, fontSize: 11.5, color: 'var(--red)', fontWeight: 700 }}>
+            ⚠ {100 - apostPct}% do dinheiro não foi apostado — padrão pass-through
+          </div>
+        </div>
+      )
+    }
+
+    if (f.padrao === 'saques-recorrentes') {
+      const base     = f.valorSaque ?? 0
+      const amounts  = Array.from({ length: f.saquesRepetidos }, (_, i) =>
+        Math.round(base * (1 + SAQUE_VARS[i % SAQUE_VARS.length])))
+      const maxA     = Math.max(...amounts)
+      const minA     = Math.min(...amounts)
+      const desvio   = maxA - minA
+      return (
+        <div>
+          <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--ink)', marginBottom: 8 }}>
+            Saques identificados — {f.saquesRepetidos} ocorrências
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
+            {amounts.map((v, i) => (
+              <span key={i} style={{ fontSize: 11, fontWeight: 700, padding: '4px 9px', borderRadius: 8,
+                background: 'var(--purple-soft)', color: 'var(--purple)' }}>
+                {fmtK(v)}
+              </span>
+            ))}
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--muted-text)', marginBottom: 4 }}>
+            Valor médio {fmtK(base)} · variação total ≤ {fmtK(desvio)}
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--purple)', fontWeight: 700 }}>
+            ⚠ Valores deliberadamente similares — padrão de fracionamento
+          </div>
+        </div>
+      )
+    }
+
+    // normal
+    const jogouPct = Math.round((f.jogouV / f.volume) * 100)
+    const saidoPct = 100 - jogouPct
+    return (
+      <div>
+        <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--ink)', marginBottom: 10 }}>Distribuição do volume</div>
+        {([
+          { label: 'Apostou', v: f.jogouV, pct: jogouPct, col: 'var(--green)'  },
+          { label: 'Sacado',  v: f.saidas, pct: saidoPct, col: 'var(--muted-2)'},
+        ] as const).map(({ label, v, pct, col }) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ width: 52, fontSize: 11, color: 'var(--muted-text)', textAlign: 'right', flexShrink: 0 }}>{label}</span>
+            <div style={{ flex: 1, height: 9, background: 'var(--line)', borderRadius: 99, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${pct}%`, background: col, borderRadius: 99 }} />
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)', width: 58, flexShrink: 0 }}>{fmtK(v)}</span>
+            <span style={{ fontSize: 10.5, color: 'var(--muted-text)', width: 28, textAlign: 'right', flexShrink: 0 }}>{pct}%</span>
+          </div>
+        ))}
+        <div style={{ marginTop: 10, fontSize: 11.5, color: 'var(--green)', fontWeight: 700 }}>
+          ✓ Perfil regular — apostas representam a maior parte do fluxo
+        </div>
+      </div>
+    )
+  }
+
+  const padraoCor: Record<string, string> = {
+    'pass-through':       'var(--red)',
+    'saques-recorrentes': 'var(--purple)',
+    'normal':             'var(--green)',
+  }
+  const padraoLabel: Record<string, string> = {
+    'pass-through':       'Pass-through',
+    'saques-recorrentes': 'Saques recorrentes',
+    'normal':             'Normal',
+  }
 
   return (
     <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 16px' }}>
@@ -1010,15 +1117,16 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
         <text x={16}  y={128} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle" transform="rotate(-90,16,128)">% sem jogo ↑</text>
         {/* Labels de zona */}
         <text x={180} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--purple)' }} fontWeight={700} textAnchor="middle">saques recorrentes · quantias semelhantes</text>
-        <text x={490} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--red)' }}    fontWeight={700} textAnchor="middle">entra e sai sem jogar</text>
+        <text x={490} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--red)'    }} fontWeight={700} textAnchor="middle">entra e sai sem jogar</text>
         {/* Bolhas */}
         {FLUXO_DATA.map((f) => {
-          const isSel = selFx?.id === f.id
-          const col   = FLUXO_COLORS[f.padrao]
-          const r     = f.padrao === 'saques-recorrentes' ? 5 + f.saquesRepetidos * 0.7 : 8
+          const isSel  = selFx?.id === f.id
+          const col    = FLUXO_COLORS[f.padrao]
+          const r      = f.padrao === 'saques-recorrentes' ? 5 + f.saquesRepetidos * 0.7 : 8
           const rFinal = isSel ? r + 3 : r
           return (
-            <g key={f.id} style={{ cursor: 'pointer' }} onClick={() => { setSelFx(f); onInvestigate(fluxoToRow(f)) }}>
+            <g key={f.id} style={{ cursor: 'pointer' }}
+              onClick={() => setSelFx(selFx?.id === f.id ? null : f)}>
               <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal + 5} fill="transparent" />
               <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal}
                 style={{ fill: col, stroke: isSel ? 'var(--ink)' : 'none' }}
@@ -1035,34 +1143,70 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
         })}
       </svg>
 
-      {/* Faixa de estatísticas por padrão */}
-      <div style={{ display: 'flex', gap: 0, marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
-        {[
-          {
-            col:   'var(--red)',
-            label: 'Entra e sai sem jogar',
-            detail: `${ptCount} contas · R$ ${(ptVol / 1000).toFixed(0)}k movimentado · ~3% jogado`,
-          },
-          {
-            col:   'var(--purple)',
-            label: 'Saques · quantias semelhantes',
-            detail: `${srCount} contas · ~${srAvgSaq} saques de valor semelhante · ~7% jogado`,
-          },
-          {
-            col:   'var(--muted-2)',
-            label: 'Jogou normalmente',
-            detail: `${nrmCount} contas — sem anomalia`,
-          },
-        ].map(({ col, label, detail }, i) => (
-          <div key={label} style={{ flex: 1, padding: '0 14px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>{label}</span>
-            </div>
-            <div style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>{detail}</div>
+      {/* Detalhe do ponto selecionado */}
+      {selFx ? (
+        <div style={{ marginTop: 14, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
+          {/* Cabeçalho da conta */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 13.5, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }}>{selFx.conta}</span>
+            <Pill c={padraoCor[selFx.padrao] || 'var(--muted-text)'}
+                  bg={selFx.padrao === 'pass-through' ? 'var(--red-soft)' : selFx.padrao === 'saques-recorrentes' ? 'var(--purple-soft)' : 'var(--green-soft)'}>
+              {padraoLabel[selFx.padrao]}
+            </Pill>
+            {selFx.contasVinculadas !== '—' && (
+              <span style={{ fontSize: 11, color: 'var(--muted-text)' }}>Vínculos: <strong>{selFx.contasVinculadas}</strong></span>
+            )}
+            <button onClick={() => setSelFx(null)}
+              style={{ marginLeft: 'auto', border: 'none', background: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--muted-text)', lineHeight: 1, padding: 0 }}>×</button>
           </div>
-        ))}
-      </div>
+
+          {/* KPIs: Entradas · Saídas · Renda média */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 16 }}>
+            {([
+              { label: 'Total de entradas', value: fmtK(selFx.entradas), accent: 'var(--green)'   },
+              { label: 'Total de saídas',   value: fmtK(selFx.saidas),   accent: 'var(--red)'     },
+              { label: 'Renda média',        value: selFx.rendaMedia,     accent: 'var(--ink-2)'   },
+            ] as const).map(({ label, value, accent }) => (
+              <div key={label} style={{ background: 'var(--bg)', borderRadius: 10, padding: '10px 14px', border: '1px solid var(--line)' }}>
+                <div style={{ fontSize: 11, color: 'var(--muted-text)', marginBottom: 4 }}>{label}</div>
+                <div style={{ fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-head)', color: accent, lineHeight: 1 }}>{value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Simulação do cenário */}
+          <div style={{ background: 'var(--bg)', borderRadius: 12, padding: '12px 14px', border: '1px solid var(--line)', marginBottom: 14 }}>
+            {renderScenario(selFx)}
+          </div>
+
+          {/* Ação */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button className="btn-primary" onClick={() => onInvestigate(fluxoToRow(selFx))}>
+              Investigar →
+            </button>
+            {selFx.ip !== '—' && (
+              <span style={{ fontSize: 11, color: 'var(--muted-text)' }}>IP: {selFx.ip}</span>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* Faixa de estatísticas agregadas (nada selecionado) */
+        <div style={{ display: 'flex', gap: 0, marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+          {[
+            { col: 'var(--red)',    label: 'Entra e sai sem jogar',          detail: `${ptCount} contas · R$ ${(ptVol / 1000).toFixed(0)}k movimentado · ~3% jogado` },
+            { col: 'var(--purple)', label: 'Saques · quantias semelhantes',   detail: `${srCount} contas · ~${srAvgSaq} saques de valor semelhante · ~7% jogado` },
+            { col: 'var(--muted-2)', label: 'Jogou normalmente',              detail: `${nrmCount} contas — sem anomalia` },
+          ].map(({ col, label, detail }, i) => (
+            <div key={label} style={{ flex: 1, padding: '0 14px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>{label}</span>
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>{detail}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
