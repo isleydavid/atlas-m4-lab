@@ -196,7 +196,14 @@ const DILIG: Record<string, StyleToken> = {
 const SCORE_COLOR = (s: number) =>
   s >= 85 ? 'var(--red)' : s >= 70 ? 'var(--amber)' : 'var(--atlas-color-status-info)'
 
-const FILTERS = ['Todos', 'Aberto', 'Em análise', 'Crítico', 'Estruturação', 'vaidebet']
+const FILTERS  = ['Todos', 'Aberto', 'Em análise', 'Crítico', 'Estruturação', 'vaidebet']
+const PERIODOS = ['Hoje', 'Ontem', '7 dias', '15 dias', 'MTD', 'Trimestre']
+const ABAS     = [
+  { id: 'visao-geral', label: 'Visão Geral' },
+  { id: 'alertas',     label: 'Alertas'     },
+  // extensível: { id: 'pep-sancoes', label: 'PEP & Sanções' }, { id: 'comunicacoes', label: 'Comunicações' }
+] as const
+type AbaId = typeof ABAS[number]['id']
 
 // ---------------------------------------------------------------------------
 // Atoms
@@ -661,6 +668,8 @@ export default function PldAmlPage() {
   const [filter, setFilter]           = useState('Todos')
   const [rowStatus, setRowStatus]     = useState<Record<number, string>>({})
   const [selectedPep, setSelectedPep] = useState<PepPoint | null>(null)
+  const [periodo, setPeriodo]         = useState('7 dias')
+  const [aba, setAba]                 = useState<AbaId>('visao-geral')
 
   function updateStatus(id: number, newStatus: string) {
     setRowStatus((prev) => ({ ...prev, [id]: newStatus }))
@@ -703,100 +712,143 @@ export default function PldAmlPage() {
             </div>
           </div>
 
-          {/* Indicadores — faixa plana */}
-          <Sech>Visão geral</Sech>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
-            {KPI_DATA.map((kpi, i) => (
-              <button key={kpi.label}
-                style={{ textAlign: 'left', background: 'none', border: 'none', borderRight: i < 3 ? '1px solid var(--line)' : 'none', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 9, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                <span style={{ fontSize: 13, color: 'var(--muted-text)', display: 'flex', alignItems: 'center', gap: 5, lineHeight: 1.3 }}>
-                  {kpi.label}
-                  <span title={kpi.tooltip}
-                    style={{ width: 15, height: 15, borderRadius: '50%', border: '1px solid var(--line)', color: 'var(--muted-text)', fontSize: 9.5, fontStyle: 'italic', fontWeight: 700, display: 'inline-grid', placeItems: 'center', flexShrink: 0, cursor: 'help', fontFamily: 'serif' }}>
-                    i
-                  </span>
-                </span>
-                <span style={{ fontSize: 30, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', lineHeight: 1 }}>
-                  {kpi.value}
-                </span>
-                <span style={{ fontSize: 12.5, fontWeight: 600, color: kpi.deltaColor || 'var(--muted-text)' }}>
-                  {kpi.delta}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* COAF + PEP — 2 colunas, empilha abaixo de ~1100px via flex wrap */}
-          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>
-            <div style={{ flex: '1 1 460px', minWidth: 0 }}>
-              <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
-              <CoafTimeline onInvestigate={(row) => { setSelected(row); setTimeout(() => document.getElementById('pld-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
+          {/* Linha de Período */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', marginTop: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              {PERIODOS.map((p) => (
+                <button key={p} onClick={() => setPeriodo(p)}
+                  style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 13px', borderRadius: 999, cursor: 'pointer', fontFamily: 'var(--font-body)', border: '1px solid',
+                    borderColor:  periodo === p ? 'var(--orange)'      : 'var(--line)',
+                    background:   periodo === p ? 'var(--orange-soft)' : 'transparent',
+                    color:        periodo === p ? 'var(--orange)'      : 'var(--muted-text)' }}>
+                  {p}
+                </button>
+              ))}
             </div>
-            <div style={{ flex: '1 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-              <Sech style={{ margin: '0 0 11px', flexShrink: 0 }}>Pessoas politicamente expostas (PEP)</Sech>
-              <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
-            </div>
+            <span style={{ fontSize: 12.5, fontWeight: 600, padding: '6px 13px', borderRadius: 999, border: '1px solid var(--line)', color: 'var(--ink-2)', background: 'var(--card)', whiteSpace: 'nowrap', cursor: 'pointer' }}>
+              01 abr – 18 abr 2026
+            </span>
           </div>
 
-          {/* WorkList */}
-          <Sech>Fila de alertas (WorkList)</Sech>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-            <span style={{ fontSize: 12, color: 'var(--muted-text)', marginRight: 2 }}>Filtros:</span>
-            {FILTERS.map((f) => (
-              <button key={f} onClick={() => { setFilter(f); setSelected(null) }}
-                style={{ fontSize: 12.5, fontWeight: 600, padding: '7px 13px', borderRadius: 999, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)',
-                  background: filter === f ? 'var(--orange)' : 'var(--bg)',
-                  color:      filter === f ? '#fff'          : 'var(--ink-2)' }}>
-                {f}
-              </button>
-            ))}
+          {/* Barra de Abas */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, borderBottom: '1px solid var(--line)', marginTop: 18 }}>
+            {ABAS.map((a) => {
+              const active = aba === a.id
+              return (
+                <button key={a.id} onClick={() => setAba(a.id)}
+                  style={{ padding: '10px 18px', fontSize: 13, fontWeight: active ? 800 : 600, fontFamily: 'var(--font-body)', background: 'none', border: 'none', cursor: 'pointer',
+                    color:        active ? 'var(--orange)'      : 'var(--muted-text)',
+                    borderBottom: active ? '2px solid var(--orange)' : '2px solid transparent',
+                    marginBottom: -1 }}>
+                  {a.label}
+                </button>
+              )
+            })}
           </div>
 
-          <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', overflow: 'hidden', background: 'var(--card)' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  {['Apostador','Marca','Red flag','Score PLD','Severidade','SLA','Status','Responsável'].map((h) => (
-                    <th key={h} style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.4px', color: 'var(--muted-text)', textAlign: 'left', fontWeight: 700, padding: '11px 14px', borderBottom: '1px solid var(--line)', background: 'var(--bg)', fontFamily: 'var(--font-body)' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((row) => {
-                  const status = rowStatus[row.id] || row.status
-                  const sc     = SCORE_COLOR(row.score)
-                  const sev    = SEV[row.sev]  || SEV['Médio']
-                  const st     = ST[status]    || ST['Aberto']
-                  const slaCol = row.slaC === 'r' ? 'var(--red)' : row.slaC === 'a' ? 'var(--amber)' : 'var(--muted-text)'
-                  const isSel  = selected?.id === row.id
-                  const bg     = isSel ? 'var(--orange-soft)' : undefined
-                  return (
-                    <tr key={row.id} onClick={() => setSelected(isSel ? null : row)}
-                      style={{ cursor: 'pointer', boxShadow: row.crit ? 'inset 3px 0 0 var(--red)' : 'none' }}>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}>
-                        <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{row.nome}</div>
-                        <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{row.cpf}</div>
-                      </td>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.marca}</td>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.flag}</td>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}>
-                        <span style={{ width: 84, height: 6, background: 'var(--line)', borderRadius: 999, overflow: 'hidden', display: 'inline-block', verticalAlign: 'middle', marginRight: 7 }}>
-                          <span style={{ display: 'block', height: '100%', borderRadius: 999, background: sc, width: `${row.score}%` }} />
-                        </span>
-                        <span style={{ fontWeight: 800, fontSize: 13.5, color: sc }}>{row.score}</span>
-                      </td>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}><Pill c={sev.c} bg={sev.bg}>{row.sev}</Pill></td>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13, color: slaCol, background: bg }}>{row.sla}</td>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}><Pill c={st.c} bg={st.bg}>{status}</Pill></td>
-                      <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13, color: 'var(--muted-text)', background: bg }}>{row.resp}</td>
+          {/* ── Aba: Visão Geral ── */}
+          {aba === 'visao-geral' && (
+            <>
+              {/* Indicadores — faixa plana */}
+              <Sech>Visão geral</Sech>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
+                {KPI_DATA.map((kpi, i) => (
+                  <button key={kpi.label}
+                    style={{ textAlign: 'left', background: 'none', border: 'none', borderRight: i < 3 ? '1px solid var(--line)' : 'none', padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 9, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                    <span style={{ fontSize: 13, color: 'var(--muted-text)', display: 'flex', alignItems: 'center', gap: 5, lineHeight: 1.3 }}>
+                      {kpi.label}
+                      <span title={kpi.tooltip}
+                        style={{ width: 15, height: 15, borderRadius: '50%', border: '1px solid var(--line)', color: 'var(--muted-text)', fontSize: 9.5, fontStyle: 'italic', fontWeight: 700, display: 'inline-grid', placeItems: 'center', flexShrink: 0, cursor: 'help', fontFamily: 'serif' }}>
+                        i
+                      </span>
+                    </span>
+                    <span style={{ fontSize: 30, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', lineHeight: 1 }}>
+                      {kpi.value}
+                    </span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: kpi.deltaColor || 'var(--muted-text)' }}>
+                      {kpi.delta}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* COAF + PEP — 2 colunas */}
+              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>
+                <div style={{ flex: '1 1 460px', minWidth: 0 }}>
+                  <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
+                  <CoafTimeline onInvestigate={(row) => { setSelected(row); setTimeout(() => document.getElementById('pld-drawer')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50) }} />
+                </div>
+                <div style={{ flex: '1 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                  <Sech style={{ margin: '0 0 11px', flexShrink: 0 }}>Pessoas politicamente expostas (PEP)</Sech>
+                  <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* ── Aba: Alertas ── */}
+          {aba === 'alertas' && (
+            <>
+              <Sech>Fila de alertas (WorkList)</Sech>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                <span style={{ fontSize: 12, color: 'var(--muted-text)', marginRight: 2 }}>Filtros:</span>
+                {FILTERS.map((f) => (
+                  <button key={f} onClick={() => { setFilter(f); setSelected(null) }}
+                    style={{ fontSize: 12.5, fontWeight: 600, padding: '7px 13px', borderRadius: 999, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)',
+                      background: filter === f ? 'var(--orange)' : 'var(--bg)',
+                      color:      filter === f ? '#fff'          : 'var(--ink-2)' }}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', overflow: 'hidden', background: 'var(--card)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      {['Apostador','Marca','Red flag','Score PLD','Severidade','SLA','Status','Responsável'].map((h) => (
+                        <th key={h} style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.4px', color: 'var(--muted-text)', textAlign: 'left', fontWeight: 700, padding: '11px 14px', borderBottom: '1px solid var(--line)', background: 'var(--bg)', fontFamily: 'var(--font-body)' }}>{h}</th>
+                      ))}
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {filtered.map((row) => {
+                      const status = rowStatus[row.id] || row.status
+                      const sc     = SCORE_COLOR(row.score)
+                      const sev    = SEV[row.sev]  || SEV['Médio']
+                      const st     = ST[status]    || ST['Aberto']
+                      const slaCol = row.slaC === 'r' ? 'var(--red)' : row.slaC === 'a' ? 'var(--amber)' : 'var(--muted-text)'
+                      const isSel  = selected?.id === row.id
+                      const bg     = isSel ? 'var(--orange-soft)' : undefined
+                      return (
+                        <tr key={row.id} onClick={() => setSelected(isSel ? null : row)}
+                          style={{ cursor: 'pointer', boxShadow: row.crit ? 'inset 3px 0 0 var(--red)' : 'none' }}>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}>
+                            <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{row.nome}</div>
+                            <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{row.cpf}</div>
+                          </td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.marca}</td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.flag}</td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}>
+                            <span style={{ width: 84, height: 6, background: 'var(--line)', borderRadius: 999, overflow: 'hidden', display: 'inline-block', verticalAlign: 'middle', marginRight: 7 }}>
+                              <span style={{ display: 'block', height: '100%', borderRadius: 999, background: sc, width: `${row.score}%` }} />
+                            </span>
+                            <span style={{ fontWeight: 800, fontSize: 13.5, color: sc }}>{row.score}</span>
+                          </td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}><Pill c={sev.c} bg={sev.bg}>{row.sev}</Pill></td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13, color: slaCol, background: bg }}>{row.sla}</td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}><Pill c={st.c} bg={st.bg}>{status}</Pill></td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13, color: 'var(--muted-text)', background: bg }}>{row.resp}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
 
-          {/* Drawer */}
+          {/* Drawer — overlay compartilhado entre abas */}
           <div id="pld-drawer">
             {selected && (
               <Drawer row={selected} rowStatus={rowStatus} onUpdateStatus={updateStatus} onClose={() => setSelected(null)} />
