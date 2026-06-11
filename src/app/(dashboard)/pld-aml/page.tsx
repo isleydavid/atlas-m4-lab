@@ -201,7 +201,7 @@ const REDFLAG_CATS = [
   { label: 'Estruturação',               count: 9, color: 'var(--red)'    },
   { label: 'Saque atípico',              count: 7, color: 'var(--orange)' },
   { label: 'Depósito suspeito',          count: 4, color: 'var(--amber)'  },
-  { label: 'Comportamento inconsistente', count: 3, color: 'var(--purple)' },
+  { label: 'Comportamento inconsistente', count: 3, color: 'var(--muted-2)' },
 ] as const
 
 const VOLUME_DATA = [
@@ -270,18 +270,18 @@ function RedFlagsDonut() {
         <div style={{ flexShrink: 0, position: 'relative', width: 128, height: 128 }}>
           <svg width="128" height="128" viewBox="0 0 128 128" aria-hidden="true">
             {/* trilha cinza */}
-            <circle cx={CX} cy={CY} r={R} fill="none" stroke="var(--line)" strokeWidth={20} />
+            <circle cx={CX} cy={CY} r={R} fill="none" strokeWidth={20} style={{ stroke: 'var(--line)' }} />
             {/* segmentos */}
             {segments.map(seg => (
               <circle key={seg.label}
                 cx={CX} cy={CY} r={R}
                 fill="none"
-                stroke={seg.color}
                 strokeWidth={20}
                 strokeLinecap="butt"
                 strokeDasharray={`${seg.arcLen} ${C}`}
                 strokeDashoffset={seg.dashOffset}
                 transform={`rotate(-90 ${CX} ${CY})`}
+                style={{ stroke: seg.color }}
               />
             ))}
           </svg>
@@ -377,13 +377,13 @@ function VolumeTrend() {
         {/* Área preenchida */}
         <path d={areaPath} fill="url(#vol-grad)" />
         {/* Linha */}
-        <path d={linePath} fill="none" stroke="var(--orange)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={linePath} fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: 'var(--orange)' }} />
         {/* Marcadores */}
         {pts.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y}
             r={i === todayIdx ? 5 : 3.5}
-            fill={i === todayIdx ? 'var(--orange)' : 'var(--card)'}
-            stroke="var(--orange)" strokeWidth="2"
+            strokeWidth="2"
+            style={{ fill: i === todayIdx ? 'var(--orange)' : 'var(--card)', stroke: 'var(--orange)' }}
           />
         ))}
         {/* Rótulos dos dias */}
@@ -396,7 +396,7 @@ function VolumeTrend() {
         ))}
         {/* Anotação do pico */}
         <line x1={peak.x} y1={peak.y - 7} x2={peak.x} y2={peak.y - 18}
-          stroke="var(--orange)" strokeWidth="1.5" strokeDasharray="2 2" />
+          strokeWidth="1.5" strokeDasharray="2 2" style={{ stroke: 'var(--orange)' }} />
         <text x={peak.x} y={peak.y - 22}
           textAnchor={peakIdx >= n - 2 ? 'end' : peakIdx <= 1 ? 'start' : 'middle'}
           style={{ fontSize: 11, fontWeight: 700, fill: 'var(--orange)', fontFamily: 'var(--font-body)' }}>
