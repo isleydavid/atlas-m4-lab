@@ -233,7 +233,7 @@ const WS: Record<string, StyleToken> = {
   'Removido':      { c: 'var(--muted-text)', bg: 'var(--bg)'         },
 }
 const WM: Record<string, StyleToken> = {
-  'PEP':          { c: 'var(--purple)', bg: 'var(--purple-soft)' },
+  'PEP':          { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
   'Reincidência': { c: 'var(--red)',    bg: 'var(--red-soft)'    },
   'Alto volume':  { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
 }
@@ -278,7 +278,7 @@ const FLUXO_DATA: FluxoPoint[] = [
 ]
 const FLUXO_COLORS: Record<string, string> = {
   'pass-through':       'var(--red)',
-  'saques-recorrentes': 'var(--purple)',
+  'saques-recorrentes': 'var(--amber)',
   'normal':             'var(--muted-2)',
 }
 
@@ -1023,7 +1023,7 @@ function FluxoScenarioView({ f }: { f: FluxoPoint }) {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
           {amounts.map((v, i) => (
             <span key={i} style={{ fontSize: 11, fontWeight: 700, padding: '4px 8px', borderRadius: 7,
-              background: 'var(--purple-soft)', color: 'var(--purple)' }}>
+              background: 'var(--amber-soft)', color: 'var(--amber)' }}>
               {fmtK(v)}
             </span>
           ))}
@@ -1031,7 +1031,7 @@ function FluxoScenarioView({ f }: { f: FluxoPoint }) {
         <div style={{ fontSize: 11, color: 'var(--muted-text)', marginBottom: 4 }}>
           Valor médio {fmtK(base)} · variação ≤ {fmtK(maxA - minA)}
         </div>
-        <div style={{ fontSize: 11.5, color: 'var(--purple)', fontWeight: 700 }}>
+        <div style={{ fontSize: 11.5, color: 'var(--amber)', fontWeight: 700 }}>
           ⚠ Valores similares — padrão de fracionamento
         </div>
       </div>
@@ -1081,7 +1081,7 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           {([
             ['pass-through',       'var(--red)',    'Entra e sai sem jogar'],
-            ['saques-recorrentes', 'var(--purple)', 'Saques recorrentes · quantias semelhantes'],
+            ['saques-recorrentes', 'var(--amber)', 'Saques recorrentes · quantias semelhantes'],
             ['normal',             'var(--muted-2)','Jogou normalmente'],
           ] as const).map(([, cor, label]) => (
             <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
@@ -1115,7 +1115,7 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
         ))}
         <text x={345} y={248} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">→ volume movimentado (R$)</text>
         <text x={16}  y={128} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle" transform="rotate(-90,16,128)">% sem jogo ↑</text>
-        <text x={180} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--purple)' }} fontWeight={700} textAnchor="middle">saques recorrentes · quantias semelhantes</text>
+        <text x={180} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--amber)' }} fontWeight={700} textAnchor="middle">saques recorrentes · quantias semelhantes</text>
         <text x={490} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--red)'    }} fontWeight={700} textAnchor="middle">entra e sai sem jogar</text>
         {FLUXO_DATA.map((f) => {
           const isSel  = selFx?.id === f.id
@@ -1142,7 +1142,7 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
       <div style={{ display: 'flex', gap: 0, marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
         {[
           { col: 'var(--red)',     label: 'Entra e sai sem jogar',        detail: `${ptCount} contas · R$ ${(ptVol / 1000).toFixed(0)}k movimentado · ~3% jogado` },
-          { col: 'var(--purple)',  label: 'Saques · quantias semelhantes', detail: `${srCount} contas · ~${srAvgSaq} saques de valor semelhante · ~7% jogado` },
+          { col: 'var(--amber)',   label: 'Saques · quantias semelhantes', detail: `${srCount} contas · ~${srAvgSaq} saques de valor semelhante · ~7% jogado` },
           { col: 'var(--muted-2)', label: 'Jogou normalmente',             detail: `${nrmCount} contas — sem anomalia` },
         ].map(({ col, label, detail }, i) => (
           <div key={label} style={{ flex: 1, padding: '0 14px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
