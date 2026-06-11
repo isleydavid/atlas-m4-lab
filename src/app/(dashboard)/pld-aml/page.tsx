@@ -26,6 +26,12 @@ interface StyleToken { c: string; bg: string }
 interface CoafCase {
   id: string; nome: string; marca: string; t: number; tl: string; sev: 'CRÍTICO' | 'ALTO'
 }
+interface WatchRow {
+  id: number; nome: string; cpf: string; score: number
+  classe: 'Alto' | 'Médio' | 'Baixo'
+  motivo: string; marca: string; ultima: string
+  status: 'Em observação' | 'Escalado' | 'Removido'
+}
 
 // ---------------------------------------------------------------------------
 // Dados mock — WorkList
@@ -193,6 +199,16 @@ const DILIG: Record<string, StyleToken> = {
   'em andamento': { c: 'var(--orange)', bg: 'var(--orange-soft)' },
   'ok':           { c: 'var(--green)',  bg: 'var(--green-soft)'  },
 }
+const WS: Record<string, StyleToken> = {
+  'Em observação': { c: 'var(--ink-2)',     bg: 'var(--bg)'          },
+  'Escalado':      { c: 'var(--orange)',    bg: 'var(--orange-soft)' },
+  'Removido':      { c: 'var(--muted-text)', bg: 'var(--bg)'         },
+}
+const WM: Record<string, StyleToken> = {
+  'PEP':          { c: 'var(--purple)', bg: 'var(--purple-soft)' },
+  'Reincidência': { c: 'var(--red)',    bg: 'var(--red-soft)'    },
+  'Alto volume':  { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
+}
 
 const SCORE_COLOR = (s: number) =>
   s >= 85 ? 'var(--red)' : s >= 70 ? 'var(--amber)' : 'var(--atlas-color-status-info)'
@@ -214,12 +230,25 @@ const VOLUME_DATA = [
   { day: 'Qui', v: 1.85 },
 ] as const
 
+const WATCH_DATA: WatchRow[] = [
+  { id: 101, nome: 'J. COSTA',    cpf: '•••.•••.•••-14', score: 93, classe: 'Alto',  motivo: 'PEP',          marca: 'vaidebet',     ultima: 'há 1h',  status: 'Em observação' },
+  { id: 102, nome: 'R. FERREIRA', cpf: '•••.•••.•••-37', score: 92, classe: 'Alto',  motivo: 'Reincidência', marca: 'vaidebet-ngx', ultima: 'há 3h',  status: 'Escalado'      },
+  { id: 103, nome: 'G. NUNES',    cpf: '•••.•••.•••-88', score: 82, classe: 'Alto',  motivo: 'PEP',          marca: 'kto',          ultima: 'há 6h',  status: 'Em observação' },
+  { id: 104, nome: 'L. ALMEIDA',  cpf: '•••.•••.•••-52', score: 71, classe: 'Médio', motivo: 'PEP',          marca: 'vaidebet',     ultima: 'há 1d',  status: 'Em observação' },
+  { id: 105, nome: 'C. ROCHA',    cpf: '•••.•••.•••-09', score: 64, classe: 'Médio', motivo: 'Alto volume',  marca: 'betnacional',  ultima: 'há 2d',  status: 'Em observação' },
+  { id: 106, nome: 'M. DIAS',     cpf: '•••.•••.•••-73', score: 58, classe: 'Médio', motivo: 'Reincidência', marca: 'vaidebet',     ultima: 'há 3d',  status: 'Em observação' },
+  { id: 107, nome: 'T. ALVES',    cpf: '•••.•••.•••-21', score: 45, classe: 'Baixo', motivo: 'Alto volume',  marca: 'betano',       ultima: 'há 8d',  status: 'Removido'      },
+]
+
+const WATCH_STATUS_F = ['Todos', 'Em observação', 'Escalado', 'Removido']
+const WATCH_MOTIVO_F = ['Todos', 'PEP', 'Reincidência', 'Alto volume']
+
 const FILTERS  = ['Todos', 'Aberto', 'Em análise', 'Crítico', 'Estruturação', 'vaidebet']
 const PERIODOS = ['Hoje', 'Ontem', '7 dias', '15 dias', 'MTD', 'Trimestre']
 const ABAS     = [
   { id: 'visao-geral', label: 'Visão Geral' },
   { id: 'alertas',     label: 'Alertas'     },
-  // extensível: { id: 'pep-sancoes', label: 'PEP & Sanções' }, { id: 'comunicacoes', label: 'Comunicações' }
+  { id: 'watchlist',   label: 'Watchlist'   },
 ] as const
 type AbaId = typeof ABAS[number]['id']
 
@@ -869,6 +898,35 @@ export default function PldAmlPage() {
   const [periodo, setPeriodo]         = useState('7 dias')
   const [aba, setAba]                 = useState<AbaId>('visao-geral')
 
+  // Watchlist state
+  const [watchStatusF,   setWatchStatusF]   = useState('Todos')
+  const [watchMotivoF,   setWatchMotivoF]   = useState('Todos')
+  const [watchMutations, setWatchMutations] = useState<Record<number, string>>({})
+  const [removeTarget,   setRemoveTarget]   = useState<WatchRow | null>(null)
+  const [removeJustif,   setRemoveJustif]   = useState('')
+
+  function watchStatus(w: WatchRow) { return (watchMutations[w.id] || w.status) as string }
+
+  function watchToRow(w: WatchRow): Row {
+    return {
+      id: w.id, nome: w.nome, cpf: w.cpf, marca: w.marca, flag: w.motivo,
+      score: w.score,
+      sev: w.score >= 85 ? 'Crítico' : w.score >= 70 ? 'Alto' : 'Médio',
+      sla: '—', slaH: null, slaC: 'm',
+      status: 'Aberto', resp: '—', crit: w.score >= 85,
+    }
+  }
+
+  const watchFiltered = WATCH_DATA.filter((w) => {
+    const st = watchStatus(w)
+    if (watchStatusF !== 'Todos' && st !== watchStatusF)     return false
+    if (watchMotivoF !== 'Todos' && w.motivo !== watchMotivoF) return false
+    return true
+  })
+
+  const watchObsCount = WATCH_DATA.filter(w => watchStatus(w) === 'Em observação').length
+  const watchEscCount = WATCH_DATA.filter(w => watchStatus(w) === 'Escalado').length
+
   function updateStatus(id: number, newStatus: string) {
     setRowStatus((prev) => ({ ...prev, [id]: newStatus }))
     if (newStatus === 'Arquivado' || newStatus === 'Comunicado COAF') setSelected(null)
@@ -1034,6 +1092,149 @@ export default function PldAmlPage() {
             </>
           )}
 
+          {aba === 'watchlist' && (
+            <>
+              <Sech>Monitorados (Watchlist)</Sech>
+
+              {/* KPI strip */}
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
+                {[
+                  { label: 'Em observação', value: watchObsCount },
+                  { label: 'Adicionados (7d)', value: 3 },
+                  { label: 'Escalados (7d)', value: watchEscCount },
+                ].map(({ label, value }) => (
+                  <div key={label} style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 12, padding: '14px 20px', minWidth: 140 }}>
+                    <div style={{ fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{value}</div>
+                    <div style={{ fontSize: 12, color: 'var(--muted-text)', marginTop: 2 }}>{label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Filters */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                <span style={{ fontSize: 12, color: 'var(--muted-text)', marginRight: 2 }}>Status:</span>
+                {WATCH_STATUS_F.map((f) => (
+                  <button key={f} onClick={() => setWatchStatusF(f)}
+                    style={{ fontSize: 12.5, fontWeight: 600, padding: '7px 13px', borderRadius: 999, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)',
+                      background: watchStatusF === f ? 'var(--orange)' : 'var(--bg)',
+                      color:      watchStatusF === f ? '#fff'          : 'var(--ink-2)' }}>
+                    {f}
+                  </button>
+                ))}
+                <span style={{ fontSize: 12, color: 'var(--muted-text)', marginLeft: 8, marginRight: 2 }}>Motivo:</span>
+                {WATCH_MOTIVO_F.map((f) => (
+                  <button key={f} onClick={() => setWatchMotivoF(f)}
+                    style={{ fontSize: 12.5, fontWeight: 600, padding: '7px 13px', borderRadius: 999, border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)',
+                      background: watchMotivoF === f ? 'var(--orange)' : 'var(--bg)',
+                      color:      watchMotivoF === f ? '#fff'          : 'var(--ink-2)' }}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+
+              {/* Table */}
+              <div style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius)', overflow: 'hidden', background: 'var(--card)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      {['Apostador', 'Score PLD', 'Motivo', 'Marca', 'Última ocorrência', 'Status', 'Ação'].map((h) => (
+                        <th key={h} style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.4px', color: 'var(--muted-text)', textAlign: 'left', fontWeight: 700, padding: '11px 14px', borderBottom: '1px solid var(--line)', background: 'var(--bg)', fontFamily: 'var(--font-body)' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {watchFiltered.map((w) => {
+                      const st     = watchStatus(w)
+                      const wst    = WS[st]            || WS['Em observação']
+                      const wm     = WM[w.motivo]      || { c: 'var(--muted-text)', bg: 'var(--bg)' }
+                      const sc     = SCORE_COLOR(w.score)
+                      const dimmed = st === 'Removido'
+                      const rowBg  = dimmed ? 'var(--bg)' : undefined
+                      return (
+                        <tr key={w.id} style={{ opacity: dimmed ? 0.55 : 1 }}>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}>
+                            <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{w.nome}</div>
+                            <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{w.cpf}</div>
+                          </td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}>
+                            <span style={{ width: 72, height: 6, background: 'var(--line)', borderRadius: 999, overflow: 'hidden', display: 'inline-block', verticalAlign: 'middle', marginRight: 7 }}>
+                              <span style={{ display: 'block', height: '100%', borderRadius: 999, background: sc, width: `${w.score}%` }} />
+                            </span>
+                            <span style={{ fontWeight: 800, fontSize: 13.5, color: sc }}>{w.score}</span>
+                          </td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}><Pill c={wm.c} bg={wm.bg}>{w.motivo}</Pill></td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: rowBg }}>{w.marca}</td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13, color: 'var(--muted-text)', background: rowBg }}>{w.ultima}</td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}><Pill c={wst.c} bg={wst.bg}>{st}</Pill></td>
+                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}>
+                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                              <button onClick={() => setSelected(watchToRow(w))}
+                                style={{ fontSize: 12, fontWeight: 700, padding: '5px 10px', borderRadius: 8, border: '1px solid var(--line)', background: 'var(--card)', color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                                Abrir ↗
+                              </button>
+                              {st !== 'Removido' && (
+                                <>
+                                  <button onClick={() => setWatchMutations((p) => ({ ...p, [w.id]: 'Escalado' }))}
+                                    style={{ fontSize: 12, fontWeight: 700, padding: '5px 10px', borderRadius: 8, border: '1px solid var(--orange-line)', background: 'var(--orange-soft)', color: 'var(--orange)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                                    Escalar
+                                  </button>
+                                  <button onClick={() => { setRemoveTarget(w); setRemoveJustif('') }}
+                                    style={{ fontSize: 12, fontWeight: 700, padding: '5px 10px', borderRadius: 8, border: '1px solid var(--line)', background: 'var(--bg)', color: 'var(--muted-text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                                    Remover
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Modal de remoção */}
+              {removeTarget && (
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.35)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  onClick={(e) => { if (e.target === e.currentTarget) setRemoveTarget(null) }}>
+                  <div style={{ background: 'var(--card)', borderRadius: 16, padding: '28px 28px 24px', width: 420, boxShadow: '0 8px 32px rgba(0,0,0,.18)' }}>
+                    <div style={{ fontWeight: 800, fontSize: 16, color: 'var(--ink)', marginBottom: 6, fontFamily: 'var(--font-head)' }}>Remover da Watchlist</div>
+                    <div style={{ fontSize: 13.5, color: 'var(--ink-2)', marginBottom: 16 }}>
+                      <strong>{removeTarget.nome}</strong> — justificativa obrigatória (mín. 50 caracteres).
+                    </div>
+                    <textarea
+                      value={removeJustif}
+                      onChange={(e) => setRemoveJustif(e.target.value)}
+                      placeholder="Descreva o motivo da remoção…"
+                      rows={4}
+                      style={{ width: '100%', fontSize: 13.5, fontFamily: 'var(--font-body)', border: '1px solid var(--line)', borderRadius: 10, padding: '10px 12px', resize: 'vertical', background: 'var(--bg)', color: 'var(--ink)', outline: 'none', boxSizing: 'border-box' }}
+                    />
+                    <div style={{ fontSize: 11.5, color: removeJustif.length >= 50 ? 'var(--green)' : 'var(--muted-text)', marginTop: 4, marginBottom: 16 }}>
+                      {removeJustif.length}/50 caracteres mínimos
+                    </div>
+                    <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                      <button onClick={() => setRemoveTarget(null)}
+                        style={{ fontSize: 13, fontWeight: 700, padding: '9px 18px', borderRadius: 10, border: '1px solid var(--line)', background: 'var(--card)', color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                        Cancelar
+                      </button>
+                      <button
+                        disabled={removeJustif.length < 50}
+                        onClick={() => {
+                          setWatchMutations((p) => ({ ...p, [removeTarget!.id]: 'Removido' }))
+                          setRemoveTarget(null)
+                        }}
+                        style={{ fontSize: 13, fontWeight: 700, padding: '9px 18px', borderRadius: 10, border: 'none', fontFamily: 'var(--font-body)', cursor: removeJustif.length >= 50 ? 'pointer' : 'not-allowed',
+                          background: removeJustif.length >= 50 ? 'var(--red)' : 'var(--line)',
+                          color: removeJustif.length >= 50 ? '#fff' : 'var(--muted-text)' }}>
+                        Confirmar remoção
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           {/* Drawer de investigação — painel lateral compartilhado entre abas */}
           <Sheet open={!!selected} onOpenChange={(open) => { if (!open) setSelected(null) }}>
             <SheetContent side="right" showCloseButton={false}
@@ -1048,7 +1249,9 @@ export default function PldAmlPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 28 }}>
             <span style={{ fontSize: 12.5, color: 'var(--muted-text)' }}>Abrir páginas:</span>
             {['Perfil do apostador', 'Watchlist', 'Glossário COAF', 'Fluxos PLD'].map((label) => (
-              <span key={label} style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink-2)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 999, padding: '8px 14px', cursor: 'pointer' }}>
+              <span key={label}
+                onClick={() => { if (label === 'Watchlist') setAba('watchlist') }}
+                style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink-2)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 999, padding: '8px 14px', cursor: 'pointer' }}>
                 {label}
               </span>
             ))}
