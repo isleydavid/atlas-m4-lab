@@ -196,6 +196,13 @@ const DILIG: Record<string, StyleToken> = {
 const SCORE_COLOR = (s: number) =>
   s >= 85 ? 'var(--red)' : s >= 70 ? 'var(--amber)' : 'var(--atlas-color-status-info)'
 
+const REDFLAG_CATS = [
+  { label: 'Estruturação',               count: 9, color: 'var(--red)'    },
+  { label: 'Saque atípico',              count: 7, color: 'var(--orange)' },
+  { label: 'Depósito suspeito',          count: 4, color: 'var(--amber)'  },
+  { label: 'Comportamento inconsistente', count: 3, color: 'var(--purple)' },
+] as const
+
 const FILTERS  = ['Todos', 'Aberto', 'Em análise', 'Crítico', 'Estruturação', 'vaidebet']
 const PERIODOS = ['Hoje', 'Ontem', '7 dias', '15 dias', 'MTD', 'Trimestre']
 const ABAS     = [
@@ -220,6 +227,64 @@ function Sech({ children, style }: { children: React.ReactNode; style?: React.CS
   return (
     <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.7px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '26px 0 11px', ...style }}>
       {children}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Red Flags Donut
+// ---------------------------------------------------------------------------
+function RedFlagsDonut() {
+  const total = REDFLAG_CATS.reduce((s, c) => s + c.count, 0)
+  const R = 54, CX = 64, CY = 64, GAP = 2.5
+  const C = 2 * Math.PI * R
+
+  let accumulated = 0
+  const segments = REDFLAG_CATS.map(cat => {
+    const arcLen      = (cat.count / total) * C - GAP
+    const dashOffset  = -accumulated
+    accumulated      += (cat.count / total) * C
+    return { ...cat, arcLen: Math.max(0, arcLen), dashOffset, pct: Math.round(cat.count / total * 100) }
+  })
+
+  return (
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border-default)', borderRadius: 16, padding: '20px 24px', boxShadow: 'var(--shadow-card)', display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
+      {/* Anel SVG */}
+      <div style={{ flexShrink: 0, position: 'relative', width: 128, height: 128 }}>
+        <svg width="128" height="128" viewBox="0 0 128 128" aria-hidden="true">
+          {/* trilha cinza */}
+          <circle cx={CX} cy={CY} r={R} fill="none" stroke="var(--line)" strokeWidth={20} />
+          {/* segmentos */}
+          {segments.map(seg => (
+            <circle key={seg.label}
+              cx={CX} cy={CY} r={R}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={20}
+              strokeLinecap="butt"
+              strokeDasharray={`${seg.arcLen} ${C}`}
+              strokeDashoffset={seg.dashOffset}
+              transform={`rotate(-90 ${CX} ${CY})`}
+            />
+          ))}
+        </svg>
+        {/* total no centro */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <span style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', lineHeight: 1 }}>{total}</span>
+          <span style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 3, fontFamily: 'var(--font-body)' }}>ativos</span>
+        </div>
+      </div>
+      {/* Legenda */}
+      <div style={{ flex: '1 1 160px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {segments.map(seg => (
+          <div key={seg.label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <span style={{ width: 10, height: 10, borderRadius: '50%', background: seg.color, flexShrink: 0 }} />
+            <span style={{ flex: 1, fontSize: 13, color: 'var(--ink-2)', fontFamily: 'var(--font-body)', lineHeight: 1.3 }}>{seg.label}</span>
+            <span style={{ fontSize: 13.5, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', marginLeft: 6 }}>{seg.count}</span>
+            <span style={{ fontSize: 12, color: 'var(--muted-text)', width: 38, textAlign: 'right', fontFamily: 'var(--font-body)' }}>{seg.pct}%</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -771,6 +836,10 @@ export default function PldAmlPage() {
                   </button>
                 ))}
               </div>
+
+              {/* Red flags por categoria — donut */}
+              <Sech>Red flags por categoria</Sech>
+              <RedFlagsDonut />
 
               {/* COAF + PEP — 2 colunas */}
               <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>

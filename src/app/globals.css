@@ -100,6 +100,8 @@
   --green-soft: #E7F4EC;
   --amber: #E0901F;
   --amber-soft: #FBF0DD;
+  --purple: #7C5CD0;
+  --purple-soft: #EEE8FA;
   --line: var(--atlas-color-neutral-border-divider);
   --border-default: var(--atlas-color-neutral-border-divider);
   --bg: #fafafa;
