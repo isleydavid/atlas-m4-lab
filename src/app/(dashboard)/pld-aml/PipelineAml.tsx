@@ -218,7 +218,7 @@ const TEXT_DARK = ['#fff','#fff','#fff','#fff','#fff','#F26122']
 // ---------------------------------------------------------------------------
 // Componente principal
 // ---------------------------------------------------------------------------
-export function PipelineAml({ onViewRegras }: { onViewRegras?: () => void } = {}) {
+export function PipelineAml() {
   const maxH   = Math.max(...STAGES.map(s => s.h))
   const topRow = maxH + 40
 
@@ -241,15 +241,10 @@ export function PipelineAml({ onViewRegras }: { onViewRegras?: () => void } = {}
 
         {/* Cabeçalho */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div style={{ marginBottom: 4 }}>
             <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>
               PIPELINE AML · ÚLTIMOS 30 DIAS
             </div>
-            {onViewRegras && (
-              <button onClick={onViewRegras} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: 'var(--orange)', fontFamily: 'var(--font-body)', padding: 0 }}>
-                Ver regras →
-              </button>
-            )}
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', fontFamily: 'var(--font-body)' }}>HOJE</span>
@@ -280,7 +275,6 @@ export function PipelineAml({ onViewRegras }: { onViewRegras?: () => void } = {}
                 </div>
 
                 <div
-                  onClick={i === 1 && onViewRegras ? onViewRegras : undefined}
                   style={{
                     width: '100%', height: s.h,
                     background: BG[i],
@@ -288,7 +282,6 @@ export function PipelineAml({ onViewRegras }: { onViewRegras?: () => void } = {}
                     borderRadius: isLast ? 4 : 0,
                     display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                     padding: '6px 14px 6px 6px', boxSizing: 'border-box', overflow: 'hidden',
-                    cursor: i === 1 && onViewRegras ? 'pointer' : 'default',
                   }}>
                   <span style={{ fontSize: s.h > 70 ? 18 : s.h > 50 ? 14 : 11, fontWeight: 900, color: TEXT_DARK[i], fontFamily: 'var(--font-head)', lineHeight: 1, letterSpacing: '-0.3px', textAlign: 'center' }}>
                     {s.value}

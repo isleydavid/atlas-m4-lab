@@ -354,4 +354,5 @@ export function CoafTimelineV2({ onInvestigate }: CoafTimelineV2Props) {
   )
 }
 
+export { CASES as COAF_CASES }
 export default CoafTimelineV2
