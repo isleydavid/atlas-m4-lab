@@ -21,20 +21,26 @@ Operadores são **sujeitos obrigados** (Lei 9.613/1998) a comunicar operações 
 - **Analista de Compliance / Risco** (diária): mora na WorkList, tria alertas, investiga no drawer, arquiva ou escala. `risk_analyst` não exporta RO (decisão é de compliance).
 - **Anti-tipping-off:** a página **nunca** expõe ao apostador que há investigação.
 
-## 4. Anatomia da página (a página inteira, de cima para baixo)
-A página é uma **visão geral operacional que abre páginas dedicadas** — cada bloco resume e faz drill-down.
+## 4. Anatomia da página (estado atual — implementação no `page.tsx`)
+Estrutura: barra superior global → linha de **PERÍODO** (Hoje · Ontem · 7 dias · 15 dias · MTD · Trimestre) → **abas**: **Visão Geral** · **Alertas** (a barra de abas é extensível — PEP & Sanções, Comunicações etc. previstas).
 
-1. **Cabeçalho — 4 KPIs** (já construído): apostadores com flag ativo · alertas gerados (período) · volume sob análise (R$) · red flags por categoria. Cada tile com mini-tendência (o de categoria com barra), tooltip leve no "i", e link "abrir → página".
-2. **Prazo COAF (24h)** (faixa inteira): countdown dos alertas críticos se aproximando das 24h, com **barra de urgência por caso** (tempo decorrido; crítico ao restar < 8h). A distribuição por categoria já vive no 4º KPI do cabeçalho.
-3. **PEP — exposição × risco + ficha** (no lugar do antigo painel de severidade): quadrante geral dos PEP (cada ponto uma pessoa, cor por tipo de vínculo — titular/familiar 2º grau/representante/colaborador; zona de ação = alta exposição + alto risco) e, ao clicar num ponto, a **ficha individual** da pessoa (cargo/esfera, aging dos 5 anos, comportamento financeiro, vínculos, status da DD). *Tipo/cargo/aging dependem do feed do provedor; o eixo de risco roda com dado interno (M4/M5).*
-4. **Fila de Alertas (WorkList) — o coração:** tabela com status (ABERTO · EM_ANÁLISE · COMUNICADO_COAF · ARQUIVADO), severidade (Médio/Alto/Crítico), score bar, badge de SLA, responsável e marca; filtros por status/severidade/tipo/marca. Críticos (score ≥ 85) sobem ao topo. Clique na linha → drawer.
-5. **Drawer de Investigação** (overlay): timeline de transações, `score_factors[]` (obrigatório p/ score ≥ 70), vínculos (IP/marca). Ações: Iniciar análise → **Escalar p/ COAF** (modal de RO, justificativa obrigatória) ou **Arquivar** (justificativa mín. 50 chars). Tudo grava no audit trail.
-6. **Atalhos/drill para páginas dedicadas:** Perfil do Apostador (scores 3D), **Watchlist**, **Glossário COAF** (14 termos), **Fluxos PLD** (4 árvores de decisão).
+**Aba "Visão Geral":**
+1. **Indicadores** — **faixa plana** de 4 KPIs (apostadores com flag ativo · alertas gerados · volume sob análise R$ · **SLA crítico em risco** — alertas críticos sem ação > 20h); tooltip leve no "i" + drill por clique. *(O "red flags por categoria" saiu daqui — já é coberto pelo donut abaixo.)*
+2. **Prazo COAF — vencimentos:** **timeline empilhada (beeswarm)**, horizonte dinâmico (arredonda acima do último caso); pontos próximos empilham; zona crítica (<12h) sombreada + linha de 24h tracejada; cor por severidade. Abaixo, lista **"Próximos a vencer"**. Clique num ponto/linha → **popover** → **drawer**.
+3. **PEP — exposição × risco + ficha:** quadrante (ponto = pessoa, cor por tipo de vínculo: titular/familiar 2º grau/representante/colaborador; zona de ação = alta exposição + alto risco) + **ficha individual** ao clicar (cargo/esfera, aging dos 5 anos, comportamento financeiro, vínculos, status da diligência). *Tipo/cargo/aging dependem do feed do provedor; risco usa dado interno (M4/M5).*
+4. **Red flags por categoria** — **donut** com total no centro + legenda (Estruturação · Saque atípico · Depósito suspeito · Comportamento inconsistente).
+5. **Volume sob análise — 7 dias** — **área/tendência** (ponto de hoje destacado, pico anotado).
+6. **Rodapé** — chips de drill: Perfil do apostador · Watchlist · Glossário COAF · Fluxos PLD (páginas-destino **ainda não construídas**).
 
-Leitura da página num relance: *"o que chegou (KPIs) → o que está perto do prazo (countdown) → o que eu trabalho agora (WorkList) → investigo e decido (drawer) → registro com prova (audit/RO)."*
+**Aba "Alertas":** **WorkList** — tabela (apostador mascarado · marca · red flag · score com barra · severidade · SLA · status · responsável) + filtros; críticos (score ≥ 85) no topo; clique na linha → drawer.
 
-## 5. Telas e rotas (6 views + 4 overlays)
-Views: `dashboard` · `alertas` (WorkList) · `apostador` (perfil) · `watchlist` · `glossario` · `fluxos`. Overlays: drawer de investigação · modal COAF · modal arquivar · tooltip de KPI.
+**Drawer de investigação (compartilhado):** **painel lateral (Sheet)** que desliza da direita — cabeçalho (nome + marca + score + ✕), seções (Timeline de transações · `score_factors[]` ≥70 · Vínculos · Decisão) e ações (Iniciar análise · → COAF · Arquivar) + nota de trilha auditável (art. 32). Abre da WorkList, do popover do Prazo COAF e da ficha PEP.
+
+Leitura da página num relance: *"o que chegou (KPIs) → o que está perto do prazo (timeline) → quem priorizar no PEP → o que trabalho agora (WorkList/Alertas) → investigo e decido (drawer)."*
+
+## 5. Telas e estado de implementação
+**Construído:** abas `visao-geral` e `alertas`; drawer lateral (Sheet); indicadores, Prazo COAF (timeline), PEP (quadrante + ficha), Red flags (donut), Volume (área), WorkList.
+**Planejado (ainda não construído):** páginas/abas **Watchlist** (monitorados), **Glossário COAF**, **Fluxos PLD** (hoje só chips de atalho no rodapé). Overlays previstos: modal de RO (COAF), modal de arquivamento.
 
 ## 6. Dados (via M05 + DataSourceRouter, filtrados por RBAC)
 Consome `score_pld_aml` e `score_factors[]` do **M05**; `transactions` do **ClickHouse** (0–90d) e `transactions_historical` do **BigQuery** (90+d). Tabelas novas: `flags`, `pld_alerts`, `pld_audit_log` (append-only, imutável). RO exportado vai para **S3** (retenção 5 anos). Os 4 red flags: **Estruturação, Saque Atípico, Depósito Suspeito, Comportamento Inconsistente**.
