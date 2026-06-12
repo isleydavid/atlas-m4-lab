@@ -206,21 +206,27 @@ const KPI_DATA = [
 // ---------------------------------------------------------------------------
 // Dados mock — Aba Regras PLD/AML
 // ---------------------------------------------------------------------------
-interface PldRule { id: string; grupo: string; nome: string; base: string; flag: string | null; afetados: number; obrigatorio: boolean; params?: string }
+interface PldRule { id: string; grupo: string; nome: string; base: string; flag: string | null; afetados: number; obrigatorio: boolean; severidade: 'P1' | 'P2' | 'P3'; tipo: 'HIPÓTESE' | 'OBRIGATÓRIA'; investigacao: string; params?: string }
 const PLD_RULES: PldRule[] = [
-  { id:'estruturacao', grupo:'Padrões Transacionais',  nome:'Estruturação / smurfing',                    base:'art. 25, XI',                              flag:'Estruturação',              afetados:14, obrigatorio:false, params:'Janela 6h · mín 3 transações' },
-  { id:'pass-through', grupo:'Padrões Transacionais',  nome:'Pass-through (dep → saque sem aposta)',       base:'art. 25, XII',                             flag:'Saque atípico',             afetados:9,  obrigatorio:false, params:'dep/saque ≥ 95% · janela 10 min' },
-  { id:'velocidade',   grupo:'Padrões Transacionais',  nome:'Velocidade atípica / automação',             base:'art. 25, X',                               flag:'Saque atípico',             afetados:3,  obrigatorio:false, params:'intervalo mín 30s' },
-  { id:'perfil',       grupo:'Padrões Transacionais',  nome:'Movimentação incompatível com perfil',       base:'art. 25, IX',                              flag:'Depósito suspeito',         afetados:6,  obrigatorio:false, params:'desvio ≥ 2σ da média histórica' },
-  { id:'terceiro',     grupo:'Vínculos e Contas',       nome:'Conta usada por terceiro / intermediador',   base:'art. 25, XIII–XV',                         flag:'Comportamento inconsistente', afetados:4, obrigatorio:false, params:'≥ 2 IPs compartilhados' },
-  { id:'conluio',      grupo:'Vínculos e Contas',       nome:'Conluio em bolsa (apostas opostas)',         base:'art. 25, XVI',                             flag:'Comportamento inconsistente', afetados:1, obrigatorio:false, params:'delta de odds ≥ 0.05' },
-  { id:'suspeicao',    grupo:'Perfil e KYC',            nome:'Pessoa com suspeição de LD/FTP',             base:'art. 25, I–II',                            flag:'Comportamento inconsistente', afetados:2, obrigatorio:false },
-  { id:'kyc-falso',    grupo:'Perfil e KYC',            nome:'Cadastro incompleto / informação falsa',     base:'art. 25, XVIII',                           flag:'Comportamento inconsistente', afetados:1, obrigatorio:false },
-  { id:'incomp-econ',  grupo:'Perfil e KYC',            nome:'Incompatibilidade econômico-financeira',     base:'art. 25, IX',                              flag:'Depósito suspeito',         afetados:5,  obrigatorio:false, params:'múltiplo ≥ 4× renda estimada' },
-  { id:'pep',          grupo:'PEP e Listas',            nome:'Pessoa Politicamente Exposta (PEP)',         base:'art. 25, XVII',                            flag:null,                        afetados:11, obrigatorio:false, params:'aging PEP 5 anos' },
-  { id:'sancao',       grupo:'PEP e Listas',            nome:'Hit em lista de sanções ONU/CSNU',           base:'art. 31',                                  flag:null,                        afetados:0,  obrigatorio:true  },
-  { id:'jurisdicao',   grupo:'Origem e Integridade',    nome:'Jurisdição de alto risco (GAFI)',            base:'art. 25, III',                             flag:'Depósito suspeito',         afetados:2,  obrigatorio:false },
-  { id:'match-fixing', grupo:'Origem e Integridade',    nome:'Manipulação de resultados (match-fixing)',   base:'art. 25, VIII + art. 177 Lei 14.597',      flag:'Comportamento inconsistente', afetados:1, obrigatorio:false },
+  // Estruturação
+  { id:'EST-R01', grupo:'Estruturação',               nome:'Fracionamento de Depósitos (Janela)',            base:'art. 25, XI',                           flag:'Estruturação',               afetados:8,  obrigatorio:false, severidade:'P2', tipo:'HIPÓTESE',    investigacao:'INV-MANUAL',            params:'limiar R$ 2.000 · qty_min 3 · janela 24h' },
+  { id:'EST-R02', grupo:'Estruturação',               nome:'Smurfing entre Contas Vinculadas',               base:'art. 25, XIII–XIV',                     flag:'Estruturação',               afetados:6,  obrigatorio:false, severidade:'P1', tipo:'HIPÓTESE',    investigacao:'INV-DEEP → INV-COAF',   params:'min_contas 2 · janela 48h' },
+  // Saque Atípico
+  { id:'SAQ-R01', grupo:'Saque Atípico',              nome:'Pass-Through (dep → aposta simbólica → saque)',  base:'art. 25, XII',                          flag:'Saque atípico',              afetados:9,  obrigatorio:false, severidade:'P1', tipo:'HIPÓTESE',    investigacao:'INV-DEEP → INV-COAF',   params:'pct_aposta ≤ 5% · janela 60 min' },
+  { id:'SAQ-R02', grupo:'Saque Atípico',              nome:'Saques Recorrentes de Valor Similar',            base:'art. 25, XII',                          flag:'Saque atípico',              afetados:6,  obrigatorio:false, severidade:'P2', tipo:'HIPÓTESE',    investigacao:'INV-MANUAL',            params:'pct_variação 10% · qty_min 3 · janela 48h' },
+  // Depósito Suspeito
+  { id:'DEP-R01', grupo:'Depósito Suspeito',          nome:'Volume Incompatível com Perfil Financeiro',      base:'art. 25, IX',                           flag:'Depósito suspeito',          afetados:6,  obrigatorio:false, severidade:'P2', tipo:'HIPÓTESE',    investigacao:'INV-MANUAL',            params:'múltiplo 5× · pct_renda 50%/mês' },
+  { id:'DEP-R02', grupo:'Depósito Suspeito',          nome:'Depósito de Jurisdição de Alto Risco (GAFI)',    base:'art. 25, III',                          flag:'Depósito suspeito',          afetados:2,  obrigatorio:false, severidade:'P2', tipo:'OBRIGATÓRIA', investigacao:'INV-DEEP' },
+  { id:'DEP-R03', grupo:'Depósito Suspeito',          nome:'Origem Suspeita de Recursos',                    base:'art. 25, VI + art. 25, XIII',           flag:'Depósito suspeito',          afetados:4,  obrigatorio:false, severidade:'P3', tipo:'HIPÓTESE',    investigacao:'INV-MANUAL',            params:'limiar_PJ R$ 500' },
+  // Comportamento Inconsistente
+  { id:'COM-R01', grupo:'Comportamento Inconsistente', nome:'Conluio / Apostas em Mercados Opostos',         base:'art. 25, XVI',                          flag:'Comportamento inconsistente', afetados:1, obrigatorio:false, severidade:'P1', tipo:'HIPÓTESE',    investigacao:'INV-DEEP → INV-COAF',   params:'delta_odds 10%' },
+  { id:'COM-R02', grupo:'Comportamento Inconsistente', nome:'Velocidade Atípica / Automação',                base:'art. 25, X',                            flag:'Comportamento inconsistente', afetados:3, obrigatorio:false, severidade:'P2', tipo:'HIPÓTESE',    investigacao:'INV-MANUAL',            params:'intervalo mín 3s · qty_min 5 · janela 10 min' },
+  { id:'COM-R03', grupo:'Comportamento Inconsistente', nome:'Match-Fixing / Manipulação de Resultados',      base:'art. 25, VIII + art. 177 Lei 14.597',   flag:'Comportamento inconsistente', afetados:1, obrigatorio:false, severidade:'P1', tipo:'HIPÓTESE',    investigacao:'INV-DEEP → INV-COAF',   params:'pct_mercado 30% · win_rate_max 80%/30d' },
+  { id:'COM-R04', grupo:'Comportamento Inconsistente', nome:'Resistência / Informação Falsa no KYC',         base:'art. 25, IV–V + art. 25, XVIII',        flag:'Comportamento inconsistente', afetados:3, obrigatorio:false, severidade:'P3', tipo:'HIPÓTESE',    investigacao:'INV-MANUAL',            params:'múltiplo_renda 3×' },
+  // PEP e Listas
+  { id:'PEP-R01', grupo:'PEP e Listas',               nome:'Pessoa Politicamente Exposta (PEP)',             base:'art. 25, XVII + art. 16 §único',        flag:null,                         afetados:11, obrigatorio:false, severidade:'P2', tipo:'OBRIGATÓRIA', investigacao:'Watchlist → INV-MANUAL', params:'aging PEP 5 anos' },
+  { id:'SAN-R01', grupo:'PEP e Listas',               nome:'Hit em Lista de Sanções ONU/CSNU',               base:'art. 31',                               flag:null,                         afetados:0,  obrigatorio:true,  severidade:'P1', tipo:'OBRIGATÓRIA', investigacao:'INV-ONU (imediato)' },
+  { id:'KYC-R01', grupo:'PEP e Listas',               nome:'Impedido de Apostar (art. 26 Lei 14.790)',       base:'art. 26 Lei 14.790 + art. 15 Portaria', flag:null,                         afetados:1,  obrigatorio:true,  severidade:'P1', tipo:'OBRIGATÓRIA', investigacao:'INV-BLOCK (imediato)' },
 ]
 
 interface ExtList { id: string; nome: string; base: string; atualizada: string; obrigatorio: boolean }
@@ -1464,19 +1470,31 @@ function RegraTab() {
 
   const RuleRow = ({ rule }: { rule: PldRule }) => {
     const on = toggles[rule.id] ?? true
+    const sevStyle = {
+      P1: { c: 'var(--red)',     bg: 'var(--red-soft)'   },
+      P2: { c: 'var(--amber)',   bg: 'var(--amber-soft)'  },
+      P3: { c: 'var(--muted-2)', bg: 'var(--bg)'          },
+    }
+    const { c: sevC, bg: sevBg } = sevStyle[rule.severidade]
     return (
       <div style={{ display:'flex', gap:10, alignItems:'flex-start', padding:'10px 0', borderBottom:'1px solid var(--line)' }}>
         <Tog on={on} disabled={rule.obrigatorio}
           onToggle={() => { if (!rule.obrigatorio) { setToggles(p => ({...p, [rule.id]: !p[rule.id]})); setPending(true) } }} />
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:13, fontWeight:700, color:'var(--ink)', display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+            <span style={{ fontSize:10.5, fontFamily:'var(--font-mono)', color:'var(--muted-text)', fontWeight:500 }}>{rule.id}</span>
             {rule.nome}
             {rule.obrigatorio && <span style={{ fontSize:10, fontWeight:700, color:'#fff', background:'var(--orange)', borderRadius:999, padding:'1px 7px' }}>Obrigatório</span>}
+            {!rule.obrigatorio && rule.tipo === 'OBRIGATÓRIA' && <span style={{ fontSize:10, fontWeight:700, color:'var(--orange)', background:'var(--orange-soft)', borderRadius:999, padding:'1px 7px' }}>Obrigatória</span>}
           </div>
           <div style={{ display:'flex', gap:8, marginTop:3, flexWrap:'wrap', alignItems:'center' }}>
+            <span style={{ fontSize:10.5, fontWeight:700, color:sevC, background:sevBg, borderRadius:999, padding:'1px 8px' }}>{rule.severidade}</span>
             <span style={{ fontSize:11, color:'var(--muted-text)' }}>{rule.base}</span>
             {rule.flag && <span style={{ fontSize:10.5, fontWeight:700, color:'var(--amber)', background:'var(--amber-soft)', borderRadius:999, padding:'1px 8px' }}>Flag: {rule.flag}</span>}
             <span style={{ fontSize:11, color:'var(--ink-2)' }}>Afetados hoje: <strong>{rule.afetados}</strong></span>
+          </div>
+          <div style={{ display:'flex', gap:8, marginTop:3, flexWrap:'wrap', alignItems:'center' }}>
+            <span style={{ fontSize:10.5, color:'var(--ink-2)', background:'var(--bg)', borderRadius:6, padding:'1px 8px', border:'1px solid var(--line)' }}>→ {rule.investigacao}</span>
             {rule.params && <span style={{ fontSize:10.5, color:'var(--muted-text)', background:'var(--bg)', borderRadius:6, padding:'1px 8px', border:'1px solid var(--line)' }}>{rule.params}</span>}
           </div>
         </div>
