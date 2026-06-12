@@ -204,6 +204,41 @@ const KPI_DATA = [
 ]
 
 // ---------------------------------------------------------------------------
+// Dados mock — Aba Regras PLD/AML
+// ---------------------------------------------------------------------------
+interface PldRule { id: string; grupo: string; nome: string; base: string; flag: string | null; afetados: number; obrigatorio: boolean; params?: string }
+const PLD_RULES: PldRule[] = [
+  { id:'estruturacao', grupo:'Padrões Transacionais',  nome:'Estruturação / smurfing',                    base:'art. 25, XI',                              flag:'Estruturação',              afetados:14, obrigatorio:false, params:'Janela 6h · mín 3 transações' },
+  { id:'pass-through', grupo:'Padrões Transacionais',  nome:'Pass-through (dep → saque sem aposta)',       base:'art. 25, XII',                             flag:'Saque atípico',             afetados:9,  obrigatorio:false, params:'dep/saque ≥ 95% · janela 10 min' },
+  { id:'velocidade',   grupo:'Padrões Transacionais',  nome:'Velocidade atípica / automação',             base:'art. 25, X',                               flag:'Saque atípico',             afetados:3,  obrigatorio:false, params:'intervalo mín 30s' },
+  { id:'perfil',       grupo:'Padrões Transacionais',  nome:'Movimentação incompatível com perfil',       base:'art. 25, IX',                              flag:'Depósito suspeito',         afetados:6,  obrigatorio:false, params:'desvio ≥ 2σ da média histórica' },
+  { id:'terceiro',     grupo:'Vínculos e Contas',       nome:'Conta usada por terceiro / intermediador',   base:'art. 25, XIII–XV',                         flag:'Comportamento inconsistente', afetados:4, obrigatorio:false, params:'≥ 2 IPs compartilhados' },
+  { id:'conluio',      grupo:'Vínculos e Contas',       nome:'Conluio em bolsa (apostas opostas)',         base:'art. 25, XVI',                             flag:'Comportamento inconsistente', afetados:1, obrigatorio:false, params:'delta de odds ≥ 0.05' },
+  { id:'suspeicao',    grupo:'Perfil e KYC',            nome:'Pessoa com suspeição de LD/FTP',             base:'art. 25, I–II',                            flag:'Comportamento inconsistente', afetados:2, obrigatorio:false },
+  { id:'kyc-falso',    grupo:'Perfil e KYC',            nome:'Cadastro incompleto / informação falsa',     base:'art. 25, XVIII',                           flag:'Comportamento inconsistente', afetados:1, obrigatorio:false },
+  { id:'incomp-econ',  grupo:'Perfil e KYC',            nome:'Incompatibilidade econômico-financeira',     base:'art. 25, IX',                              flag:'Depósito suspeito',         afetados:5,  obrigatorio:false, params:'múltiplo ≥ 4× renda estimada' },
+  { id:'pep',          grupo:'PEP e Listas',            nome:'Pessoa Politicamente Exposta (PEP)',         base:'art. 25, XVII',                            flag:null,                        afetados:11, obrigatorio:false, params:'aging PEP 5 anos' },
+  { id:'sancao',       grupo:'PEP e Listas',            nome:'Hit em lista de sanções ONU/CSNU',           base:'art. 31',                                  flag:null,                        afetados:0,  obrigatorio:true  },
+  { id:'jurisdicao',   grupo:'Origem e Integridade',    nome:'Jurisdição de alto risco (GAFI)',            base:'art. 25, III',                             flag:'Depósito suspeito',         afetados:2,  obrigatorio:false },
+  { id:'match-fixing', grupo:'Origem e Integridade',    nome:'Manipulação de resultados (match-fixing)',   base:'art. 25, VIII + art. 177 Lei 14.597',      flag:'Comportamento inconsistente', afetados:1, obrigatorio:false },
+]
+
+interface ExtList { id: string; nome: string; base: string; atualizada: string; obrigatorio: boolean }
+const EXT_LISTS: ExtList[] = [
+  { id:'onu',  nome:'Lista ONU/CSNU',    base:'art. 31',            atualizada:'08/06/2026', obrigatorio:true  },
+  { id:'ofac', nome:'OFAC (EUA)',         base:'—',                  atualizada:'07/06/2026', obrigatorio:false },
+  { id:'ue',   nome:'Listas UE',          base:'—',                  atualizada:'05/06/2026', obrigatorio:false },
+  { id:'fbi',  nome:'FBI Most Wanted',    base:'—',                  atualizada:'—',          obrigatorio:false },
+  { id:'spa',  nome:'Impedidos SPA',      base:'art. 26 Lei 14.790', atualizada:'10/06/2026', obrigatorio:true  },
+]
+
+const AUDIT_LOG_RULES = [
+  { ts:'09/06/2026 · 14:32', user:'Marina Costa', role:'compliance_admin', sinal:'Pass-through',    antes:'janela 10 min · dep/saque ≥ 95%',       depois:'janela 15 min · dep/saque ≥ 90%',       motivo:'Redução de falsos positivos após revisão de 14 casos arquivados',             dryRun:true, impacto:'−2 alertas/dia (estimado)' },
+  { ts:'02/06/2026 · 09:15', user:'Carlos Mendes', role:'org_admin',        sinal:'Threshold Crítico', antes:'score ≥ 90',                           depois:'score ≥ 85',                            motivo:'Alinhamento com nova diretriz regulatória SPA junho/2026',                    dryRun:true, impacto:'+3 casos críticos' },
+  { ts:'15/05/2026 · 11:48', user:'Marina Costa', role:'compliance_admin', sinal:'Estruturação',    antes:'janela 4h · mín 2 transações',           depois:'janela 6h · mín 3 transações',           motivo:'Janela aumentada para reduzir alarmes de baixo risco durante fins de semana', dryRun:true, impacto:'−5 alertas/semana (estimado)' },
+]
+
+// ---------------------------------------------------------------------------
 // Beeswarm layout (algoritmo do mockup.html)
 // ---------------------------------------------------------------------------
 const BW = 700, BH = 132, BPL = 46, BPR = 26, BY = 104, BSTEP = 13, BR = 6, BGAP = 14
@@ -404,6 +439,7 @@ const ABAS     = [
   { id: 'visao-geral', label: 'Visão Geral' },
   { id: 'alertas',     label: 'Alertas'     },
   { id: 'watchlist',   label: 'Watchlist'   },
+  { id: 'regras',      label: 'Regras'      },
 ] as const
 type AbaId = typeof ABAS[number]['id']
 
@@ -1391,6 +1427,319 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
 }
 
 // ---------------------------------------------------------------------------
+// Aba Regras
+// ---------------------------------------------------------------------------
+function RegraTab() {
+  type ThState = { critico: number; alto: number; medio: number; slaC: number; slaA: number; slaM: number; factorsMin: number; notifAfter: number }
+  type WState  = { estruturacao: number; passThrough: number; perfil: number; vinculos: number; velocidade: number; jurisdicao: number }
+
+  const [toggles,  setToggles]  = useState<Record<string,boolean>>(() => Object.fromEntries(PLD_RULES.map(r => [r.id, true])) as Record<string,boolean>)
+  const [listTgls, setListTgls] = useState<Record<string,boolean>>(() => Object.fromEntries(EXT_LISTS.map(l => [l.id, true])) as Record<string,boolean>)
+  const [thresholds, setThresholds] = useState<ThState>({ critico:85, alto:70, medio:50, slaC:24, slaA:72, slaM:30, factorsMin:70, notifAfter:20 })
+  const [weights,    setWeights]    = useState<WState> ({ estruturacao:35, passThrough:25, perfil:15, vinculos:12, velocidade:8, jurisdicao:5 })
+  const [isDryRun, setIsDryRun] = useState(false)
+  const [pending,  setPending]  = useState(false)
+  const [showLog,  setShowLog]  = useState(false)
+
+  const setTh = (k: keyof ThState, v: number) => { setThresholds(p => ({...p, [k]: v})); setPending(true) }
+  const setW  = (k: keyof WState,  v: number) => { setWeights(p =>    ({...p, [k]: v})); setPending(true) }
+  const totalW = Object.values(weights).reduce((s, v) => s + v, 0)
+  const ruleGroups = Array.from(new Set(PLD_RULES.map(r => r.grupo)))
+
+  const cardS = {
+    background:'var(--card)', border:'1px solid var(--line)',
+    borderRadius:'var(--radius)', boxShadow:'var(--shadow-card)',
+    padding:'16px 18px', marginBottom:12,
+  }
+
+  const Tog = ({ on, disabled, onToggle }: { on: boolean; disabled?: boolean; onToggle: () => void }) => (
+    <button onClick={onToggle} disabled={disabled}
+      title={disabled ? 'Obrigatório por norma — não pode ser desativado' : undefined}
+      style={{ width:34, height:20, borderRadius:999, border:'none', cursor:disabled?'default':'pointer', padding:0, flexShrink:0,
+        background:on?'var(--green)':'var(--line)', position:'relative', opacity:disabled?0.55:1 }}>
+      <span style={{ display:'block', width:14, height:14, borderRadius:'50%', background:'#fff',
+        position:'absolute', top:3, left:on?17:3 }} />
+    </button>
+  )
+
+  const RuleRow = ({ rule }: { rule: PldRule }) => {
+    const on = toggles[rule.id] ?? true
+    return (
+      <div style={{ display:'flex', gap:10, alignItems:'flex-start', padding:'10px 0', borderBottom:'1px solid var(--line)' }}>
+        <Tog on={on} disabled={rule.obrigatorio}
+          onToggle={() => { if (!rule.obrigatorio) { setToggles(p => ({...p, [rule.id]: !p[rule.id]})); setPending(true) } }} />
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:13, fontWeight:700, color:'var(--ink)', display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
+            {rule.nome}
+            {rule.obrigatorio && <span style={{ fontSize:10, fontWeight:700, color:'#fff', background:'var(--orange)', borderRadius:999, padding:'1px 7px' }}>Obrigatório</span>}
+          </div>
+          <div style={{ display:'flex', gap:8, marginTop:3, flexWrap:'wrap', alignItems:'center' }}>
+            <span style={{ fontSize:11, color:'var(--muted-text)' }}>{rule.base}</span>
+            {rule.flag && <span style={{ fontSize:10.5, fontWeight:700, color:'var(--amber)', background:'var(--amber-soft)', borderRadius:999, padding:'1px 8px' }}>Flag: {rule.flag}</span>}
+            <span style={{ fontSize:11, color:'var(--ink-2)' }}>Afetados hoje: <strong>{rule.afetados}</strong></span>
+            {rule.params && <span style={{ fontSize:10.5, color:'var(--muted-text)', background:'var(--bg)', borderRadius:6, padding:'1px 8px', border:'1px solid var(--line)' }}>{rule.params}</span>}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const thRows = [
+    { label:'Crítico', sk:'critico' as keyof ThState, slk:'slaC' as keyof ThState, slaUnit:'h' },
+    { label:'Alto',    sk:'alto'    as keyof ThState, slk:'slaA' as keyof ThState, slaUnit:'h' },
+    { label:'Médio',   sk:'medio'   as keyof ThState, slk:'slaM' as keyof ThState, slaUnit:'d', nota:'art. 26 §2' },
+    { label:'Baixo',   sk:undefined as (keyof ThState | undefined), slk:undefined as (keyof ThState | undefined), nota:'monitoramento passivo' },
+  ]
+
+  const wRows: [string, keyof WState][] = [
+    ['Estruturação / smurfing',       'estruturacao'],
+    ['Pass-through',                   'passThrough' ],
+    ['Desvio de perfil',               'perfil'      ],
+    ['Vínculos / IP compartilhado',   'vinculos'    ],
+    ['Automação / velocidade',         'velocidade'  ],
+    ['Jurisdição de risco',            'jurisdicao'  ],
+  ]
+
+  return (
+    <div style={{ position:'relative', paddingBottom: pending ? 140 : 0 }}>
+
+      {/* Cabeçalho */}
+      <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:12, marginBottom:20 }}>
+        <button onClick={() => setIsDryRun(d => !d)}
+          style={{ fontSize:11.5, fontWeight:800, letterSpacing:'.5px', padding:'5px 14px', borderRadius:999,
+            border:'none', cursor:'pointer', background:isDryRun?'var(--line)':'var(--orange)', color:isDryRun?'var(--ink-2)':'#fff' }}>
+          {isDryRun ? 'DRY-RUN' : 'PRODUÇÃO'}
+        </button>
+        <span style={{ fontSize:12, color:'var(--muted-text)' }}>Última alteração: por Marina Costa · 09/06/2026 14:32</span>
+        <div style={{ marginLeft:'auto', display:'flex', gap:8, flexWrap:'wrap' }}>
+          <button onClick={() => setShowLog(true)}
+            style={{ fontSize:12, fontWeight:700, color:'var(--ink-2)', background:'var(--card)', border:'1px solid var(--line)', borderRadius:10, padding:'6px 14px', cursor:'pointer' }}>
+            Ver histórico
+          </button>
+          <button onClick={() => alert('Exportação disponível em produção')}
+            style={{ fontSize:12, fontWeight:700, color:'var(--ink-2)', background:'var(--card)', border:'1px solid var(--line)', borderRadius:10, padding:'6px 14px', cursor:'pointer' }}>
+            Exportar configuração
+          </button>
+        </div>
+      </div>
+
+      {/* A — Sinais de Risco */}
+      <Sech>A — Sinais de Risco</Sech>
+      {ruleGroups.map(g => (
+        <div key={g} style={cardS}>
+          <div style={{ fontSize:11.5, fontWeight:800, color:'var(--orange)', textTransform:'uppercase', letterSpacing:'.5px', marginBottom:2 }}>{g}</div>
+          {PLD_RULES.filter(r => r.grupo === g).map(r => <RuleRow key={r.id} rule={r} />)}
+        </div>
+      ))}
+
+      {/* B — Thresholds */}
+      <Sech>B — Thresholds de Severidade e SLA</Sech>
+      <div style={cardS}>
+        <table style={{ width:'100%', borderCollapse:'collapse' }}>
+          <thead>
+            <tr>
+              {(['Severidade','Score PLD ≥','SLA'] as const).map(h => (
+                <th key={h} style={{ textAlign:'left', fontSize:11, fontWeight:700, color:'var(--muted-text)', paddingBottom:8, paddingRight:16 }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {thRows.map(row => (
+              <tr key={row.label}>
+                <td style={{ fontSize:13, fontWeight:600, color:'var(--ink)', padding:'8px 16px 8px 0' }}>{row.label}</td>
+                <td style={{ padding:'8px 16px 8px 0' }}>
+                  {row.sk
+                    ? <input type="number" value={thresholds[row.sk]} min={1} max={100}
+                        onChange={e => setTh(row.sk!, Number(e.target.value))}
+                        style={{ width:60, fontFamily:'var(--font-mono)', fontSize:13, border:'1px solid var(--line)', borderRadius:8, padding:'3px 8px', textAlign:'right' }} />
+                    : <span style={{ fontSize:12, color:'var(--muted-text)' }}>{'< 50'}</span>}
+                </td>
+                <td style={{ padding:'8px 0' }}>
+                  {row.slk
+                    ? <span style={{ display:'flex', alignItems:'center', gap:6 }}>
+                        <input type="number" value={thresholds[row.slk]} min={1}
+                          onChange={e => setTh(row.slk!, Number(e.target.value))}
+                          style={{ width:60, fontFamily:'var(--font-mono)', fontSize:13, border:'1px solid var(--line)', borderRadius:8, padding:'3px 8px', textAlign:'right' }} />
+                        <span style={{ fontSize:12, color:'var(--muted-text)' }}>{row.slaUnit}</span>
+                      </span>
+                    : <span style={{ fontSize:12, color:'var(--muted-text)' }}>{row.nota}</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ marginTop:12, display:'flex', gap:16, flexWrap:'wrap', alignItems:'center', fontSize:12, color:'var(--ink-2)' }}>
+          <span>
+            Score factors obrigatório quando ≥{' '}
+            <input type="number" value={thresholds.factorsMin} min={1} max={100}
+              onChange={e => setTh('factorsMin', Number(e.target.value))}
+              style={{ width:52, fontFamily:'var(--font-mono)', fontSize:12, border:'1px solid var(--line)', borderRadius:6, padding:'2px 6px' }} />
+          </span>
+          <span>
+            Notif. ao Diretor quando crítico sem ação &gt;{' '}
+            <input type="number" value={thresholds.notifAfter} min={1}
+              onChange={e => setTh('notifAfter', Number(e.target.value))}
+              style={{ width:52, fontFamily:'var(--font-mono)', fontSize:12, border:'1px solid var(--line)', borderRadius:6, padding:'2px 6px' }} />h
+          </span>
+        </div>
+        <div style={{ marginTop:10, padding:'8px 12px', background:'var(--amber-soft)', borderRadius:8, fontSize:11.5, color:'var(--ink-2)' }}>
+          ⚠ O prazo de 30 dias vem do art. 26 §2 da Portaria 1.143/2024 — não reduzir sem validação jurídica.
+        </div>
+      </div>
+
+      {/* C — Pesos do Score */}
+      <Sech>C — Pesos do Score PLD</Sech>
+      <div style={cardS}>
+        {wRows.map(([label, key]) => {
+          const v = weights[key]
+          return (
+            <div key={key} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:8 }}>
+              <span style={{ fontSize:12.5, color:'var(--ink-2)', width:210, flexShrink:0 }}>{label}</span>
+              <div style={{ flex:1, height:10, borderRadius:999, background:'var(--bg)', overflow:'hidden', border:'1px solid var(--line)', minWidth:0 }}>
+                <div style={{ height:'100%', width:`${v}%`, background:'var(--orange)', borderRadius:999 }} />
+              </div>
+              <input type="range" min={0} max={100} value={v} onChange={e => setW(key, Number(e.target.value))}
+                style={{ width:80, accentColor:'var(--orange)' }} />
+              <span style={{ fontSize:12, fontFamily:'var(--font-mono)', color:'var(--ink)', width:36, textAlign:'right' }}>{v}%</span>
+            </div>
+          )
+        })}
+        <div style={{ fontSize:12.5, fontWeight:700, color:totalW===100?'var(--green)':'var(--red)', marginTop:4 }}>
+          Total: {totalW}% {totalW===100 ? '✓' : '⚠ Deve somar 100%'}
+        </div>
+        <div style={{ marginTop:14 }}>
+          <div style={{ fontSize:11, color:'var(--muted-text)', marginBottom:6 }}>Distribuição estimada por faixa de score</div>
+          <svg viewBox="0 0 300 65" width="100%" style={{ maxWidth:340 }}>
+            {([
+              ['Baixo',   'var(--green)', 10,  45],
+              ['Médio',   'var(--amber)', 85,  35],
+              ['Alto',    'var(--red)',  160,  15],
+              ['Crítico', '#b91c1c',    235,   5],
+            ] as [string, string, number, number][]).map(([lbl, col, x, pct]) => {
+              const bh = Math.round(pct * 0.9)
+              return (
+                <g key={lbl}>
+                  <rect x={x} y={55 - bh} width={52} height={bh} fill={col} rx={4} opacity={0.85} />
+                  <text x={x + 26} y={62} textAnchor="middle" fontSize={9} fill="var(--muted-text)">{lbl}</text>
+                  <text x={x + 26} y={55 - bh - 3} textAnchor="middle" fontSize={9} fill="var(--ink-2)">{pct}%</text>
+                </g>
+              )
+            })}
+          </svg>
+        </div>
+      </div>
+
+      {/* D — Listas Externas */}
+      <Sech>D — Listas Externas</Sech>
+      <div style={cardS}>
+        {EXT_LISTS.map(l => (
+          <div key={l.id} style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 0', borderBottom:'1px solid var(--line)' }}>
+            <Tog on={listTgls[l.id] ?? true} disabled={l.obrigatorio}
+              onToggle={() => { if (!l.obrigatorio) { setListTgls(p => ({...p, [l.id]: !p[l.id]})); setPending(true) } }} />
+            <div style={{ flex:1, minWidth:0 }}>
+              <span style={{ fontSize:13, fontWeight:600, color:'var(--ink)' }}>{l.nome}</span>
+              {l.obrigatorio && <span style={{ marginLeft:8, fontSize:10, fontWeight:700, color:'#fff', background:'var(--orange)', borderRadius:999, padding:'1px 7px' }}>Obrigatório</span>}
+              <span style={{ fontSize:11, color:'var(--muted-text)', marginLeft:8 }}>{l.base}</span>
+            </div>
+            <span style={{ fontSize:11, color:'var(--muted-text)', flexShrink:0 }}>Atualizada: {l.atualizada}</span>
+            <button style={{ fontSize:11.5, fontWeight:700, color:'var(--orange)', background:'transparent', border:'1px solid var(--orange)', borderRadius:8, padding:'3px 10px', cursor:'pointer' }}>
+              Ver lista
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* E — Comunicação de Não-Ocorrência */}
+      <Sech>E — Comunicação de Não-Ocorrência</Sech>
+      <div style={cardS}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+          <div>
+            <div style={{ fontSize:13.5, fontWeight:700, color:'var(--ink)' }}>Comunicação de Não-Ocorrência — Ano 2026</div>
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:6 }}>
+              <span style={{ width:8, height:8, borderRadius:'50%', background:'var(--amber)', display:'inline-block' }} />
+              <span style={{ fontSize:12.5, color:'var(--amber)', fontWeight:700 }}>Pendente</span>
+              <span style={{ fontSize:12, color:'var(--muted-text)' }}>(prazo: 01/fev/2027)</span>
+              <span style={{ fontSize:12, color:'var(--muted-text)' }}>· Canal: SIGAP</span>
+            </div>
+          </div>
+          <div style={{ marginLeft:'auto', display:'flex', gap:8, flexWrap:'wrap' }}>
+            <button onClick={() => alert('Funcionalidade disponível em produção')}
+              style={{ fontSize:12, fontWeight:700, color:'#fff', background:'var(--orange)', border:'none', borderRadius:10, padding:'6px 14px', cursor:'pointer' }}>
+              Marcar como enviada
+            </button>
+            <button style={{ fontSize:12, fontWeight:700, color:'var(--ink-2)', background:'var(--card)', border:'1px solid var(--line)', borderRadius:10, padding:'6px 14px', cursor:'pointer' }}>
+              Ver histórico de anos anteriores
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Painel de Impacto */}
+      {pending && (
+        <div style={{ position:'sticky', bottom:16, background:'var(--amber-soft)', border:'1px solid var(--amber)', borderRadius:12, padding:'14px 18px', marginTop:16, boxShadow:'0 4px 16px rgba(0,0,0,.1)' }}>
+          <div style={{ fontSize:13, fontWeight:800, color:'var(--amber)', marginBottom:10 }}>⚡ Impacto estimado (dry-run — não salvo)</div>
+          <div style={{ display:'flex', gap:20, flexWrap:'wrap', marginBottom:8 }}>
+            {([['KPI "Alertas"','38 → 51','+13'],['Críticos','2 → 5','+3'],['WorkList','6 → 8','+2']] as [string,string,string][]).map(([lbl,val,d]) => (
+              <div key={lbl}>
+                <div style={{ fontSize:11, color:'var(--muted-text)' }}>{lbl}</div>
+                <div style={{ fontSize:13, fontWeight:700, color:'var(--ink)' }}>{val} <span style={{ color:'var(--red)' }}>({d})</span></div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize:11.5, color:'var(--ink-2)', marginBottom:10 }}>⚠ 3 casos que hoje são &quot;Alto&quot; virariam &quot;Crítico&quot; com o novo threshold.</div>
+          <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+            <button style={{ fontSize:12, fontWeight:700, color:'var(--ink-2)', background:'#fff', border:'1px solid var(--line)', borderRadius:10, padding:'6px 14px', cursor:'pointer' }}>
+              Ver 3 casos
+            </button>
+            <button onClick={() => setPending(false)}
+              style={{ fontSize:12, fontWeight:700, color:'#fff', background:'var(--orange)', border:'none', borderRadius:10, padding:'6px 14px', cursor:'pointer' }}>
+              Publicar
+            </button>
+            <button onClick={() => {
+              setPending(false)
+              setToggles(Object.fromEntries(PLD_RULES.map(r => [r.id, true])) as Record<string,boolean>)
+              setThresholds({ critico:85, alto:70, medio:50, slaC:24, slaA:72, slaM:30, factorsMin:70, notifAfter:20 })
+              setWeights({ estruturacao:35, passThrough:25, perfil:15, vinculos:12, velocidade:8, jurisdicao:5 })
+            }} style={{ fontSize:12, fontWeight:700, color:'var(--muted-text)', background:'transparent', border:'1px solid var(--line)', borderRadius:10, padding:'6px 14px', cursor:'pointer' }}>
+              Descartar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Audit Log Drawer */}
+      <Sheet open={showLog} onOpenChange={setShowLog}>
+        <SheetContent side="right" showCloseButton={false}
+          style={{ background:'var(--card)', padding:0, maxWidth:480, display:'flex', flexDirection:'column' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 20px', borderBottom:'1px solid var(--line)' }}>
+            <span style={{ fontSize:15, fontWeight:800, color:'var(--ink)', fontFamily:'var(--font-head)' }}>Histórico de Alterações</span>
+            <button onClick={() => setShowLog(false)} style={{ fontSize:18, color:'var(--muted-text)', background:'transparent', border:'none', cursor:'pointer' }}>✕</button>
+          </div>
+          <div style={{ flex:1, overflow:'auto', padding:'16px 20px' }}>
+            {AUDIT_LOG_RULES.map((entry, i) => (
+              <div key={i} style={{ marginBottom:20, paddingBottom:20, borderBottom: i < AUDIT_LOG_RULES.length - 1 ? '1px solid var(--line)' : 'none' }}>
+                <div style={{ fontSize:11.5, color:'var(--muted-text)', marginBottom:4 }}>{entry.ts}</div>
+                <div style={{ fontSize:13, fontWeight:700, color:'var(--ink)' }}>
+                  {entry.user} <span style={{ fontSize:11, color:'var(--muted-text)', fontWeight:400 }}>({entry.role})</span>
+                </div>
+                <div style={{ fontSize:12.5, color:'var(--ink-2)', marginTop:4 }}>Sinal: <strong>{entry.sinal}</strong></div>
+                <div style={{ fontSize:12, color:'var(--muted-text)', marginTop:3 }}>Antes: {entry.antes}</div>
+                <div style={{ fontSize:12, color:'var(--muted-text)', marginTop:1 }}>Depois: {entry.depois}</div>
+                <div style={{ fontSize:12, color:'var(--ink-2)', marginTop:4, fontStyle:'italic' }}>&ldquo;{entry.motivo}&rdquo;</div>
+                <div style={{ fontSize:11, color:'var(--muted-text)', marginTop:4 }}>
+                  {entry.dryRun ? '✓ Dry-run executado' : 'Sem dry-run'} · Impacto: {entry.impacto}
+                </div>
+              </div>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
+
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Página principal
 // ---------------------------------------------------------------------------
 export default function PldAmlPage() {
@@ -1742,6 +2091,10 @@ export default function PldAmlPage() {
                 </div>
               )}
             </>
+          )}
+
+          {aba === 'regras' && (
+            <RegraTab />
           )}
 
           {/* Drawer de investigação — painel lateral compartilhado entre abas */}
