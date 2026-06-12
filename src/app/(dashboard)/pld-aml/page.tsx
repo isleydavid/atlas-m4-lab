@@ -746,10 +746,11 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
         </div>
 
         {/* Fluxo financeiro — CashflowStacked (só para contas do scatter fluxo) */}
+        {/* flex+height no wrapper → ResponsiveContainer height="100%" mede corretamente */}
         {fluxo && cashflowDados && (
           <>
             <SecLabel>Fluxo financeiro</SecLabel>
-            <div style={{ height: 180 }}>
+            <div style={{ height: 180, display: 'flex', flexDirection: 'column' }}>
               <CashflowStacked dados={cashflowDados} />
             </div>
           </>
@@ -763,29 +764,23 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
           </>
         )}
 
-        {/* Timeline de transações — Transacoes */}
+        {/* Timeline de transações — Transacoes (sem altura fixa, cresce com conteúdo) */}
         <SecLabel>Timeline de transações</SecLabel>
-        <div style={{ height: 250 }}>
-          <Transacoes dados={transacoesDados} />
-        </div>
+        <Transacoes dados={transacoesDados} />
 
-        {/* Score factors — ScoreFactors (só quando score ≥ 70) */}
+        {/* Score factors — ScoreFactors (sem altura fixa, barras de divs crescem com conteúdo) */}
         {row.score >= 70 && d.factors.length > 0 && (
           <>
             <SecLabel>Score factors (≥ 70 · obrigatório)</SecLabel>
-            <div style={{ height: 160 }}>
-              <ScoreFactors dados={scoreFactoresDados} />
-            </div>
+            <ScoreFactors dados={scoreFactoresDados} />
           </>
         )}
 
-        {/* Vínculos — AnaliseRiscos (só quando há dados de vínculo) */}
+        {/* Vínculos — AnaliseRiscos (SVG viewBox escala, sem altura fixa) */}
         {analise && (
           <>
             <SecLabel>Vínculos</SecLabel>
-            <div style={{ height: 260 }}>
-              <AnaliseRiscos dados={analise} />
-            </div>
+            <AnaliseRiscos dados={analise} />
           </>
         )}
 
