@@ -96,6 +96,155 @@ const DRAWER_DATA: Record<number, DrawerEntry> = {
     factors: ['Saque atípico para o perfil', 'Frequência de saques +4× no mês'],
     vinculos: ['Conta bancária de destino diferente do cadastrado'],
   },
+
+  // ── COAF cases (IDs derivados do número do caso, ex: AML-2026-0046 → 46) ──
+  46: {
+    timeline: [
+      { desc: 'Depósito PIX R$ 72.300', ts: '09/06 07:15' },
+      { desc: 'Aposta simbólica R$ 200', ts: '09/06 07:18' },
+      { desc: 'Saque R$ 71.800', ts: '09/06 07:22' },
+      { desc: 'Novo depósito PIX R$ 144.200', ts: '09/06 08:41' },
+      { desc: 'Saque R$ 143.600', ts: '09/06 08:55' },
+    ],
+    factors: ['Pass-through confirmado: ratio dep/saque 99,2%', 'Aposta simbólica (<0,3% do depósito)', 'Intervalo dep→saque < 10 min', 'Volume R$ 215 k em 2 ciclos', 'IP compartilhado com conta AML-2026-0044'],
+    vinculos: ['2 PIX de remetentes distintos na mesma sessão', 'Conta de destino não cadastrada no KYC'],
+  },
+  47: {
+    timeline: [
+      { desc: 'Depósito PIX R$ 1.850', ts: '08/06 22:10' },
+      { desc: 'Depósito PIX R$ 1.920', ts: '08/06 22:18' },
+      { desc: 'Depósito PIX R$ 1.990', ts: '08/06 22:29' },
+      { desc: 'Depósito PIX R$ 1.870', ts: '08/06 22:41' },
+      { desc: 'Saque R$ 7.580 sem apostas', ts: '08/06 23:05' },
+    ],
+    factors: ['Fracionamento ×4 abaixo de R$ 2.000', 'Sem atividade de aposta no período', 'Horário noturno concentrado (22h–23h)', 'Soma R$ 183 k via smurfing'],
+    vinculos: ['3 remetentes PIX distintos · mesmo CPF mascarado', 'Dispositivo móvel recorrente'],
+  },
+  48: {
+    timeline: [
+      { desc: 'Depósito PIX R$ 98.760 (PJ)', ts: '07/06 11:30' },
+      { desc: 'Sem apostas registradas em 24h', ts: '—' },
+    ],
+    factors: ['Remetente PIX pessoa jurídica (CNPJ)', 'Volume 14× acima da média histórica do apostador', 'Nenhuma atividade de jogo pós-depósito'],
+    vinculos: ['CNPJ remetente sem histórico na plataforma'],
+  },
+  45: {
+    timeline: [
+      { desc: 'Depósito R$ 25.000', ts: '07/06 14:22' },
+      { desc: 'Aposta R$ 300', ts: '07/06 14:25' },
+      { desc: 'Saque R$ 24.600', ts: '07/06 14:38' },
+      { desc: 'Depósito R$ 47.800', ts: '07/06 15:50' },
+      { desc: 'Aposta R$ 250', ts: '07/06 15:53' },
+    ],
+    factors: ['Pass-through: ratio dep/saque 98,4%', 'Apostas simbólicas em ambos os ciclos', 'Dois ciclos em < 2h', 'Score PLD acionou SAQ-R01'],
+    vinculos: ['PIX de origem variada', 'Conta vinculada ao caso AML-2026-0046 por IP'],
+  },
+  44: {
+    timeline: [
+      { desc: 'Apostas opostas: Flamengo ganha (R$ 14.200)', ts: '05/06 20:30' },
+      { desc: 'Apostas opostas: Flamengo não ganha (R$ 13.800)', ts: '05/06 20:32' },
+      { desc: 'Conta vinculada: mesma aposta invertida', ts: '05/06 20:35' },
+    ],
+    factors: ['Conluio: apostas opostas no mesmo evento', 'Delta odds 2,1% (abaixo do limiar 10%)', 'Conta vinculada por dispositivo', 'Regra COM-R01 acionada'],
+    vinculos: ['Conta B compartilha IP · mesmo evento', 'Lucro líquido nulo → transferência disfarçada de valor'],
+  },
+  43: {
+    timeline: [
+      { desc: 'Saque R$ 14.700', ts: '03/06 09:10' },
+      { desc: 'Saque R$ 14.400', ts: '03/06 10:45' },
+      { desc: 'Saque R$ 15.000', ts: '03/06 13:30' },
+    ],
+    factors: ['3 saques de valor similar em < 4h', 'Coeficiente de variação 2,1% (limiar: 10%)', 'SAQ-R02 acionada · INV-MANUAL'],
+    vinculos: ['Sem vínculos identificados · conta isolada'],
+  },
+  42: {
+    timeline: [
+      { desc: 'Depósito PIX R$ 1.980', ts: '02/06 18:00' },
+      { desc: 'Depósito PIX R$ 1.750', ts: '02/06 18:08' },
+      { desc: 'Saque R$ 3.680', ts: '02/06 18:25' },
+    ],
+    factors: ['Fracionamento ×2 abaixo de R$ 2.000', 'Saque consolidado logo após', 'Histórico de 4 ocorrências similares'],
+    vinculos: ['Remetentes PIX distintos · mesmo padrão de horário'],
+  },
+  41: {
+    timeline: [
+      { desc: 'Depósito R$ 28.900', ts: '28/05 10:15' },
+      { desc: 'Aposta R$ 100', ts: '28/05 10:18' },
+      { desc: 'Saque R$ 28.750', ts: '28/05 11:02' },
+    ],
+    factors: ['Pass-through: ratio 99,5%', 'Aposta mínima para justificar operação', 'SLA 34h — próximo ao limite (36h COAF)'],
+    vinculos: ['Nenhum vínculo identificado · caso isolado'],
+  },
+
+  // ── PEP / Watchlist (IDs = WATCH_DATA.id: 101–107) ──
+  101: {
+    timeline: [
+      { desc: 'KYC PEP confirmado (Titular)', ts: '01/06 09:00' },
+      { desc: 'Depósito R$ 85.000', ts: '04/06 14:22' },
+      { desc: 'Aposta R$ 12.000', ts: '04/06 14:35' },
+      { desc: 'Saque R$ 71.200', ts: '04/06 15:10' },
+    ],
+    factors: ['PEP Titular — diligência reforçada obrigatória', 'Score PLD 93 (Crítico)', 'Volume incompatível com perfil declarado', 'Ratio dep/saque 83,8%'],
+    vinculos: ['2 contas vinculadas ao mesmo CPF base', 'PIX recebidos de CNPJ relacionado a cargo político'],
+  },
+  102: {
+    timeline: [
+      { desc: 'Caso anterior arquivado (03/2026)', ts: '01/03 —' },
+      { desc: 'Reabertura por novo padrão detectado', ts: '05/06 08:30' },
+      { desc: 'Depósito R$ 42.000', ts: '05/06 11:15' },
+      { desc: 'Saque R$ 41.500 para conta nova', ts: '05/06 11:28' },
+    ],
+    factors: ['Reincidência: 3º caso em 90 dias', 'Pass-through confirmado: ratio 98,8%', 'Conta de destino não cadastrada', 'Score PLD 92 (Crítico)'],
+    vinculos: ['IP compartilhado com caso AML-2026-0046 (R. FERREIRA)', '2 casos anteriores arquivados por insuficiência de provas'],
+  },
+  103: {
+    timeline: [
+      { desc: 'KYC PEP confirmado (Familiar 1º grau)', ts: '15/05 —' },
+      { desc: 'Monitoramento contínuo ativado', ts: '15/05 —' },
+      { desc: 'Depósito R$ 38.000', ts: '08/06 16:40' },
+      { desc: 'Apostas R$ 5.200', ts: '08/06 16:55' },
+    ],
+    factors: ['PEP Familiar 1º grau — monitoramento reforçado', 'Score PLD 82 (Alto)', 'Depósito 9× acima da média histórica'],
+    vinculos: ['Titular PEP identificado: cargo federal ativo', 'Aging PEP: 14 meses restantes'],
+  },
+  104: {
+    timeline: [
+      { desc: 'KYC PEP: cônjuge de titular', ts: '20/04 —' },
+      { desc: 'Depósito R$ 28.000', ts: '07/06 10:05' },
+      { desc: 'Apostas R$ 4.100', ts: '07/06 10:30' },
+      { desc: 'Saque R$ 23.500', ts: '07/06 11:45' },
+    ],
+    factors: ['PEP por vínculo familiar (cônjuge)', 'Ratio dep/saque 83,9%', 'Volume 6× acima da média'],
+    vinculos: ['Titular PEP: cargos no executivo estadual', 'PIX de origem variada (4 remetentes)'],
+  },
+  105: {
+    timeline: [
+      { desc: 'Saque R$ 15.200', ts: '05/06 09:15' },
+      { desc: 'Saque R$ 14.800', ts: '05/06 14:30' },
+      { desc: 'Saque R$ 15.600', ts: '06/06 10:20' },
+      { desc: 'Saque R$ 15.100', ts: '06/06 16:45' },
+    ],
+    factors: ['Alto volume de saques: R$ 60.700 em 2 dias', '4 saques com variação < 3% (SAQ-R02)', 'Score PLD 64 (Médio)'],
+    vinculos: ['Conta de destino recorrente sem histórico anterior'],
+  },
+  106: {
+    timeline: [
+      { desc: 'Caso anterior (03/2026) — Comportamento inconsistente', ts: '10/03 —' },
+      { desc: 'Apostas opostas detectadas novamente', ts: '06/06 19:30' },
+      { desc: 'Investigação manual reaberta', ts: '07/06 08:00' },
+    ],
+    factors: ['Reincidência: comportamento inconsistente (2º episódio)', 'COM-R01 acionada: apostas opostas · delta 4,2%', 'Score PLD 58 (Médio)'],
+    vinculos: ['Conta B vinculada por dispositivo · mesmo padrão do caso anterior'],
+  },
+  107: {
+    timeline: [
+      { desc: 'Depósito R$ 12.000', ts: '01/06 20:10' },
+      { desc: 'Apostas R$ 8.500 (múltiplos mercados)', ts: '01/06 20:15' },
+      { desc: 'Saque R$ 3.100', ts: '02/06 08:30' },
+    ],
+    factors: ['Alto volume relativo ao perfil histórico', 'Score PLD 45 (Baixo) — monitoramento passivo'],
+    vinculos: ['Nenhum vínculo identificado'],
+  },
 }
 
 // ---------------------------------------------------------------------------
@@ -169,6 +318,244 @@ const ANALISE_DATA: Record<number, {
       arestas: [['EP', 'CB']],
     },
     descricao: 'Conta bancária de destino diferente do cadastrado. Frequência de saques aumentou +4× no mês.',
+  },
+
+  // ── COAF ──
+  46: {
+    vinculosMesmoIP: true, contasVinculadas: 2,
+    conta: { nome: 'R. FERREIRA', marca: 'vaidebet-ngx', cpf: '•••.•••.•••-37', ip: '177.202.xx.xx' },
+    score: { valor: 91, max: 100, critico: true },
+    sinais: ['Pass-through: ratio dep/saque 99,2%', 'Aposta simbólica (< 0,3%)', 'IP compartilhado com caso AML-2026-0044'],
+    grafo: {
+      nos: [
+        { id: 'RF',  x: 210, y: 85,  principal: true  },
+        { id: 'IP',  x: 340, y: 55,  principal: false },
+        { id: 'A44', x: 90,  y: 55,  principal: false },
+        { id: 'CB',  x: 340, y: 115, principal: false },
+      ],
+      arestas: [['RF', 'IP'], ['RF', 'CB'], ['A44', 'IP']],
+    },
+    descricao: 'Pass-through confirmado em 2 ciclos (R$ 215 k). IP compartilhado com conta do caso AML-2026-0044.',
+  },
+  47: {
+    vinculosMesmoIP: false, contasVinculadas: 3,
+    conta: { nome: 'C. ROCHA', marca: 'vaidebet', cpf: '•••.•••.•••-09', ip: '177.203.xx.xx' },
+    score: { valor: 91, max: 100, critico: true },
+    sinais: ['Fracionamento ×4 (smurfing)', 'Remetentes PIX distintos · mesmo CPF base', 'Saque consolidado sem apostas'],
+    grafo: {
+      nos: [
+        { id: 'CR',  x: 210, y: 85,  principal: true  },
+        { id: 'P1',  x: 80,  y: 40,  principal: false },
+        { id: 'P2',  x: 80,  y: 85,  principal: false },
+        { id: 'P3',  x: 80,  y: 130, principal: false },
+        { id: 'CB',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['P1', 'CR'], ['P2', 'CR'], ['P3', 'CR'], ['CR', 'CB']],
+    },
+    descricao: '4 depósitos fracionados abaixo de R$ 2.000 em 31 min, seguidos de saque consolidado sem atividade de jogo.',
+  },
+  48: {
+    vinculosMesmoIP: false, contasVinculadas: 0,
+    conta: { nome: 'M. DIAS', marca: 'vaidebet', cpf: '•••.•••.•••-73', ip: '—' },
+    score: { valor: 75, max: 100, critico: false },
+    sinais: ['Remetente PIX: pessoa jurídica (CNPJ)', 'Volume 14× acima da média histórica', 'Sem apostas após depósito'],
+    grafo: {
+      nos: [
+        { id: 'MD',   x: 210, y: 85,  principal: true  },
+        { id: 'CNPJ', x: 80,  y: 85,  principal: false },
+      ],
+      arestas: [['CNPJ', 'MD']],
+    },
+    descricao: 'Depósito único de R$ 98.760 via PIX de CNPJ sem histórico na plataforma. Nenhuma aposta registrada nas 24h seguintes.',
+  },
+  45: {
+    vinculosMesmoIP: true, contasVinculadas: 1,
+    conta: { nome: 'P. SANTOS', marca: 'vaidebet', cpf: '•••.•••.•••-00', ip: '177.202.xx.xx' },
+    score: { valor: 75, max: 100, critico: false },
+    sinais: ['Pass-through: ratio 98,4%', 'IP compartilhado com caso AML-2026-0046'],
+    grafo: {
+      nos: [
+        { id: 'PS',  x: 210, y: 85,  principal: true  },
+        { id: 'IP',  x: 340, y: 60,  principal: false },
+        { id: 'A46', x: 90,  y: 60,  principal: false },
+        { id: 'CB',  x: 340, y: 110, principal: false },
+      ],
+      arestas: [['PS', 'IP'], ['PS', 'CB'], ['A46', 'IP']],
+    },
+    descricao: 'Dois ciclos de pass-through em < 2h. IP compartilhado com R. FERREIRA (AML-2026-0046), sugerindo operação coordenada.',
+  },
+  44: {
+    vinculosMesmoIP: true, contasVinculadas: 1,
+    conta: { nome: 'L. ALMEIDA', marca: 'vaidebet', cpf: '•••.•••.•••-52', ip: '177.202.xx.xx' },
+    score: { valor: 55, max: 100, critico: false },
+    sinais: ['Apostas opostas no mesmo evento (COM-R01)', 'Conta B vinculada por IP e dispositivo'],
+    grafo: {
+      nos: [
+        { id: 'LA',  x: 210, y: 85,  principal: true  },
+        { id: 'CB',  x: 80,  y: 85,  principal: false },
+        { id: 'EV',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['LA', 'EV'], ['CB', 'EV']],
+    },
+    descricao: 'Apostas opostas detectadas com conta B no mesmo evento. Delta de odds 2,1% — transferência disfarçada de valor.',
+  },
+  43: {
+    vinculosMesmoIP: false, contasVinculadas: 0,
+    conta: { nome: 'T. MELO', marca: 'kto', cpf: '•••.•••.•••-00', ip: '—' },
+    score: { valor: 75, max: 100, critico: false },
+    sinais: ['3 saques de valor similar em < 4h (SAQ-R02)', 'Coeficiente de variação 2,1%'],
+    grafo: {
+      nos: [
+        { id: 'TM',  x: 210, y: 85,  principal: true  },
+        { id: 'S1',  x: 90,  y: 40,  principal: false },
+        { id: 'S2',  x: 90,  y: 85,  principal: false },
+        { id: 'S3',  x: 90,  y: 130, principal: false },
+      ],
+      arestas: [['TM', 'S1'], ['TM', 'S2'], ['TM', 'S3']],
+    },
+    descricao: 'Três saques de valor quase idêntico em menos de 4 horas. Padrão sugere automação ou instrução de terceiro.',
+  },
+  42: {
+    vinculosMesmoIP: false, contasVinculadas: 2,
+    conta: { nome: 'F. CASTRO', marca: 'betano', cpf: '•••.•••.•••-00', ip: '—' },
+    score: { valor: 55, max: 100, critico: false },
+    sinais: ['Fracionamento ×2 (EST-R01)', '4 ocorrências similares nos últimos 30 dias'],
+    grafo: {
+      nos: [
+        { id: 'FC',  x: 210, y: 85,  principal: true  },
+        { id: 'P1',  x: 80,  y: 55,  principal: false },
+        { id: 'P2',  x: 80,  y: 115, principal: false },
+        { id: 'CB',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['P1', 'FC'], ['P2', 'FC'], ['FC', 'CB']],
+    },
+    descricao: 'Fracionamento recorrente: 4ª ocorrência em 30 dias. Dois remetentes PIX distintos + saque consolidado.',
+  },
+  41: {
+    vinculosMesmoIP: false, contasVinculadas: 0,
+    conta: { nome: 'J. PIRES', marca: 'vaidebet', cpf: '•••.•••.•••-00', ip: '—' },
+    score: { valor: 55, max: 100, critico: false },
+    sinais: ['Pass-through isolado: ratio 99,5%', 'SLA 34h (próximo ao limite de 36h)'],
+    grafo: {
+      nos: [
+        { id: 'JP',  x: 210, y: 85,  principal: true  },
+        { id: 'PIX', x: 80,  y: 85,  principal: false },
+        { id: 'CB',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['PIX', 'JP'], ['JP', 'CB']],
+    },
+    descricao: 'Ciclo único de pass-through. Sem vínculos com outras contas. SLA próximo ao limite regulatório de 36h.',
+  },
+
+  // ── PEP / Watchlist ──
+  101: {
+    vinculosMesmoIP: false, contasVinculadas: 2,
+    conta: { nome: 'J. COSTA', marca: 'vaidebet', cpf: '•••.•••.•••-14', ip: '177.204.xx.xx' },
+    score: { valor: 93, max: 100, critico: true },
+    sinais: ['PEP Titular — diligência reforçada obrigatória', 'Volume incompatível com perfil', 'PIX de CNPJ relacionado a cargo político'],
+    grafo: {
+      nos: [
+        { id: 'JC',   x: 210, y: 85,  principal: true  },
+        { id: 'PEP',  x: 80,  y: 55,  principal: false },
+        { id: 'CNPJ', x: 80,  y: 115, principal: false },
+        { id: 'CB',   x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['PEP', 'JC'], ['CNPJ', 'JC'], ['JC', 'CB']],
+    },
+    descricao: 'PEP Titular com score crítico (93). Depósito de R$ 85 k via PIX de CNPJ vinculado a cargo público. Ratio dep/saque 83,8%.',
+  },
+  102: {
+    vinculosMesmoIP: true, contasVinculadas: 1,
+    conta: { nome: 'R. FERREIRA', marca: 'vaidebet-ngx', cpf: '•••.•••.•••-37', ip: '177.202.xx.xx' },
+    score: { valor: 92, max: 100, critico: true },
+    sinais: ['Reincidência: 3º caso em 90 dias', 'Pass-through confirmado (ratio 98,8%)', 'IP compartilhado com AML-2026-0046'],
+    grafo: {
+      nos: [
+        { id: 'RF',  x: 210, y: 85,  principal: true  },
+        { id: 'IP',  x: 340, y: 60,  principal: false },
+        { id: 'A46', x: 90,  y: 60,  principal: false },
+        { id: 'CB',  x: 340, y: 110, principal: false },
+      ],
+      arestas: [['RF', 'IP'], ['RF', 'CB'], ['A46', 'IP']],
+    },
+    descricao: '3º caso de reincidência em 90 dias. IP coincide com caso COAF AML-2026-0046, sugerindo rede coordenada.',
+  },
+  103: {
+    vinculosMesmoIP: false, contasVinculadas: 0,
+    conta: { nome: 'G. NUNES', marca: 'kto', cpf: '•••.•••.•••-88', ip: '—' },
+    score: { valor: 82, max: 100, critico: false },
+    sinais: ['PEP Familiar (1º grau) — monitoramento contínuo', 'Depósito 9× acima da média histórica'],
+    grafo: {
+      nos: [
+        { id: 'GN',  x: 210, y: 85,  principal: true  },
+        { id: 'PEP', x: 80,  y: 85,  principal: false },
+        { id: 'PIX', x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['PEP', 'GN'], ['PIX', 'GN']],
+    },
+    descricao: 'Familiar de PEP com cargo federal ativo. Depósito de R$ 38 k está 9× acima da média histórica do apostador.',
+  },
+  104: {
+    vinculosMesmoIP: false, contasVinculadas: 1,
+    conta: { nome: 'L. ALMEIDA', marca: 'vaidebet', cpf: '•••.•••.•••-52', ip: '—' },
+    score: { valor: 71, max: 100, critico: false },
+    sinais: ['PEP por vínculo familiar (cônjuge)', 'Volume 6× acima da média', 'PIX de 4 remetentes distintos'],
+    grafo: {
+      nos: [
+        { id: 'LA',  x: 210, y: 85,  principal: true  },
+        { id: 'PEP', x: 80,  y: 55,  principal: false },
+        { id: 'P1',  x: 80,  y: 115, principal: false },
+        { id: 'CB',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['PEP', 'LA'], ['P1', 'LA'], ['LA', 'CB']],
+    },
+    descricao: 'Cônjuge de PEP com cargo no executivo estadual. Ratio dep/saque 83,9%. Quatro remetentes PIX distintos.',
+  },
+  105: {
+    vinculosMesmoIP: false, contasVinculadas: 0,
+    conta: { nome: 'C. ROCHA', marca: 'betnacional', cpf: '•••.•••.•••-09', ip: '—' },
+    score: { valor: 64, max: 100, critico: false },
+    sinais: ['Alto volume: R$ 60,7 k em saques em 2 dias', '4 saques com variação < 3% (SAQ-R02)'],
+    grafo: {
+      nos: [
+        { id: 'CR',  x: 210, y: 85,  principal: true  },
+        { id: 'S1',  x: 80,  y: 40,  principal: false },
+        { id: 'S2',  x: 80,  y: 75,  principal: false },
+        { id: 'S3',  x: 80,  y: 110, principal: false },
+        { id: 'S4',  x: 80,  y: 145, principal: false },
+      ],
+      arestas: [['CR', 'S1'], ['CR', 'S2'], ['CR', 'S3'], ['CR', 'S4']],
+    },
+    descricao: 'Quatro saques de valor quase idêntico (variação < 3%) em dois dias consecutivos. Conta de destino recorrente sem histórico.',
+  },
+  106: {
+    vinculosMesmoIP: false, contasVinculadas: 1,
+    conta: { nome: 'M. DIAS', marca: 'vaidebet', cpf: '•••.•••.•••-73', ip: '—' },
+    score: { valor: 58, max: 100, critico: false },
+    sinais: ['Reincidência: comportamento inconsistente (2ª ocorrência)', 'Apostas opostas detectadas (COM-R01)'],
+    grafo: {
+      nos: [
+        { id: 'MD',  x: 210, y: 85,  principal: true  },
+        { id: 'CB',  x: 80,  y: 85,  principal: false },
+        { id: 'EV',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['MD', 'EV'], ['CB', 'EV']],
+    },
+    descricao: '2ª ocorrência de apostas opostas com mesma conta B vinculada por dispositivo. Reincidência confirma padrão de conluio.',
+  },
+  107: {
+    vinculosMesmoIP: false, contasVinculadas: 0,
+    conta: { nome: 'T. ALVES', marca: 'betano', cpf: '•••.•••.•••-21', ip: '—' },
+    score: { valor: 45, max: 100, critico: false },
+    sinais: ['Alto volume relativo ao perfil', 'Monitoramento passivo (score Baixo)'],
+    grafo: {
+      nos: [
+        { id: 'TA',  x: 210, y: 85,  principal: true  },
+        { id: 'PIX', x: 80,  y: 85,  principal: false },
+      ],
+      arestas: [['PIX', 'TA']],
+    },
+    descricao: 'Apostador removido da watchlist ativa. Monitoramento passivo mantido por 90 dias conforme procedimento padrão.',
   },
 }
 
