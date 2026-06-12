@@ -8,6 +8,7 @@ import AnaliseRiscos from '@/modules/perfil-apostador/charts/analise-riscos'
 import { ScoreFactors } from '@/modules/perfil-apostador/charts/score'
 import { PipelineAml } from './PipelineAml'
 import { CoafTimelineV2 } from './CoafTimelineV2'
+import { PepSectionV2 } from './PepSectionV2'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -21,13 +22,6 @@ interface DrawerEntry {
   timeline: Array<{ desc: string; ts: string }>
   factors: string[]
   vinculos: string[]
-}
-interface PepPoint {
-  id: string; nome: string; cargo: string; esfera: string; cat: string
-  tipo: string; x: number; y: number; score: number
-  agingMeses: number; agingMax: number
-  vol: string; dep: string; giro: string; giroAlto: boolean
-  fatores: string[]; vinculos: string; diligencia: string
 }
 interface StyleToken { c: string; bg: string }
 interface WatchRow {
@@ -250,34 +244,6 @@ function fluxoToRow(f: FluxoPoint): Row {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Dados mock — PEP
-// ---------------------------------------------------------------------------
-const PEP_COLORS: Record<string, string> = {
-  titular:       'var(--orange)',
-  familiar:      'var(--ink-2)',
-  representante: 'var(--muted-text)',
-  colaborador:   'var(--muted-2)',
-}
-
-const PEP_POINTS: PepPoint[] = [
-  { id: 'pep-1',  nome: 'EVANDRO P.', cargo: 'Secretário Municipal',  esfera: 'Municipal', cat: 'Titular',          tipo: 'titular',       x: 78, y: 88, score: 88, agingMeses: 22, agingMax: 60, vol: 'R$ 420k', dep: 'R$ 420k', giro: '8%',  giroAlto: true,  fatores: ['Depósitos ×4 vs média do cargo', 'Saques para conta de terceiro', 'Sem aposta efetiva'],  vinculos: '—',                         diligencia: 'pendente'     },
-  { id: 'pep-2',  nome: 'B. SANTOS',  cargo: 'Vereador',              esfera: 'Municipal', cat: 'Familiar 2º grau', tipo: 'familiar',      x: 62, y: 71, score: 71, agingMeses: 14, agingMax: 60, vol: 'R$ 180k', dep: 'R$ 195k', giro: '15%', giroAlto: false, fatores: ['Movimentação acima do esperado'],                                                           vinculos: 'Cônjuge do titular',         diligencia: 'em andamento' },
-  { id: 'pep-3',  nome: 'C. LIMA',    cargo: 'Deputado Estadual',     esfera: 'Estadual',  cat: 'Representante',    tipo: 'representante', x: 85, y: 55, score: 55, agingMeses: 38, agingMax: 60, vol: 'R$ 95k',  dep: 'R$ 100k', giro: '5%',  giroAlto: false, fatores: ['Volume dentro do esperado'],                                                                vinculos: '—',                         diligencia: 'ok'           },
-  { id: 'pep-4',  nome: 'D. MELO',    cargo: 'Senador',               esfera: 'Federal',   cat: 'Titular',          tipo: 'titular',       x: 91, y: 79, score: 79, agingMeses:  8, agingMax: 60, vol: 'R$ 310k', dep: 'R$ 330k', giro: '11%', giroAlto: true,  fatores: ['Depósito elevado · Federal', 'Padrão de giro suspeito'],                                    vinculos: 'Familiar presente na lista', diligencia: 'pendente'     },
-  { id: 'pep-5',  nome: 'E. FARIA',   cargo: 'Secretário Estadual',   esfera: 'Estadual',  cat: 'Familiar 2º grau', tipo: 'familiar',      x: 48, y: 42, score: 42, agingMeses: 50, agingMax: 60, vol: 'R$ 60k',  dep: 'R$ 65k',  giro: '3%',  giroAlto: false, fatores: ['Abaixo do limiar'],                                                                         vinculos: '—',                         diligencia: 'ok'           },
-  { id: 'pep-6',  nome: 'F. ROCHA',   cargo: 'Diretor de Autarquia',  esfera: 'Federal',   cat: 'Colaborador',      tipo: 'colaborador',   x: 55, y: 60, score: 60, agingMeses: 29, agingMax: 60, vol: 'R$ 120k', dep: 'R$ 125k', giro: '7%',  giroAlto: false, fatores: ['Operações dentro do padrão'],                                                               vinculos: '—',                         diligencia: 'em andamento' },
-  { id: 'pep-7',  nome: 'G. NUNES',   cargo: 'Prefeito',              esfera: 'Municipal', cat: 'Titular',          tipo: 'titular',       x: 70, y: 82, score: 82, agingMeses:  3, agingMax: 60, vol: 'R$ 270k', dep: 'R$ 280k', giro: '9%',  giroAlto: true,  fatores: ['Início de mandato · alta exposição', 'Volume crescente'],                                   vinculos: 'Esposa na base de dados',   diligencia: 'pendente'     },
-  { id: 'pep-8',  nome: 'H. VIEIRA',  cargo: 'Vereador',              esfera: 'Municipal', cat: 'Familiar 2º grau', tipo: 'familiar',      x: 35, y: 30, score: 30, agingMeses: 54, agingMax: 60, vol: 'R$ 40k',  dep: 'R$ 42k',  giro: '2%',  giroAlto: false, fatores: ['Sem anomalia detectada'],                                                                   vinculos: '—',                         diligencia: 'ok'           },
-  { id: 'pep-9',  nome: 'I. BORGES',  cargo: 'Rep. Comercial',        esfera: 'Estadual',  cat: 'Representante',    tipo: 'representante', x: 73, y: 48, score: 48, agingMeses: 42, agingMax: 60, vol: 'R$ 75k',  dep: 'R$ 80k',  giro: '4%',  giroAlto: false, fatores: ['Operações regulares'],                                                                      vinculos: '—',                         diligencia: 'ok'           },
-  { id: 'pep-10', nome: 'J. COSTA',   cargo: 'Governador',            esfera: 'Estadual',  cat: 'Titular',          tipo: 'titular',       x: 82, y: 93, score: 93, agingMeses:  1, agingMax: 60, vol: 'R$ 580k', dep: 'R$ 600k', giro: '14%', giroAlto: true,  fatores: ['Recém-empossado · máxima exposição', 'Depósitos atípicos'],                                vinculos: '2 familiares cadastrados',  diligencia: 'pendente'     },
-  { id: 'pep-11', nome: 'K. ALVES',   cargo: 'Analista Público',      esfera: 'Federal',   cat: 'Colaborador',      tipo: 'colaborador',   x: 22, y: 18, score: 18, agingMeses: 58, agingMax: 60, vol: 'R$ 25k',  dep: 'R$ 27k',  giro: '1%',  giroAlto: false, fatores: ['Risco baixo'],                                                                              vinculos: '—',                         diligencia: 'ok'           },
-]
-
-const SX = (v: number) => 50 + (v / 100) * 400
-const SY = (v: number) => 240 - (v / 100) * 200
-const CROSS_X = SX(60)
-const CROSS_Y = SY(60)
 
 // Fluxo chart: X = volume R$0–500k; Y = % sem jogo 0–100 (viewBox 640×260)
 const FX = (v: number) => 70 + (Math.min(v, 500000) / 500000) * 550
@@ -721,158 +687,6 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
   )
 }
 
-
-// ---------------------------------------------------------------------------
-// PEP — quadrante (flex: 1) + modal de ficha
-// ---------------------------------------------------------------------------
-function PepSection({ selectedPep: p, setSelectedPep }: { selectedPep: PepPoint | null; setSelectedPep: (p: PepPoint) => void }) {
-  const [pepModal, setPepModal] = useState(false)
-
-  function selectPep(pt: PepPoint) {
-    setSelectedPep(pt)
-    setPepModal(true)
-  }
-
-  const sc         = p ? SCORE_COLOR(p.score) : null
-  const pepColor   = p ? PEP_COLORS[p.tipo]   : null
-  const diligStyle = p ? (DILIG[p.diligencia] || DILIG['pendente']) : null
-
-  return (
-    <>
-      {/* quadrante — flex: 1 para igualar altura com coluna COAF */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-          <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-            Quadrante PEP — exposição × risco
-          </h3>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {[['titular','Titular'],['familiar','Familiar 2º grau'],['representante','Representante'],['colaborador','Colaborador']].map(([tipo, label]) => (
-              <span key={tipo} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
-                <span style={{ width: 8, height: 8, borderRadius: 2, background: PEP_COLORS[tipo], flexShrink: 0 }} />
-                {label}
-              </span>
-            ))}
-          </div>
-        </div>
-        {/* SVG cresce para preencher o espaço disponível */}
-        <div style={{ flex: 1, minHeight: 160, overflow: 'visible' }}>
-          <svg viewBox="0 0 500 280" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', overflow: 'visible' }}>
-            <rect x={CROSS_X} y={40} width={450 - CROSS_X} height={CROSS_Y - 40} fill="rgba(226,59,59,.05)" />
-            <text x={449} y={54} fontSize={9} fill="var(--red)" fontWeight={700} textAnchor="end">Ação</text>
-            <line x1={50} y1={240} x2={450} y2={240} stroke="var(--line)" strokeWidth={1} />
-            <line x1={50} y1={40}  x2={50}  y2={240} stroke="var(--line)" strokeWidth={1} />
-            <line x1={CROSS_X} y1={40}  x2={CROSS_X} y2={240} stroke="var(--muted-2)" strokeWidth={1} strokeDasharray="4 3" />
-            <line x1={50} y1={CROSS_Y} x2={450} y2={CROSS_Y} stroke="var(--muted-2)" strokeWidth={1} strokeDasharray="4 3" />
-            <text x={250} y={260} fontSize={10} fill="var(--muted-text)" textAnchor="middle">exposição PEP →</text>
-            <text x={14}  y={145} fontSize={10} fill="var(--muted-text)" textAnchor="middle" transform="rotate(-90,14,145)">↑ risco / score PLD</text>
-            {[0,25,50,75,100].map((v) => (
-              <g key={v}>
-                <line x1={SX(v)} y1={238} x2={SX(v)} y2={242} stroke="var(--line)" strokeWidth={1} />
-                <text x={SX(v)} y={252} fontSize={8} fill="var(--muted-text)" textAnchor="middle">{v}</text>
-                <line x1={48} y1={SY(v)} x2={52} y2={SY(v)} stroke="var(--line)" strokeWidth={1} />
-                <text x={43} y={SY(v)+3} fontSize={8} fill="var(--muted-text)" textAnchor="end">{v}</text>
-              </g>
-            ))}
-            {PEP_POINTS.map((pt) => {
-              const isSel = p && pt.id === p.id
-              const col   = PEP_COLORS[pt.tipo]
-              return (
-                <g key={pt.id} style={{ cursor: 'pointer' }} onClick={() => selectPep(pt)}>
-                  <circle cx={SX(pt.x)} cy={SY(pt.y)} r={isSel ? 10 : 7}
-                    fill={col} fillOpacity={isSel ? 1 : 0.72}
-                    stroke={isSel ? 'var(--ink)' : 'none'} strokeWidth={2} />
-                  {isSel && (
-                    <text x={SX(pt.x)} y={SY(pt.y) - 14} fontSize={9} fill="var(--ink)" fontWeight={700} textAnchor="middle">
-                      {pt.nome}
-                    </text>
-                  )}
-                </g>
-              )
-            })}
-          </svg>
-        </div>
-        <div style={{ marginTop: 4, fontSize: 11, color: 'var(--muted-text)' }}>
-          {p ? `${p.nome} selecionado(a) · clique para ver a ficha ou em outro ponto.` : 'Clique em um ponto para ver a ficha. Zona "Ação" = alta exposição + alto risco.'}
-        </div>
-      </div>
-
-      {/* Modal — ficha PEP */}
-      {pepModal && p && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,24,31,.45)', display: 'grid', placeItems: 'center', zIndex: 200, padding: 20 }}
-          onMouseDown={(e) => { if (e.target === e.currentTarget) setPepModal(false) }}>
-          <div style={{ background: 'var(--card)', borderRadius: 'var(--radius)', width: 500, maxWidth: '100%', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 16px 48px rgba(16,24,40,.22)' }}>
-            {/* Cabeçalho */}
-            <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', position: 'sticky', top: 0, background: 'var(--card)', zIndex: 1 }}>
-              <span style={{ width: 32, height: 32, borderRadius: '50%', background: pepColor ?? undefined, display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 800, fontSize: 12, flexShrink: 0 }}>
-                {p.nome[0]}
-              </span>
-              <span style={{ fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', flex: 1 }}>{p.nome}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, color: pepColor ?? undefined, background: 'var(--bg)' }}>{p.cat}</span>
-              <span style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-mono)', color: sc ?? undefined }}>{p.score}</span>
-              <button onClick={() => setPepModal(false)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 20, color: 'var(--muted-text)', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}>×</button>
-            </div>
-            {/* Corpo */}
-            <div style={{ padding: '16px 20px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Condição PEP</div>
-                  {[['Cargo', p.cargo], ['Esfera', p.esfera], ['Categoria', p.cat]].map(([k, v]) => (
-                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '4px 0', borderBottom: '1px solid var(--bg)' }}>
-                      <span style={{ color: 'var(--muted-text)' }}>{k}</span>
-                      <span style={{ fontWeight: 600, color: 'var(--ink)' }}>{v}</span>
-                    </div>
-                  ))}
-                  <div style={{ marginTop: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 4 }}>
-                      <span style={{ color: 'var(--muted-text)' }}>Aging (5 anos)</span>
-                      <span style={{ fontWeight: 700, color: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-text)', fontFamily: 'var(--font-mono)' }}>
-                        {p.agingMeses}mo / {p.agingMax}mo
-                      </span>
-                    </div>
-                    <div style={{ height: 5, background: 'var(--line)', borderRadius: 999, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', borderRadius: 999, width: `${Math.round(p.agingMeses / p.agingMax * 100)}%`, background: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-2)' }} />
-                    </div>
-                    <div style={{ fontSize: 10.5, color: p.agingMeses <= 12 ? 'var(--orange)' : 'var(--muted-text)', marginTop: 3 }}>
-                      {p.agingMeses <= 12 ? '⚠ Exposição recente — máxima atenção' : 'Status ativo · monitoramento contínuo'}
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 8 }}>Comportamento financeiro</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 10 }}>
-                    {[{ label:'Volume', v:p.vol, alert:false }, { label:'Depósitos', v:p.dep, alert:false }, { label:'Giro', v:p.giro, alert:p.giroAlto }].map((k) => (
-                      <div key={k.label} style={{ textAlign: 'center', background: k.alert ? 'var(--red-soft)' : 'var(--bg)', borderRadius: 8, padding: '6px 4px' }}>
-                        <div style={{ fontSize: 9.5, color: k.alert ? 'var(--red)' : 'var(--muted-text)', fontWeight: 700, marginBottom: 3 }}>{k.label}</div>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: k.alert ? 'var(--red)' : 'var(--ink)' }}>{k.v}</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-                    {p.fatores.map((f) => (
-                      <span key={f} style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '2px 7px', borderRadius: 6 }}>
-                        {f}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16, paddingTop: 12, borderTop: '1px solid var(--line)', flexWrap: 'wrap', gap: 6 }}>
-                <span style={{ fontSize: 12, color: 'var(--muted-text)' }}>
-                  Vínculos: <span style={{ color: 'var(--ink)', fontWeight: 600 }}>{p.vinculos}</span>
-                </span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>Diligência reforçada:</span>
-                  {diligStyle && <Pill c={diligStyle.c} bg={diligStyle.bg}>{p.diligencia}</Pill>}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
 
 // ---------------------------------------------------------------------------
 // Fluxo financeiro × jogo — scatter landscape
@@ -1496,8 +1310,7 @@ export default function PldAmlPage() {
   const [selected, setSelected]       = useState<Row | null>(null)
   const [filter, setFilter]           = useState('Todos')
   const [rowStatus, setRowStatus]     = useState<Record<number, string>>({})
-  const [selectedPep, setSelectedPep] = useState<PepPoint | null>(null)
-  const [periodo, setPeriodo]         = useState('7 dias')
+const [periodo, setPeriodo]         = useState('7 dias')
   const [aba, setAba]                 = useState<AbaId>('visao-geral')
 
   // Watchlist state
@@ -1626,10 +1439,7 @@ export default function PldAmlPage() {
               {/* Red Flags + PEP — grid 2 colunas iguais */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 26 }}>
                 <RedFlagsDonut />
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <Sech style={{ margin: '0 0 11px', flexShrink: 0 }}>Pessoas politicamente expostas (PEP)</Sech>
-                  <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
-                </div>
+                <PepSectionV2 />
               </div>
 
               {/* Fluxo financeiro × jogo */}
