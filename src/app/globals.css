@@ -203,6 +203,9 @@
   overflow: auto;
   height: 100%;
   min-height: 0;
+  /* --muted no shadcn é token de fundo (quase branco); os chart components
+     do perfil-apostador usam --muted como cor de texto — restaura o valor correto */
+  --muted: #8A92A3;
 }
 
 /* Layout utilitário — 2 colunas lado a lado, mesma altura */
