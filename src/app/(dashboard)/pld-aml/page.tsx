@@ -7,6 +7,7 @@ import Transacoes from '@/modules/perfil-apostador/charts/transacoes'
 import AnaliseRiscos from '@/modules/perfil-apostador/charts/analise-riscos'
 import { ScoreFactors } from '@/modules/perfil-apostador/charts/score'
 import { PipelineAml } from './PipelineAml'
+import { CoafTimelineV2 } from './CoafTimelineV2'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,9 +30,6 @@ interface PepPoint {
   fatores: string[]; vinculos: string; diligencia: string
 }
 interface StyleToken { c: string; bg: string }
-interface CoafCase {
-  id: string; nome: string; marca: string; t: number; tl: string; sev: 'CRÍTICO' | 'ALTO'
-}
 interface WatchRow {
   id: number; nome: string; cpf: string; score: number
   classe: 'Alto' | 'Médio' | 'Baixo'
@@ -182,17 +180,6 @@ const ANALISE_DATA: Record<number, {
 // ---------------------------------------------------------------------------
 // Dados mock — COAF (9 casos · do mockup)
 // ---------------------------------------------------------------------------
-const COAF_CASES: CoafCase[] = [
-  { id: 'AML-2026-0046', nome: 'R. FERREIRA', marca: 'vaidebet-ngx', t: 6.5,  tl: '6h 30min', sev: 'CRÍTICO' },
-  { id: 'AML-2026-0047', nome: 'C. ROCHA',    marca: 'betnacional',  t: 9,    tl: '9h',        sev: 'CRÍTICO' },
-  { id: 'AML-2026-0048', nome: 'M. DIAS',     marca: 'vaidebet',     t: 10,   tl: '10h',       sev: 'CRÍTICO' },
-  { id: 'AML-2026-0045', nome: 'P. SANTOS',   marca: 'betnacional',  t: 11,   tl: '11h',       sev: 'CRÍTICO' },
-  { id: 'AML-2026-0044', nome: 'L. ALMEIDA',  marca: 'vaidebet',     t: 13,   tl: '13h',       sev: 'ALTO'    },
-  { id: 'AML-2026-0043', nome: 'T. OLIVEIRA', marca: 'kto',          t: 19.7, tl: '19h 40min', sev: 'ALTO'    },
-  { id: 'AML-2026-0042', nome: 'J. SOUSA',    marca: 'vaidebet',     t: 22,   tl: '22h',       sev: 'ALTO'    },
-  { id: 'AML-2026-0041', nome: 'R. LIMA',     marca: 'betano',       t: 27.7, tl: '27h 40min', sev: 'ALTO'    },
-  { id: 'AML-2026-0040', nome: 'G. SANTOS',   marca: 'kto',          t: 33,   tl: '33h',       sev: 'ALTO'    },
-]
 
 // ---------------------------------------------------------------------------
 // Dados mock — KPIs (faixa plana)
@@ -245,39 +232,6 @@ const AUDIT_LOG_RULES = [
   { ts:'15/05/2026 · 11:48', user:'Marina Costa', role:'compliance_admin', sinal:'Estruturação',    antes:'janela 4h · mín 2 transações',           depois:'janela 6h · mín 3 transações',           motivo:'Janela aumentada para reduzir alarmes de baixo risco durante fins de semana', dryRun:true, impacto:'−5 alertas/semana (estimado)' },
 ]
 
-// ---------------------------------------------------------------------------
-// Beeswarm layout (algoritmo do mockup.html)
-// ---------------------------------------------------------------------------
-const BW = 700, BH = 132, BPL = 46, BPR = 26, BY = 104, BSTEP = 13, BR = 6, BGAP = 14
-const BMAX = Math.ceil(Math.max(...COAF_CASES.map(c => c.t)) / 6) * 6  // rounds up to nearest 6h above last case
-function beeX(t: number) { return BPL + (t / BMAX) * (BW - BPL - BPR) }
-type BeePoint = CoafCase & { x: number; cy: number }
-const BEE_LAYOUT: BeePoint[] = (() => {
-  const placed: Array<{ x: number; lvl: number }> = []
-  return [...COAF_CASES].sort((a, b) => a.t - b.t).map((c) => {
-    const x = beeX(c.t)
-    let lvl = 0
-    while (placed.some(p => p.lvl === lvl && Math.abs(p.x - x) < BGAP)) lvl++
-    placed.push({ x, lvl })
-    return { ...c, x, cy: BY - 8 - lvl * BSTEP }
-  })
-})()
-
-function coafToRow(c: CoafCase): Row {
-  const match = ROWS.find(r => r.nome === c.nome)
-  if (match) return match
-  return {
-    id: -(COAF_CASES.findIndex(x => x.id === c.id) + 1),
-    nome: c.nome, cpf: '•••.•••.•••-••', marca: c.marca,
-    flag: 'Estruturação',
-    score: c.sev === 'CRÍTICO' ? 88 : 71,
-    sev: c.sev === 'CRÍTICO' ? 'Crítico' : 'Alto',
-    sla: c.tl, slaH: c.t,
-    slaC: c.t < 12 ? 'r' : 'a',
-    status: 'Aberto', resp: '—',
-    crit: c.sev === 'CRÍTICO',
-  }
-}
 
 function fluxoToRow(f: FluxoPoint): Row {
   const score = f.padrao === 'pass-through' ? 89 : f.padrao === 'saques-recorrentes' ? 74 : 32
@@ -767,129 +721,6 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
   )
 }
 
-// ---------------------------------------------------------------------------
-// COAF Timeline — beeswarm + popover
-// ---------------------------------------------------------------------------
-function CoafTimeline({ onInvestigate }: { onInvestigate: (row: Row) => void }) {
-  const [popCase, setPopCase] = useState<CoafCase | null>(null)
-  const [popPos,  setPopPos]  = useState<{ x: number; y: number }>({ x: 0, y: 0 })
-
-  function openPop(c: CoafCase, e: React.MouseEvent) {
-    e.stopPropagation()
-    setPopCase(c)
-    setPopPos({ x: e.clientX, y: e.clientY })
-  }
-
-  const critCount = COAF_CASES.filter(c => c.t < 12).length
-  const sortedAll = [...COAF_CASES].sort((a, b) => a.t - b.t)
-
-  return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '12px 14px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <h3 style={{ margin: 0, fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-          Prazo COAF — horizonte {BMAX}h
-        </h3>
-        <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 999, background: 'var(--red-soft)', color: 'var(--red)' }}>
-          {critCount} críticos &lt; 12h
-        </span>
-      </div>
-
-      {/* SVG beeswarm */}
-      <div>
-        <svg viewBox={`0 0 ${BW} ${BH}`} width="100%" style={{ display: 'block' }} preserveAspectRatio="xMinYMid meet">
-          {/* Zona crítica */}
-          <rect x={BPL} y={0} width={beeX(12) - BPL} height={BY + 10} fill="var(--red-soft)" opacity={0.55} rx={4} />
-          {/* Linha 24h tracejada */}
-          <line x1={beeX(24)} y1={8} x2={beeX(24)} y2={BY + 8} stroke="var(--muted-text)" strokeWidth={1.5} strokeDasharray="4 3" />
-          {/* Eixo base */}
-          <line x1={BPL} y1={BY + 9} x2={BW - BPR} y2={BY + 9} stroke="var(--line)" strokeWidth={1} />
-          {/* Labels de eixo — geradas dinamicamente de 0 a BMAX em intervalos de 6h */}
-          {Array.from({ length: BMAX / 6 + 1 }, (_, i) => i * 6).map(h => (
-            <text key={h} x={h === 0 ? BPL : h === BMAX ? BW - BPR : beeX(h)} y={BH - 2}
-              fontSize={9.5} textAnchor="middle"
-              fill={h === 12 ? 'var(--red)' : 'var(--muted-text)'}
-              fontWeight={h === 12 || h === 24 ? 700 : undefined}>{h}h</text>
-          ))}
-          {/* Rótulo zona crítica */}
-          <text x={BPL + (beeX(12) - BPL) / 2} y={14} fontSize={8.5} fill="var(--red)" fontWeight={700} textAnchor="middle">CRÍTICO</text>
-          {/* Rótulo 24h */}
-          <text x={beeX(24) + 4} y={20} fontSize={8.5} fill="var(--muted-text)" textAnchor="start">prazo 24h</text>
-          {/* Pontos */}
-          {BEE_LAYOUT.map((pt) => (
-            <g key={pt.id} style={{ cursor: 'pointer' }} onClick={(e) => openPop(pt, e)}>
-              <circle cx={pt.x} cy={pt.cy} r={BR + 4} fill="transparent" />
-              <circle cx={pt.x} cy={pt.cy} r={BR}
-                fill={pt.t < 12 ? 'var(--red)' : 'var(--amber)'}
-                stroke="var(--card)" strokeWidth={1.5} />
-              <title>{pt.nome} — {pt.tl}</title>
-            </g>
-          ))}
-        </svg>
-      </div>
-
-      {/* Próximos a vencer */}
-      <div style={{ marginTop: 14, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.6px', textTransform: 'uppercase', color: 'var(--muted-text)', marginBottom: 6 }}>
-          Próximos a vencer
-        </div>
-        {sortedAll.slice(0, 5).map((c, i) => (
-          <div key={c.id} onClick={(e) => openPop(c, e)}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 6px', borderTop: i === 0 ? 'none' : '1px solid var(--bg)', cursor: 'pointer', borderRadius: 6 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: c.t < 12 ? 'var(--red)' : 'var(--amber)', flexShrink: 0 }} />
-            <span style={{ fontSize: 13, fontWeight: 700, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--ink)' }}>{c.nome}</span>
-            <span style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>{c.id}</span>
-            <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '2px 7px', borderRadius: 6, flexShrink: 0 }}>{c.marca}</span>
-            <span style={{ fontSize: 12.5, fontWeight: 800, color: c.t < 12 ? 'var(--red)' : 'var(--amber)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)', flexShrink: 0 }}>
-              faltam {c.tl}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* Popover */}
-      {popCase && (
-        <>
-          <div style={{ position: 'fixed', inset: 0, zIndex: 149 }} onClick={() => setPopCase(null)} />
-          <div style={{
-            position: 'fixed',
-            left: Math.min(popPos.x + 10, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 280),
-            top:  Math.max(popPos.y - 30, 8),
-            zIndex: 150,
-            background: 'var(--card)',
-            border: '1px solid var(--line)',
-            borderRadius: 12,
-            boxShadow: '0 8px 32px rgba(16,24,40,.18)',
-            padding: '14px 16px',
-            width: 260,
-          }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{popCase.nome}</span>
-              <button onClick={() => setPopCase(null)}
-                style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 18, color: 'var(--muted-text)', lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
-            </div>
-            <div style={{ fontSize: 10.5, fontFamily: 'var(--font-mono)', color: 'var(--muted-text)', marginBottom: 10 }}>{popCase.id}</div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-              <Pill c={popCase.t < 12 ? 'var(--red)' : 'var(--amber)'}
-                    bg={popCase.t < 12 ? 'var(--red-soft)' : 'var(--amber-soft)'}>
-                {popCase.sev}
-              </Pill>
-              <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '3px 9px', borderRadius: 999, display: 'inline-block', whiteSpace: 'nowrap' }}>
-                {popCase.marca}
-              </span>
-            </div>
-            <div style={{ fontSize: 13, fontWeight: 800, color: popCase.t < 12 ? 'var(--red)' : 'var(--amber)', fontFamily: 'var(--font-mono)', marginBottom: 14 }}>
-              ⏱ faltam {popCase.tl}
-            </div>
-            <button className="btn-primary" style={{ width: '100%', textAlign: 'center', display: 'block' }}
-              onClick={() => { onInvestigate(coafToRow(popCase)); setPopCase(null) }}>
-              Investigar →
-            </button>
-          </div>
-        </>
-      )}
-    </div>
-  )
-}
 
 // ---------------------------------------------------------------------------
 // PEP — quadrante (flex: 1) + modal de ficha
@@ -1781,19 +1612,21 @@ export default function PldAmlPage() {
                 ))}
               </div>
 
-              {/* Red flags + Volume — grid 2 colunas, mesma altura */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 26 }}>
-                <RedFlagsDonut />
-                <PipelineAml />
+              {/* Pipeline AML — linha completa */}
+              <div style={{ marginTop: 26 }}>
+                <PipelineAml onViewRegras={() => setAba('regras')} />
               </div>
 
-              {/* COAF + PEP — 2 colunas */}
-              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', marginTop: 26 }}>
-                <div style={{ flex: '1 1 460px', minWidth: 0 }}>
-                  <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
-                  <CoafTimeline onInvestigate={(row) => setSelected(row)} />
-                </div>
-                <div style={{ flex: '1 1 460px', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+              {/* COAF Timeline */}
+              <div style={{ marginTop: 26 }}>
+                <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
+                <CoafTimelineV2 />
+              </div>
+
+              {/* Red Flags + PEP — grid 2 colunas iguais */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 26 }}>
+                <RedFlagsDonut />
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <Sech style={{ margin: '0 0 11px', flexShrink: 0 }}>Pessoas politicamente expostas (PEP)</Sech>
                   <PepSection selectedPep={selectedPep} setSelectedPep={setSelectedPep} />
                 </div>

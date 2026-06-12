@@ -3,192 +3,185 @@
 import React from 'react'
 
 // ---------------------------------------------------------------------------
-// Tipos
+// Dados
 // ---------------------------------------------------------------------------
 interface Stage {
-  icon: string
   value: string
   label: string
-  conv: string | null
+  conv:  string | null
+  h:     number
 }
+
+const STAGES: Stage[] = [
+  { value: '850.000', label: 'Transações\nMonitoradas', conv: null,    h: 112 },
+  { value: '18.200',  label: 'Regras\nAcionadas',       conv: '2,1%',  h: 95  },
+  { value: '3.420',   label: 'Alertas\nGerados',        conv: '18,8%', h: 80  },
+  { value: '740',     label: 'Em\nInvestigação',        conv: '21,6%', h: 65  },
+  { value: '112',     label: 'Casos\nAbertos',          conv: '15,1%', h: 50  },
+  { value: '18',      label: 'Comunicações\nCOAF',      conv: '2,4%',  h: 38  },
+]
 
 interface KpiItem {
-  icon: string
-  value: string
-  label: string
-  delta: string
-  deltaUp: boolean | null
+  label:    string
+  value:    string
+  sub:      string
+  deltaPos: boolean | null
 }
-
-// ---------------------------------------------------------------------------
-// Mock
-// ---------------------------------------------------------------------------
-const STAGES: Stage[] = [
-  { icon: '⌕',  value: '850.000', label: 'Transações\nMonitoradas', conv: null },
-  { icon: '✦',  value: '18.200',  label: 'Regras\nAcionadas',       conv: '2,1%' },
-  { icon: '🔔', value: '3.420',   label: 'Alertas\nGerados',        conv: '18,8%' },
-  { icon: '📋', value: '740',     label: 'Em\nInvestigação',        conv: '21,6%' },
-  { icon: '📁', value: '112',     label: 'Casos\nAbertos',          conv: '15,1%' },
-  { icon: '✈',  value: '18',      label: 'Comunicações\nCOAF',     conv: '2,4%' },
-]
 
 const KPIS: KpiItem[] = [
-  { icon: '📈', value: '0,0021%',    label: 'Taxa de Conversão AML',          delta: 'Monitorado → COAF',     deltaUp: null  },
-  { icon: '⏱',  value: '2,4 dias',   label: 'Tempo Médio de Investigação',    delta: '−0,6 vs. 30 dias ant.', deltaUp: false },
-  { icon: '💰', value: 'R$ 48,7 MM', label: 'Volume Financeiro Investigado',  delta: '+12% vs. 30 dias ant.', deltaUp: true  },
-  { icon: '👤', value: '1.256',      label: 'Contas Envolvidas',              delta: '+8% vs. 30 dias ant.',  deltaUp: true  },
+  { label: 'Taxa de Conversão AML',         value: '0,0021%',    sub: 'Monitorado → COAF',        deltaPos: null  },
+  { label: 'Tempo Médio de Investigação',   value: '2,4 dias',   sub: '−0,6 vs. 30 dias ant.',    deltaPos: false },
+  { label: 'Volume Financeiro Investigado', value: 'R$ 48,7 MM', sub: '+12% vs. 30 dias ant.',    deltaPos: true  },
+  { label: 'Contas Envolvidas',             value: '1.256',      sub: '+8% vs. 30 dias ant.',     deltaPos: true  },
 ]
 
-const HEADLINE = { value: '18', label: 'COMUNICAÇÕES COAF', delta: '+5 vs. 30 dias anteriores' }
-const PERIOD   = 'ÚLTIMOS 30 DIAS'
+// ---------------------------------------------------------------------------
+// Cor por índice — laranja sólido → pêssego bem claro
+// ---------------------------------------------------------------------------
+const BG = [
+  '#F26122',
+  '#F47340',
+  '#F68B62',
+  '#F8A585',
+  '#FABFAA',
+  '#FCDACF',
+]
 
-// ---------------------------------------------------------------------------
-// Gradiente laranja com opacidade decrescente (alpha computado em JS)
-// ---------------------------------------------------------------------------
-function stageAlpha(i: number, total: number): string {
-  const alpha = 1 - (i / (total - 1)) * 0.82
-  return `rgba(242, 97, 34, ${alpha.toFixed(2)})`
-}
-
-// ---------------------------------------------------------------------------
-// Chevron
-// ---------------------------------------------------------------------------
-function Chevron({ stage, index, total }: { stage: Stage; index: number; total: number }) {
-  const isLast   = index === total - 1
-  const widthPct = 100 - index * (55 / (total - 1))
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: '0 0 auto' }}>
-      <div style={{ height: 28, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
-        {stage.conv && (
-          <>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--orange)', fontFamily: 'var(--font-body)', lineHeight: 1 }}>
-              {stage.conv}
-            </span>
-            <span style={{ fontSize: 9, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', lineHeight: 1.2 }}>
-              taxa de conversão
-            </span>
-          </>
-        )}
-      </div>
-      <div style={{
-        position: 'relative',
-        width: `${widthPct}%`,
-        minWidth: 72,
-        height: 88,
-        background: stageAlpha(index, total),
-        clipPath: isLast
-          ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%)'
-          : 'polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 2,
-        padding: '0 18px 0 8px',
-      }}>
-        <span style={{ fontSize: 18, lineHeight: 1 }}>{stage.icon}</span>
-        <span style={{ fontSize: 19, fontWeight: 800, color: '#fff', fontFamily: 'var(--font-head)', lineHeight: 1, letterSpacing: '-0.5px' }}>
-          {stage.value}
-        </span>
-        <span style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.88)', fontFamily: 'var(--font-body)', textAlign: 'center', lineHeight: 1.3, whiteSpace: 'pre-line' }}>
-          {stage.label}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Dot timeline
-// ---------------------------------------------------------------------------
-function DotTimeline({ count }: { count: number }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 0, padding: '6px 0 0 0' }}>
-      {Array.from({ length: count }).map((_, i) => (
-        <React.Fragment key={i}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: i === 0 ? 'var(--orange)' : 'var(--muted-2)', flexShrink: 0 }} />
-          {i < count - 1 && (
-            <div style={{ flex: 1, height: 1, background: 'var(--muted-2)', minWidth: 24 }} />
-          )}
-        </React.Fragment>
-      ))}
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// KPI de rodapé
-// ---------------------------------------------------------------------------
-function BottomKpi({ item }: { item: KpiItem }) {
-  const deltaColor = item.deltaUp === null
-    ? 'var(--muted-text)'
-    : item.deltaUp ? 'var(--green)' : 'var(--red)'
-
-  return (
-    <div style={{ flex: 1, display: 'flex', gap: 10, alignItems: 'flex-start', padding: '10px 12px', background: 'var(--bg)', borderRadius: 8, minWidth: 0 }}>
-      <span style={{ fontSize: 18, flexShrink: 0, marginTop: 2 }}>{item.icon}</span>
-      <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)', lineHeight: 1.1, whiteSpace: 'nowrap' }}>
-          {item.value}
-        </div>
-        <div style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', lineHeight: 1.3, marginTop: 1 }}>
-          {item.label}
-        </div>
-        <div style={{ fontSize: 10, color: deltaColor, fontFamily: 'var(--font-body)', marginTop: 2 }}>
-          {item.delta}
-        </div>
-      </div>
-    </div>
-  )
-}
+const TEXT_DARK = ['#fff', '#fff', '#fff', '#fff', '#fff', '#F26122']
 
 // ---------------------------------------------------------------------------
 // Componente principal
 // ---------------------------------------------------------------------------
-export function PipelineAml() {
+export function PipelineAml({ onViewRegras }: { onViewRegras?: () => void } = {}) {
+  const maxH   = Math.max(...STAGES.map(s => s.h))
+  const topRow = maxH + 40
+
   return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--border-default)', borderRadius: 16, padding: '20px 24px 14px', boxShadow: 'var(--shadow-card)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--border-default)', borderRadius: 16, padding: '20px 24px 14px', boxShadow: 'var(--shadow-card)', width: '100%', boxSizing: 'border-box' }}>
 
       {/* Cabeçalho */}
-      <div>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.7px', textTransform: 'uppercase', color: 'var(--muted-text)', fontFamily: 'var(--font-body)', lineHeight: 1 }}>
-          Pipeline AML · {PERIOD}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>
+            PIPELINE AML · ÚLTIMOS 30 DIAS
+          </div>
+          {onViewRegras && (
+            <button onClick={onViewRegras} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 700, color: 'var(--orange)', fontFamily: 'var(--font-body)', padding: 0 }}>
+              Ver regras →
+            </button>
+          )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 7, marginTop: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--orange)', fontFamily: 'var(--font-body)', textTransform: 'uppercase', letterSpacing: '.5px' }}>hoje</span>
-          <span style={{ fontSize: 28, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)', lineHeight: 1, letterSpacing: '-0.5px' }}>
-            {HEADLINE.value}
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>
-            {HEADLINE.label}
-          </span>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', fontFamily: 'var(--font-body)' }}>HOJE</span>
+          <span style={{ fontSize: 32, fontWeight: 900, color: 'var(--ink)', fontFamily: 'var(--font-head)', lineHeight: 1, letterSpacing: '-0.5px' }}>18</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>COMUNICAÇÕES COAF</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
           <span style={{ color: 'var(--orange)', fontSize: 10 }}>▲</span>
-          <span style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>{HEADLINE.delta}</span>
+          <span style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>+5 vs. 30 dias anteriores</span>
         </div>
       </div>
 
       {/* Funil */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 2, overflow: 'hidden', width: '100%' }}>
-        {STAGES.map((stage, i) => (
-          <Chevron key={i} stage={stage} index={i} total={STAGES.length} />
+      <div style={{ position: 'relative', height: topRow, display: 'flex', alignItems: 'flex-end', gap: 3 }}>
+        {STAGES.map((s, i) => {
+          const isLast = i === STAGES.length - 1
+          return (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+
+              {/* taxa de conversão acima */}
+              <div style={{ height: topRow - maxH - 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', paddingBottom: 4 }}>
+                {s.conv && (
+                  <>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--orange)', lineHeight: 1, fontFamily: 'var(--font-body)' }}>{s.conv}</span>
+                    <span style={{ fontSize: 9, color: 'var(--muted-text)', lineHeight: 1.2, fontFamily: 'var(--font-body)' }}>taxa de conversão</span>
+                    <span style={{ fontSize: 10, color: 'var(--muted-text)', lineHeight: 1, marginTop: 1 }}>↓</span>
+                  </>
+                )}
+              </div>
+
+              {/* chevron */}
+              <div
+                onClick={i === 1 && onViewRegras ? onViewRegras : undefined}
+                style={{
+                  width: '100%',
+                  height: s.h,
+                  background: BG[i],
+                  clipPath: isLast
+                    ? 'none'
+                    : 'polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%)',
+                  borderRadius: isLast ? 4 : 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px 14px 6px 6px',
+                  boxSizing: 'border-box',
+                  overflow: 'hidden',
+                  cursor: i === 1 && onViewRegras ? 'pointer' : 'default',
+                }}>
+                <span style={{
+                  fontSize: s.h > 70 ? 18 : s.h > 50 ? 14 : 11,
+                  fontWeight: 900,
+                  color: TEXT_DARK[i],
+                  fontFamily: 'var(--font-head)',
+                  lineHeight: 1,
+                  letterSpacing: '-0.3px',
+                  textAlign: 'center',
+                }}>
+                  {s.value}
+                </span>
+                <span style={{
+                  fontSize: s.h > 70 ? 9 : 8,
+                  color: i < 5 ? 'rgba(255,255,255,0.85)' : 'var(--orange)',
+                  lineHeight: 1.3,
+                  textAlign: 'center',
+                  marginTop: 3,
+                  whiteSpace: 'pre-line',
+                  fontFamily: 'var(--font-body)',
+                }}>
+                  {s.label}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Timeline de dots */}
+      <div style={{ display: 'flex', alignItems: 'center', margin: '8px 0 16px 0' }}>
+        {STAGES.map((_, i) => (
+          <React.Fragment key={i}>
+            <div style={{
+              width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
+              background: i === 0 ? 'var(--orange)' : 'var(--muted-2)',
+            }} />
+            {i < STAGES.length - 1 && (
+              <div style={{ flex: 1, height: 1, background: 'var(--muted-2)' }} />
+            )}
+          </React.Fragment>
         ))}
       </div>
 
-      {/* Dot timeline */}
-      <DotTimeline count={STAGES.length} />
-
-      {/* KPIs */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {KPIS.map((kpi, i) => (
-          <BottomKpi key={i} item={kpi} />
-        ))}
+      {/* KPIs de rodapé */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', borderTop: '1px solid var(--border-default)' }}>
+        {KPIS.map((k, i) => {
+          const deltaColor = k.deltaPos === null ? 'var(--muted-text)' : k.deltaPos ? 'var(--green)' : 'var(--red)'
+          return (
+            <div key={i} style={{
+              padding: '12px 14px',
+              borderLeft: i === 0 ? '3px solid var(--orange)' : '1px solid var(--border-default)',
+            }}>
+              <div style={{ fontSize: 10, color: 'var(--muted-text)', marginBottom: 4, fontFamily: 'var(--font-body)' }}>{k.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--ink)', fontFamily: 'var(--font-head)', lineHeight: 1 }}>{k.value}</div>
+              <div style={{ fontSize: 10, color: deltaColor, marginTop: 3, fontFamily: 'var(--font-body)' }}>{k.sub}</div>
+            </div>
+          )
+        })}
       </div>
 
-      {/* Rodapé */}
-      <div style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>
+      {/* Nota */}
+      <div style={{ fontSize: 10, color: 'var(--muted-text)', marginTop: 8, fontFamily: 'var(--font-body)' }}>
         ⓘ Dados referentes aos últimos 30 dias. Atualizado hoje às 08:30.
       </div>
 
