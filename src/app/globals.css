@@ -196,6 +196,13 @@
   }
 }
 
+/* Wrapper class para componentes de gráfico do perfil-apostador */
+.body {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
 /* Layout utilitário — 2 colunas lado a lado, mesma altura */
 .grid-2col {
   display: grid;

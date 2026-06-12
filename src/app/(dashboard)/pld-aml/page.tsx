@@ -1,6 +1,11 @@
 "use client"
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { CashflowStacked } from '@/modules/perfil-apostador/charts/cashflow'
+import Transacoes from '@/modules/perfil-apostador/charts/transacoes'
+import AnaliseRiscos from '@/modules/perfil-apostador/charts/analise-riscos'
+import { ScoreFactors } from '@/modules/perfil-apostador/charts/score'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -96,6 +101,80 @@ const DRAWER_DATA: Record<number, DrawerEntry> = {
     ],
     factors: ['Saque atípico para o perfil', 'Frequência de saques +4× no mês'],
     vinculos: ['Conta bancária de destino diferente do cadastrado'],
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Dados de vínculos por row — alimenta AnaliseRiscos do Perfil
+// ---------------------------------------------------------------------------
+const ANALISE_DATA: Record<number, {
+  vinculosMesmoIP: boolean; contasVinculadas: number
+  conta: { nome: string; marca: string; cpf: string; ip: string }
+  score: { valor: number; max: number; critico: boolean }
+  sinais: string[]
+  grafo: { nos: { id: string; x: number; y: number; principal: boolean }[]; arestas: [string, string][] }
+  descricao: string
+}> = {
+  1: {
+    vinculosMesmoIP: true, contasVinculadas: 2,
+    conta: { nome: 'EVANDRO P.', marca: 'vaidebet-ngx', cpf: '•••.•••.•••-70', ip: '177.200.xx.xx' },
+    score: { valor: 92, max: 100, critico: true },
+    sinais: ['Vínculos com mesmo IP', 'Dispositivo recorrente'],
+    grafo: {
+      nos: [
+        { id: 'EP',  x: 210, y: 85,  principal: true  },
+        { id: 'A2',  x: 88,  y: 135, principal: false },
+        { id: 'A3',  x: 88,  y: 38,  principal: false },
+        { id: 'IP',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['EP', 'IP'], ['EP', 'A2'], ['EP', 'A3'], ['A2', 'IP'], ['A3', 'IP']],
+    },
+    descricao: 'Foram identificadas 2 contas vinculadas ao mesmo IP, com dispositivo recorrente em 3 operações distintas.',
+  },
+  2: {
+    vinculosMesmoIP: true, contasVinculadas: 1,
+    conta: { nome: 'ADIEL F.', marca: 'betnacional', cpf: '•••.•••.•••-10', ip: '177.201.xx.xx' },
+    score: { valor: 88, max: 100, critico: true },
+    sinais: ['IP compartilhado com conta banida'],
+    grafo: {
+      nos: [
+        { id: 'EP',  x: 210, y: 85,  principal: true  },
+        { id: 'BAN', x: 90,  y: 85,  principal: false },
+        { id: 'IP',  x: 330, y: 85,  principal: false },
+      ],
+      arestas: [['EP', 'IP'], ['BAN', 'IP']],
+    },
+    descricao: 'IP compartilhado com conta previamente banida. PIX de origens variadas detectado nas últimas 48h.',
+  },
+  4: {
+    vinculosMesmoIP: false, contasVinculadas: 0,
+    conta: { nome: 'R. LIMA', marca: 'kto', cpf: '•••.•••.•••-29', ip: '—' },
+    score: { valor: 71, max: 100, critico: false },
+    sinais: ['Dispositivo recorrente em múltiplas operações'],
+    grafo: {
+      nos: [
+        { id: 'EP',  x: 210, y: 85,  principal: true  },
+        { id: 'D1',  x: 100, y: 50,  principal: false },
+        { id: 'D2',  x: 100, y: 120, principal: false },
+        { id: 'D3',  x: 330, y: 85,  principal: false },
+      ],
+      arestas: [['EP', 'D1'], ['EP', 'D2'], ['EP', 'D3']],
+    },
+    descricao: 'Dispositivo recorrente identificado em 3 operações distintas nos últimos 7 dias.',
+  },
+  6: {
+    vinculosMesmoIP: false, contasVinculadas: 1,
+    conta: { nome: 'M. COSTA', marca: 'vaidebet', cpf: '•••.•••.•••-05', ip: '—' },
+    score: { valor: 58, max: 100, critico: false },
+    sinais: ['Conta bancária divergente do cadastro'],
+    grafo: {
+      nos: [
+        { id: 'EP',  x: 210, y: 85,  principal: true  },
+        { id: 'CB',  x: 340, y: 85,  principal: false },
+      ],
+      arestas: [['EP', 'CB']],
+    },
+    descricao: 'Conta bancária de destino diferente do cadastrado. Frequência de saques aumentou +4× no mês.',
   },
 }
 
@@ -561,7 +640,7 @@ function Modal({ type, justificativa, setJustificativa, onConfirm, onClose }: {
 }
 
 // ---------------------------------------------------------------------------
-// Drawer de investigação — painel lateral
+// Drawer de investigação — painel lateral único e adaptativo
 // ---------------------------------------------------------------------------
 function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
   row: Row
@@ -569,18 +648,55 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
   onUpdateStatus: (id: number, newStatus: string) => void
   onClose: () => void
 }) {
+  const router = useRouter()
   const [modal, setModal] = useState<'coaf' | 'arquivar' | null>(null)
   const [justif, setJustif] = useState('')
-  const d      = DRAWER_DATA[row.id] ?? { timeline: [], factors: [], vinculos: [] }
-  const status = rowStatus[row.id] || row.status
-  const sc     = SCORE_COLOR(row.score)
-  const fluxo  = FLUXO_DATA.find(f => parseInt(f.id.replace('fx-', '')) + 200 === row.id)
+  const d       = DRAWER_DATA[row.id] ?? { timeline: [], factors: [], vinculos: [] }
+  const status  = rowStatus[row.id] || row.status
+  const sc      = SCORE_COLOR(row.score)
+  const fluxo   = FLUXO_DATA.find(f => parseInt(f.id.replace('fx-', '')) + 200 === row.id)
+  const analise = ANALISE_DATA[row.id] ?? null
 
   function confirm() {
     if (modal === 'coaf')     onUpdateStatus(row.id, 'Comunicado COAF')
     if (modal === 'arquivar') onUpdateStatus(row.id, 'Arquivado')
     setModal(null); setJustif('')
   }
+
+  // Adapter: timeline → Transacoes dados
+  const transacoesDados = {
+    periodo: `caso #${row.id}`,
+    rodape: d.timeline[0]?.ts ?? '—',
+    abas: [{
+      id: 'registros', label: 'Registros', tipo: 'fin' as const,
+      itens: d.timeline.map((t, i) => ({
+        tipo: /dep/i.test(t.desc) ? 'Depósito' : 'Saque',
+        data: t.ts, status: 'Registrado',
+        marca: row.marca === '—' ? '—' : row.marca,
+        id: `tx-${row.id}-${i}`,
+        valor: t.desc.match(/R\$\s?[\d.,]+/)?.[0] ?? '—',
+        tempo: '—',
+      })),
+    }],
+  }
+
+  // Adapter: factors[] → ScoreFactors dados
+  const scoreFactoresDados = {
+    fatores: d.factors.map((f, i) => ({ nome: f, pts: Math.max(8, 45 - i * 9) })),
+  }
+
+  // Adapter: fluxo entradas/saidas → CashflowStacked dados (6 dias)
+  const DEP_P = [0.18, 0.22, 0.15, 0.28, 0.12, 0.05]
+  const SAQ_P = [0.12, 0.08, 0.20, 0.25, 0.35, 0.00]
+  const DAYS  = ['04/06', '05/06', '06/06', '07/06', '08/06', '09/06']
+  const cashflowDados = fluxo ? {
+    linhas: DAYS.map((dia, i) => ({
+      dia,
+      dep: Math.round(fluxo.entradas * DEP_P[i]),
+      saq: Math.round(fluxo.saidas   * SAQ_P[i]),
+    })),
+    series: [{ chave: 'dep', nome: 'Entradas' }, { chave: 'saq', nome: 'Saídas' }],
+  } : null
 
   const SecLabel = ({ children }: { children: React.ReactNode }) => (
     <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.5px', textTransform: 'uppercase', color: 'var(--muted-text)', margin: '20px 0 8px', fontFamily: 'var(--font-body)' }}>
@@ -590,8 +706,18 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
 
   return (
     <>
+      {/* Ver perfil completo — sempre visível no topo */}
+      <div style={{ padding: '10px 20px 0', flexShrink: 0 }}>
+        <button
+          onClick={() => { router.push(`/perfil-apostador?id=${row.id}`); onClose() }}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--orange-soft)', color: 'var(--orange)', border: '1px solid var(--orange-line)', borderRadius: 10, padding: '9px 14px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+          <span>Ver perfil completo</span>
+          <span>→</span>
+        </button>
+      </div>
+
       {/* Cabeçalho */}
-      <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -600,7 +726,7 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
               <span style={{ marginLeft: 'auto', fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-mono)', color: sc }}>{row.score}</span>
             </div>
             <div style={{ fontSize: 11.5, color: 'var(--muted-text)', marginTop: 5, fontFamily: 'var(--font-mono)', lineHeight: 1.4 }}>
-              {row.cpf} · {row.flag} · {row.sev} · SLA {row.sla}
+              {row.cpf} · {row.sev} · SLA {row.sla}
             </div>
           </div>
           <button onClick={onClose} aria-label="Fechar"
@@ -613,63 +739,57 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
       {/* Corpo — rolável */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
 
-        {/* Seção exclusiva para contas do scatter Fluxo financeiro */}
-        {fluxo && (
+        {/* Motivo do alerta */}
+        <SecLabel>Motivo do alerta</SecLabel>
+        <div style={{ fontSize: 12.5, background: 'var(--red-soft)', color: 'var(--red)', border: '1px solid var(--red-soft)', borderRadius: 9, padding: '9px 12px', lineHeight: 1.5, fontWeight: 600 }}>
+          {row.flag}
+        </div>
+
+        {/* Fluxo financeiro — CashflowStacked (só para contas do scatter fluxo) */}
+        {fluxo && cashflowDados && (
           <>
             <SecLabel>Fluxo financeiro</SecLabel>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 12 }}>
-              {([
-                { label: 'Total de entradas', value: fmtK(fluxo.entradas), color: 'var(--green)'  },
-                { label: 'Total de saídas',   value: fmtK(fluxo.saidas),   color: 'var(--red)'    },
-                { label: 'Renda média',        value: fluxo.rendaMedia,     color: 'var(--ink-2)'  },
-              ] as const).map(({ label, value, color }) => (
-                <div key={label} style={{ background: 'var(--bg)', borderRadius: 9, padding: '9px 10px', border: '1px solid var(--line)' }}>
-                  <div style={{ fontSize: 9.5, color: 'var(--muted-text)', marginBottom: 3, lineHeight: 1.3 }}>{label}</div>
-                  <div style={{ fontSize: 15, fontWeight: 800, fontFamily: 'var(--font-head)', color, lineHeight: 1 }}>{value}</div>
-                </div>
-              ))}
+            <div style={{ height: 180 }}>
+              <CashflowStacked dados={cashflowDados} />
             </div>
+          </>
+        )}
+
+        {/* Cenário / padrão específico — FluxoScenarioView (mantido) */}
+        {fluxo && (
+          <>
+            <SecLabel>Cenário detectado</SecLabel>
             <FluxoScenarioView f={fluxo} />
           </>
         )}
 
+        {/* Timeline de transações — Transacoes */}
         <SecLabel>Timeline de transações</SecLabel>
-        <div style={{ position: 'relative', paddingLeft: 18 }}>
-          <div style={{ position: 'absolute', left: 5, top: 4, bottom: 4, width: 2, background: 'var(--line)', borderRadius: 2 }} />
-          {d.timeline.length === 0
-            ? <div style={{ fontSize: 12, color: 'var(--muted-text)', padding: '4px 0' }}>Sem registros disponíveis.</div>
-            : d.timeline.map((t, i) => (
-              <div key={i} style={{ position: 'relative', padding: '6px 0', fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.4 }}>
-                <span style={{ position: 'absolute', left: -17, top: 9, width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', display: 'block' }} />
-                {t.desc}
-                <span style={{ color: 'var(--muted-text)', fontSize: 11, marginLeft: 6 }}>— {t.ts}</span>
-              </div>
-            ))
-          }
+        <div style={{ height: 250 }}>
+          <Transacoes dados={transacoesDados} />
         </div>
 
-        {row.score >= 70 && (
+        {/* Score factors — ScoreFactors (só quando score ≥ 70) */}
+        {row.score >= 70 && d.factors.length > 0 && (
           <>
             <SecLabel>Score factors (≥ 70 · obrigatório)</SecLabel>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-              {d.factors.length === 0
-                ? <span style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>Aguardando análise.</span>
-                : d.factors.map((f) => (
-                  <span key={f} style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--amber)', background: 'var(--amber-soft)', border: '1px solid var(--orange-line)', padding: '4px 10px', borderRadius: 7 }}>{f}</span>
-                ))
-              }
+            <div style={{ height: 160 }}>
+              <ScoreFactors dados={scoreFactoresDados} />
             </div>
           </>
         )}
 
-        <SecLabel>Vínculos</SecLabel>
-        <div style={{ fontSize: 12.5, color: 'var(--ink-2)', lineHeight: 1.8 }}>
-          {d.vinculos.length === 0
-            ? <span style={{ color: 'var(--muted-text)' }}>Sem vínculos identificados.</span>
-            : d.vinculos.map((v, i) => <div key={i}>• {v}</div>)
-          }
-        </div>
+        {/* Vínculos — AnaliseRiscos (só quando há dados de vínculo) */}
+        {analise && (
+          <>
+            <SecLabel>Vínculos</SecLabel>
+            <div style={{ height: 260 }}>
+              <AnaliseRiscos dados={analise} />
+            </div>
+          </>
+        )}
 
+        {/* Decisão */}
         <SecLabel>Decisão</SecLabel>
         <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6 }}>
           Status: <b>{status}</b>
