@@ -85,7 +85,7 @@ function IField({ label, value, mono, eye }: { label: string; value: string; mon
 function IdentityPanel() {
   const d = IDENTITY
   return (
-    <Panel title="Identidade & KYC" style={{ gridColumn: 'span 5' }}>
+    <Panel title="Identidade & KYC">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
           <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--orange)', color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13, flex: '0 0 auto', fontFamily: 'var(--font-head)' }}>{d.iniciais}</div>
@@ -177,7 +177,7 @@ function ScorePanel() {
   ).join(' ')
 
   return (
-    <Panel title="Score de Risco" sub="Donut + dimensões + sinais" style={{ gridColumn: 'span 4' }}>
+    <Panel title="Score de Risco" sub="Donut + dimensões + sinais">
       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 8 }}>
         {[{ id: 'donut', icon: <path d="M12 3a9 9 0 1 0 9 9h-9z" /> }, { id: 'linha', icon: <path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6" /> }].map(({ id, icon }) => (
           <div key={id} onClick={() => setModo(id)} style={{ width: 30, height: 26, borderRadius: 8, display: 'grid', placeItems: 'center', cursor: 'pointer', border: `1px solid ${modo === id ? 'var(--orange)' : 'var(--line)'}`, background: modo === id ? 'var(--orange)' : '#fff', color: modo === id ? '#fff' : 'var(--muted-text)' }}>
@@ -249,7 +249,7 @@ const ACOES = [
 
 function ActionPanel() {
   return (
-    <Panel title="Ação Recomendada" sub="O que fazer" style={{ gridColumn: 'span 3' }}>
+    <Panel title="Ação Recomendada" sub="O que fazer">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {ACOES.map((a) => (
           <button key={a.titulo} style={{ textAlign: 'left', background: '#fff', border: '1px solid var(--orange-line)', borderRadius: 10, padding: '10px 12px', cursor: 'pointer', fontFamily: 'inherit' }}>
@@ -287,7 +287,7 @@ function XaiPanel() {
   })]
 
   return (
-    <Panel title="Por que esse score" sub="XAI — fatores ponderados" style={{ gridColumn: 'span 8' }}>
+    <Panel title="Por que esse score" sub="XAI — fatores ponderados">
       <ToggleBar opts={['Barras', 'Waterfall']} val={vista} onChange={setVista} />
       {vista === 'Barras' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -337,7 +337,7 @@ const TREND_LINES = [
 function ScoreTrendPanel() {
   const [vista, setVista] = useState('Área')
   return (
-    <Panel title="Evolução do Score" sub="Trajetória sobre as faixas de risco" style={{ gridColumn: 'span 7' }}>
+    <Panel title="Evolução do Score" sub="Trajetória sobre as faixas de risco">
       <ToggleBar opts={['Área', 'Multi-linha']} val={vista} onChange={setVista} />
       <div style={{ height: 220 }}>
         <ResponsiveContainer width="100%" height="100%">
@@ -396,7 +396,7 @@ function VinculosPanel() {
   const d = VINCULOS_DATA
   const node = (id: string) => d.grafo.nos.find((n) => n.id === id)
   return (
-    <Panel title="Vínculos" sub="Análise de Riscos + grafo topológico" style={{ gridColumn: 'span 5' }}>
+    <Panel title="Vínculos" sub="Análise de Riscos + grafo topológico">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {[['Vínculos com mesmo IP', d.vinculosMesmoIP ? 'Sim ⚠' : 'Não'], ['Contas Vinculadas', `${d.contasVinculadas} conta`]].map(([k, v]) => (
           <div key={k as string} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5 }}>
@@ -457,7 +457,7 @@ function CashflowPanel() {
   let acc = 0
   const netData = CASHFLOW_LINES.map((d) => { acc += d.dep - d.saq; return { dia: d.dia, net: +acc.toFixed(1) } })
   return (
-    <Panel title="Fluxo de Caixa" sub="Depósitos × saques por dia" style={{ gridColumn: 'span 7' }}>
+    <Panel title="Fluxo de Caixa" sub="Depósitos × saques por dia">
       <ToggleBar opts={['Barras', 'Saldo líquido']} val={vista} onChange={setVista} />
       <div style={{ height: 220 }}>
         <ResponsiveContainer width="100%" height="100%">
@@ -508,7 +508,7 @@ function PldPanel() {
   const maxHeat = Math.max(...PLD_HEAT.matriz.flat())
   const shade = (v: number) => v === 0 ? '#FDEDE6' : `rgba(232,97,44,${0.25 + (v / maxHeat) * 0.75})`
   return (
-    <Panel title="Padrões PLD / AML" sub="Detecta estruturação / smurfing" style={{ gridColumn: 'span 5' }}>
+    <Panel title="Padrões PLD / AML" sub="Detecta estruturação / smurfing">
       <ToggleBar opts={['Histograma', 'Dispersão', 'Heatmap']} val={vista} onChange={setVista} />
       <div style={{ height: 200 }}>
         {vista === 'Histograma' ? (
@@ -568,7 +568,7 @@ const dotColor: Record<string, string> = { g: CC.green, a: CC.amber, r: CC.red, 
 function JrPanel() {
   const [vista, setVista] = useState('Semáforo')
   return (
-    <Panel title="Jogo Responsável" sub="Portaria 1.231/2024" style={{ gridColumn: 'span 4' }}>
+    <Panel title="Jogo Responsável" sub="Portaria 1.231/2024">
       <ToggleBar opts={['Semáforo', 'Radar']} val={vista} onChange={setVista} />
       {vista === 'Semáforo' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -612,7 +612,7 @@ function PeerPanel() {
   const [vista, setVista] = useState('Percentil')
   const maxX = Math.max(...PEER_BARS.map((p) => p.x))
   return (
-    <Panel title="Comparação com Pares" sub="Posição na distribuição do cohort" style={{ gridColumn: 'span 4' }}>
+    <Panel title="Comparação com Pares" sub="Posição na distribuição do cohort">
       <ToggleBar opts={['Percentil', 'Barras', 'Radar']} val={vista} onChange={setVista} />
       {vista === 'Percentil' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
@@ -683,7 +683,7 @@ const TR: Record<string, { label: string; color: string }> = {
 function ComportamentalPanel() {
   const [periodo, setPeriodo] = useState('30D')
   return (
-    <Panel title="Classificação Comportamental" sub="Ícones + toggle de período" style={{ gridColumn: 'span 4' }}>
+    <Panel title="Classificação Comportamental" sub="Ícones + toggle de período">
       <ToggleBar opts={['30D', '90D', 'Histórico']} val={periodo} onChange={setPeriodo} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
         {COMP_ITENS.map((item) => {
@@ -720,7 +720,7 @@ const BOARD_SINAIS = [{ nome: 'JR: enviado', nivel: 'g' }, { nome: 'SLA: 48h', n
 function InterventionPanel() {
   const [vista, setVista] = useState('Timeline')
   return (
-    <Panel title="Trilha de Intervenção" sub="Histórico auditável — Portaria 1.231/2024" style={{ gridColumn: 'span 4' }}>
+    <Panel title="Trilha de Intervenção" sub="Histórico auditável — Portaria 1.231/2024">
       <ToggleBar opts={['Timeline', 'Status']} val={vista} onChange={setVista} />
       {vista === 'Timeline' ? (
         <div style={{ position: 'relative', paddingLeft: 20 }}>
@@ -776,7 +776,7 @@ function TransacoesPanel() {
   const d = TRANSACOES_DATA
   const aba = d.abas[ativa]
   return (
-    <Panel title="Transações / Bilhetes" sub="Dep · Saq · Cas · Esp" style={{ gridColumn: 'span 12' }}>
+    <Panel title="Transações / Bilhetes" sub="Dep · Saq · Cas · Esp">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
         <div style={{ display: 'flex', background: '#F1F2F4', borderRadius: 10, padding: 4, gap: 3 }}>
           {d.abas.map((a, i) => (
@@ -853,33 +853,38 @@ export default function PerfilApostadorPage() {
             </div>
           </div>
 
-          {/* Grid 12 colunas */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
+          {/* Layout em linhas — 2 colunas ou largura total */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-            {/* Row 1: identity(5) + score(4) + action(3) */}
-            <IdentityPanel />
-            <ScorePanel />
-            <ActionPanel />
+            {/* Linha 1: Identidade & KYC | Score de Risco */}
+            <div className="grid-2col">
+              <IdentityPanel />
+              <ScorePanel />
+            </div>
 
-            {/* Row 2: xai(8) + jr(4) */}
-            <XaiPanel />
-            <JrPanel />
+            {/* Linha 2: Classificação comportamental | Fluxo de caixa */}
+            <div className="grid-2col">
+              <ComportamentalPanel />
+              <CashflowPanel />
+            </div>
 
-            {/* Row 3: score-trend(7) + vinculos(5) */}
-            <ScoreTrendPanel />
+            {/* Linha 3: Vínculos [largura total] */}
             <VinculosPanel />
 
-            {/* Row 4: cashflow(7) + pld(5) */}
-            <CashflowPanel />
-            <PldPanel />
-
-            {/* Row 5: comportamental(4) + peer(4) + intervention(4) */}
-            <ComportamentalPanel />
-            <PeerPanel />
-            <InterventionPanel />
-
-            {/* Row 6: transações (12) */}
+            {/* Linha 4: Transações [largura total] */}
             <TransacoesPanel />
+
+            {/* Linha 5: Ação recomendada | Trilha de intervenção */}
+            <div className="grid-2col">
+              <ActionPanel />
+              <InterventionPanel />
+            </div>
+
+            {/* Linha 6: Evolução de score | Comparação com pares */}
+            <div className="grid-2col">
+              <ScoreTrendPanel />
+              <PeerPanel />
+            </div>
 
           </div>
         </div>
