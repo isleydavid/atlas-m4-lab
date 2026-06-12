@@ -200,7 +200,7 @@ const KPI_DATA = [
   { label: 'Apostadores com flag ativo', tooltip: 'Qtd. de apostadores com pelo menos 1 red flag ativo (não arquivado).', value: '27',        delta: '▲ +4 no período', deltaColor: 'var(--red)'   as string | undefined },
   { label: 'Alertas gerados',            tooltip: 'Total de alertas criados no período selecionado.',                       value: '38',        delta: 'no período',       deltaColor: undefined                              },
   { label: 'Volume sob análise',         tooltip: 'Soma do volume financeiro dos apostadores atualmente em análise.',       value: 'R$ 1,24 mi', delta: '▲ +R$ 180 mil',   deltaColor: 'var(--amber)' as string | undefined },
-  { label: 'Red flags por categoria',    tooltip: 'Estruturação · saque atípico · depósito suspeito · comportamento inconsistente.', value: '34', delta: '4 categorias',  deltaColor: undefined                              },
+  { label: 'SLA crítico em risco',        tooltip: 'Alertas críticos sem ação há mais de 20h',                                        value: '3',  delta: '▼ −1,0%',       deltaColor: 'var(--green)'  as string | undefined },
 ]
 
 // ---------------------------------------------------------------------------
