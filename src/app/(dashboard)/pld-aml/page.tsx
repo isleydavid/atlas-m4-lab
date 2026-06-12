@@ -282,6 +282,30 @@ const FLUXO_COLORS: Record<string, string> = {
   'normal':             'var(--muted-2)',
 }
 
+// ---------------------------------------------------------------------------
+// Histograma de estruturação (Gráfico 2 — valores recorrentes)
+// ---------------------------------------------------------------------------
+const HIST_BINS: { id: string; label: string; count: number; peak: boolean; fluxoId?: string }[] = [
+  { id: 'h1', label: '≤ 500',    count: 4,  peak: false },
+  { id: 'h2', label: '500–1k',   count: 7,  peak: false },
+  { id: 'h3', label: '1k–1,5k',  count: 11, peak: false },
+  { id: 'h4', label: '1,5–1,8k', count: 16, peak: false },
+  { id: 'h5', label: '1,8k–2k',  count: 43, peak: true,  fluxoId: 'fx-4' },
+  { id: 'h6', label: '2k–3k',    count: 8,  peak: false },
+  { id: 'h7', label: '3k–5k',    count: 5,  peak: false },
+  { id: 'h8', label: '5k+',      count: 2,  peak: false, fluxoId: 'fx-6' },
+]
+// viewBox 0 0 640 260 — mesmo do scatter para altura renderizada igual nos dois cards
+const HX_STEP = 71
+const HX_BAR  = 66
+const HX_L    = 55
+const HX_B    = 210
+const HX_T    = 22
+const HX_MAX  = 47
+const HBX = (i: number) => HX_L + i * HX_STEP + 2.5
+const HBY = (cnt: number) => HX_B - Math.round((cnt / HX_MAX) * (HX_B - HX_T))
+const H_THRESH_X = Math.round(HBX(4) + HX_BAR + 2)  // ≈ 410 — início da zona acima do limiar
+
 const WATCH_DATA: WatchRow[] = [
   { id: 101, nome: 'J. COSTA',    cpf: '•••.•••.•••-14', score: 93, classe: 'Alto',  motivo: 'PEP',          marca: 'vaidebet',     ultima: 'há 1h',  status: 'Em observação' },
   { id: 102, nome: 'R. FERREIRA', cpf: '•••.•••.•••-37', score: 92, classe: 'Alto',  motivo: 'Reincidência', marca: 'vaidebet-ngx', ultima: 'há 3h',  status: 'Escalado'      },
@@ -1063,97 +1087,190 @@ function FluxoScenarioView({ f }: { f: FluxoPoint }) {
 }
 
 function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void }) {
-  const [selFx, setSelFx] = useState<FluxoPoint | null>(null)
+  const [selFx,  setSelFx]  = useState<FluxoPoint | null>(null)
+  const [selBin, setSelBin] = useState<string | null>(null)
 
   const ptCount  = FLUXO_DATA.filter(f => f.padrao === 'pass-through').length
-  const srCount  = FLUXO_DATA.filter(f => f.padrao === 'saques-recorrentes').length
-  const nrmCount = FLUXO_DATA.filter(f => f.padrao === 'normal').length
   const ptVol    = FLUXO_DATA.filter(f => f.padrao === 'pass-through').reduce((s, f) => s + f.volume, 0)
-  const srAvgSaq = Math.round(FLUXO_DATA.filter(f => f.padrao === 'saques-recorrentes').reduce((s, f) => s + f.saquesRepetidos, 0) / srCount)
+  const nrmCount = FLUXO_DATA.filter(f => f.padrao === 'normal').length
+  const srCount  = FLUXO_DATA.filter(f => f.padrao === 'saques-recorrentes').length
+  const peakBin  = HIST_BINS.find(b => b.peak)!
+
+  const cardS = {
+    background: 'var(--card)', border: '1px solid var(--line)',
+    borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)',
+    padding: '14px 16px',
+  }
 
   return (
-    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', padding: '14px 16px' }}>
-      {/* Legenda no cabeçalho */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-        <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-          Scatter: volume movimentado × % sem jogo
-        </h3>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          {([
-            ['pass-through',       'var(--red)',    'Entra e sai sem jogar'],
-            ['saques-recorrentes', 'var(--amber)', 'Saques recorrentes · quantias semelhantes'],
-            ['normal',             'var(--muted-2)','Jogou normalmente'],
-          ] as const).map(([, cor, label]) => (
-            <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
-              <span style={{ width: 9, height: 9, borderRadius: '50%', background: cor, flexShrink: 0 }} />
-              {label}
-            </span>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+
+      {/* ── Card 1: Scatter "Entra e sai sem jogar" ── */}
+      <div style={cardS}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+          <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+            Entra e sai sem jogar
+          </h3>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            {([['var(--red)', 'Pass-through'], ['var(--muted-2)', 'Normal']] as const).map(([cor, label]) => (
+              <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
+                <span style={{ width: 9, height: 9, borderRadius: '50%', background: cor, flexShrink: 0 }} />
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <svg viewBox="0 0 640 260" width="100%" style={{ display: 'block', overflow: 'visible' }} preserveAspectRatio="xMidYMid meet">
+          <rect x={70} y={FY(100)} width={550} height={FY(75) - FY(100)} fill="var(--amber-soft)" opacity={0.6} />
+          <line x1={70} y1={220} x2={620} y2={220} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
+          <line x1={70} y1={30}  x2={70}  y2={220} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
+          {[0, 25, 50, 75, 100].map((v) => (
+            <g key={v}>
+              <line x1={68} y1={FY(v)} x2={620} y2={FY(v)}
+                style={{ stroke: v === 0 ? 'none' : 'var(--line)' }}
+                strokeWidth={1} strokeDasharray={v > 0 ? '4 3' : undefined} />
+              <text x={63} y={FY(v) + 3} fontSize={8} style={{ fill: 'var(--muted-text)' }} textAnchor="end">{v}%</text>
+            </g>
+          ))}
+          {FX_LABELS.map(({ v, label }) => (
+            <g key={v}>
+              <line x1={FX(v)} y1={30} x2={FX(v)} y2={222}
+                style={{ stroke: 'var(--line)' }} strokeWidth={1} strokeDasharray={v > 0 ? '4 3' : undefined} />
+              <text x={FX(v)} y={234} fontSize={8} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">{label}</text>
+            </g>
+          ))}
+          <text x={345} y={250} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">→ volume movimentado (R$)</text>
+          <text x={16}  y={128} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle" transform="rotate(-90,16,128)">% sem jogo ↑</text>
+          <text x={490} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--red)' }} fontWeight={700} textAnchor="middle">entra e sai sem jogar</text>
+          {/* Bolhas — somente pass-through + normal */}
+          {FLUXO_DATA.filter(f => f.padrao !== 'saques-recorrentes').map((f) => {
+            const isSel  = selFx?.id === f.id
+            const col    = FLUXO_COLORS[f.padrao]
+            const rFinal = isSel ? 11 : 8
+            return (
+              <g key={f.id} style={{ cursor: 'pointer' }}
+                onClick={() => { setSelFx(f); onInvestigate(fluxoToRow(f)) }}>
+                <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal + 5} fill="transparent" />
+                <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal}
+                  style={{ fill: col, stroke: isSel ? 'var(--ink)' : 'none' }}
+                  fillOpacity={isSel ? 1 : 0.75} strokeWidth={2} />
+                {isSel && (
+                  <text x={FX(f.volume)} y={FY(f.pctSemJogo) - 16} fontSize={8.5}
+                    style={{ fill: 'var(--ink)' }} fontWeight={700} textAnchor="middle">{f.conta}</text>
+                )}
+              </g>
+            )
+          })}
+        </svg>
+
+        <div style={{ display: 'flex', marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+          {[
+            { col: 'var(--red)',     label: 'Pass-through', detail: `${ptCount} contas · R$ ${(ptVol / 1000000).toFixed(1)}M · ~3% jogado` },
+            { col: 'var(--muted-2)', label: 'Normal',       detail: `${nrmCount} contas — sem anomalia` },
+          ].map(({ col, label, detail }, i) => (
+            <div key={label} style={{ flex: 1, padding: '0 14px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>{label}</span>
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>{detail}</div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* SVG scatter — clique abre o drawer lateral */}
-      <svg viewBox="0 0 640 260" width="100%" style={{ display: 'block', overflow: 'visible' }} preserveAspectRatio="xMidYMid meet">
-        <rect x={70} y={FY(100)} width={550} height={FY(75) - FY(100)} fill="var(--amber-soft)" opacity={0.6} />
-        <line x1={70} y1={220} x2={620} y2={220} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
-        <line x1={70} y1={30}  x2={70}  y2={220} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
-        {[0, 25, 50, 75, 100].map((v) => (
-          <g key={v}>
-            <line x1={68} y1={FY(v)} x2={620} y2={FY(v)}
-              style={{ stroke: v === 0 ? 'none' : 'var(--line)' }}
-              strokeWidth={1} strokeDasharray={v > 0 ? '4 3' : undefined} />
-            <text x={63} y={FY(v) + 3} fontSize={8} style={{ fill: 'var(--muted-text)' }} textAnchor="end">{v}%</text>
-          </g>
-        ))}
-        {FX_LABELS.map(({ v, label }) => (
-          <g key={v}>
-            <line x1={FX(v)} y1={30} x2={FX(v)} y2={222}
-              style={{ stroke: 'var(--line)' }}
-              strokeWidth={1} strokeDasharray={v > 0 ? '4 3' : undefined} />
-            <text x={FX(v)} y={234} fontSize={8} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">{label}</text>
-          </g>
-        ))}
-        <text x={345} y={248} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">→ volume movimentado (R$)</text>
-        <text x={16}  y={128} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle" transform="rotate(-90,16,128)">% sem jogo ↑</text>
-        <text x={180} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--amber)' }} fontWeight={700} textAnchor="middle">saques recorrentes · quantias semelhantes</text>
-        <text x={490} y={FY(100) + 12} fontSize={8.5} style={{ fill: 'var(--red)'    }} fontWeight={700} textAnchor="middle">entra e sai sem jogar</text>
-        {FLUXO_DATA.map((f) => {
-          const isSel  = selFx?.id === f.id
-          const col    = FLUXO_COLORS[f.padrao]
-          const r      = f.padrao === 'saques-recorrentes' ? 5 + f.saquesRepetidos * 0.7 : 8
-          const rFinal = isSel ? r + 3 : r
-          return (
-            <g key={f.id} style={{ cursor: 'pointer' }}
-              onClick={() => { setSelFx(f); onInvestigate(fluxoToRow(f)) }}>
-              <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal + 5} fill="transparent" />
-              <circle cx={FX(f.volume)} cy={FY(f.pctSemJogo)} r={rFinal}
-                style={{ fill: col, stroke: isSel ? 'var(--ink)' : 'none' }}
-                fillOpacity={isSel ? 1 : 0.75} strokeWidth={2} />
-              {isSel && (
-                <text x={FX(f.volume)} y={FY(f.pctSemJogo) - rFinal - 5} fontSize={8.5}
-                  style={{ fill: 'var(--ink)' }} fontWeight={700} textAnchor="middle">{f.conta}</text>
-              )}
-            </g>
-          )
-        })}
-      </svg>
-
-      {/* Faixa de estatísticas agregadas */}
-      <div style={{ display: 'flex', gap: 0, marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
-        {[
-          { col: 'var(--red)',     label: 'Entra e sai sem jogar',        detail: `${ptCount} contas · R$ ${(ptVol / 1000).toFixed(0)}k movimentado · ~3% jogado` },
-          { col: 'var(--amber)',   label: 'Saques · quantias semelhantes', detail: `${srCount} contas · ~${srAvgSaq} saques de valor semelhante · ~7% jogado` },
-          { col: 'var(--muted-2)', label: 'Jogou normalmente',             detail: `${nrmCount} contas — sem anomalia` },
-        ].map(({ col, label, detail }, i) => (
-          <div key={label} style={{ flex: 1, padding: '0 14px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>{label}</span>
-            </div>
-            <div style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>{detail}</div>
+      {/* ── Card 2: Histograma "Valores recorrentes · estruturação" ── */}
+      <div style={cardS}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+          <h3 style={{ margin: 0, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+            Valores recorrentes · estruturação
+          </h3>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
+              <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--red)', flexShrink: 0 }} />
+              Pico anômalo
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
+              <span style={{ width: 9, height: 9, borderRadius: '50%', background: 'var(--muted-2)', flexShrink: 0 }} />
+              Distribuição
+            </span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10.5, color: 'var(--ink-2)' }}>
+              <span style={{ width: 14, height: 2, background: 'var(--amber)', flexShrink: 0 }} />
+              Limiar COAF
+            </span>
           </div>
-        ))}
+        </div>
+
+        <svg viewBox="0 0 640 260" width="100%" style={{ display: 'block', overflow: 'visible' }} preserveAspectRatio="xMidYMid meet">
+          {/* Eixos */}
+          <line x1={HX_L} y1={HX_T - 5} x2={HX_L} y2={HX_B + 5} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
+          <line x1={HX_L} y1={HX_B} x2={630} y2={HX_B} style={{ stroke: 'var(--line)' }} strokeWidth={1} />
+          {/* Grade Y */}
+          {[0, 10, 20, 30, 40].map((v) => (
+            <g key={v}>
+              <line x1={HX_L - 2} y1={HBY(v)} x2={630} y2={HBY(v)}
+                style={{ stroke: v === 0 ? 'none' : 'var(--line)' }}
+                strokeWidth={1} strokeDasharray={v > 0 ? '4 3' : undefined} />
+              <text x={HX_L - 5} y={HBY(v) + 3} fontSize={8} style={{ fill: 'var(--muted-text)' }} textAnchor="end">{v}</text>
+            </g>
+          ))}
+          {/* Barras */}
+          {HIST_BINS.map((bin, i) => {
+            const bx   = HBX(i)
+            const by   = HBY(bin.count)
+            const barH = HX_B - by
+            const col  = bin.peak ? 'var(--red)' : 'var(--muted-2)'
+            return (
+              <g key={bin.id}
+                style={{ cursor: bin.fluxoId ? 'pointer' : 'default' }}
+                onClick={() => {
+                  if (!bin.fluxoId) return
+                  const fp = FLUXO_DATA.find(f => f.id === bin.fluxoId)
+                  if (fp) { setSelBin(bin.id); onInvestigate(fluxoToRow(fp)) }
+                }}>
+                <rect x={bx} y={by} width={HX_BAR} height={barH}
+                  style={{ fill: col }}
+                  fillOpacity={bin.peak ? (selBin === bin.id ? 1 : 0.85) : 0.5}
+                  rx={2} />
+                {bin.peak && (
+                  <text x={bx + HX_BAR / 2} y={by - 5} fontSize={10} style={{ fill: 'var(--red)' }} fontWeight={800} textAnchor="middle">
+                    {bin.count}
+                  </text>
+                )}
+                <text x={bx + HX_BAR / 2} y={HX_B + 16} fontSize={7.5}
+                  style={{ fill: bin.peak ? 'var(--ink)' : 'var(--muted-text)' }}
+                  fontWeight={bin.peak ? 700 : 400} textAnchor="middle">{bin.label}</text>
+              </g>
+            )
+          })}
+          {/* Linha do limiar R$ 2.000 */}
+          <line x1={H_THRESH_X} y1={HX_T - 5} x2={H_THRESH_X} y2={HX_B + 5}
+            style={{ stroke: 'var(--amber)' }} strokeWidth={1.5} strokeDasharray="5 3" />
+          <text x={H_THRESH_X - 6} y={HX_T + 8} fontSize={9} style={{ fill: 'var(--amber)' }} fontWeight={700} textAnchor="end">
+            limiar R$ 2.000
+          </text>
+          {/* Labels dos eixos */}
+          <text x={345} y={250} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle">→ faixa de valor (R$)</text>
+          <text x={16} y={116} fontSize={9.5} style={{ fill: 'var(--muted-text)' }} textAnchor="middle" transform="rotate(-90,16,116)">nº transações ↑</text>
+        </svg>
+
+        <div style={{ display: 'flex', marginTop: 12, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+          {[
+            { col: 'var(--red)',   label: 'Pico anômalo',          detail: `${peakBin.count} saques · ${srCount} contas · R$ 1.800–2.000` },
+            { col: 'var(--amber)', label: 'Abaixo do limiar COAF', detail: 'fracionamento estruturado — evita comunicação obrigatória' },
+          ].map(({ col, label, detail }, i) => (
+            <div key={label} style={{ flex: 1, padding: '0 14px', borderLeft: i === 0 ? 'none' : '1px solid var(--line)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: col, flexShrink: 0 }} />
+                <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--ink)' }}>{label}</span>
+              </div>
+              <div style={{ fontSize: 11.5, color: 'var(--muted-text)' }}>{detail}</div>
+            </div>
+          ))}
+        </div>
       </div>
+
     </div>
   )
 }
