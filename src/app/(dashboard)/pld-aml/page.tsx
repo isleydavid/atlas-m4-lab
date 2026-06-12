@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { CashflowStacked } from '@/modules/perfil-apostador/charts/cashflow'
@@ -9,6 +9,7 @@ import { ScoreFactors } from '@/modules/perfil-apostador/charts/score'
 import { PipelineAml } from './PipelineAml'
 import { CoafTimelineV2, COAF_CASES } from './CoafTimelineV2'
 import { PepSectionV2 } from './PepSectionV2'
+import { RULES_CATALOG, RULE_AUDIT, type PldRuleCatalog, type RuleAuditEntry } from './catalog'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -979,9 +980,242 @@ function FluxoFinanceiro({ onInvestigate }: { onInvestigate: (row: Row) => void 
 }
 
 // ---------------------------------------------------------------------------
+// Rule Drawer
+// ---------------------------------------------------------------------------
+function RuleDrawer({ rule, onClose, onDrilldown }: {
+  rule: PldRuleCatalog
+  onClose: () => void
+  onDrilldown?: (flag: string) => void
+}) {
+  const [tab, setTab]   = useState<'geral' | 'thresholds' | 'impacto' | 'historico'>('geral')
+  const [vals, setVals] = useState<Record<string, number | string>>(() =>
+    Object.fromEntries(Object.entries(rule.params).map(([k, p]) => [k, p.value]))
+  )
+  const [motivo,   setMotivo]   = useState('')
+  const [saved,    setSaved]    = useState(false)
+  const [showConf, setShowConf] = useState(false)
+
+  const hasChanged = Object.entries(vals).some(([k, v]) => String(v) !== String(rule.params[k]?.value))
+  const alertasRule = ROWS.filter(r => r.flag === rule.flagGerado)
+  const criticos    = alertasRule.filter(r => r.sev === 'Crítico').length
+  const altos       = alertasRule.filter(r => r.sev === 'Alto').length
+  const medios      = alertasRule.filter(r => r.sev === 'Médio').length
+  const auditEntries: RuleAuditEntry[] = RULE_AUDIT[rule.id] ?? []
+
+  const sevColor = (s: string) => s.startsWith('P1') ? 'var(--red)' : s.startsWith('P2') ? 'var(--amber)' : 'var(--muted-2)'
+  const tabS = (active: boolean) => ({
+    fontSize: 12, fontWeight: 700, padding: '5px 12px', borderRadius: 8, border: 'none',
+    cursor: 'pointer', fontFamily: 'var(--font-body)',
+    background: active ? 'var(--orange)' : 'transparent',
+    color: active ? '#fff' : 'var(--ink-2)',
+  } as React.CSSProperties)
+
+  return (
+    <Sheet open={true} onOpenChange={(o) => { if (!o) onClose() }}>
+      <SheetContent side="right" showCloseButton={false}
+        style={{ background: 'var(--card)', padding: 0, maxWidth: 520, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+        {/* Header */}
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted-text)', background: 'var(--bg)', borderRadius: 999, padding: '1px 8px', border: '1px solid var(--line)', fontFamily: 'var(--font-body)' }}>{rule.categoria}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', background: 'var(--green)', borderRadius: 999, padding: '1px 8px' }}>{rule.status}</span>
+                {rule.obrigatorio && <span style={{ fontSize: 10, fontWeight: 700, color: '#fff', background: 'var(--orange)', borderRadius: 999, padding: '1px 8px' }}>Obrigatório por norma</span>}
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginBottom: 2 }}>{rule.id}</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)', lineHeight: 1.3 }}>{rule.nome}</div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10, fontWeight: 700, color: sevColor(rule.severidade), background: 'rgba(0,0,0,.05)', borderRadius: 999, padding: '1px 8px' }}>{rule.severidade}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: rule.tipo === 'OBRIGATÓRIA' ? 'var(--orange)' : 'var(--ink-2)', background: 'var(--bg)', borderRadius: 999, padding: '1px 8px', border: '1px solid var(--line)' }}>{rule.tipo}</span>
+              </div>
+            </div>
+            <button onClick={onClose} style={{ fontSize: 18, color: 'var(--muted-text)', background: 'transparent', border: 'none', cursor: 'pointer', flexShrink: 0, lineHeight: 1 }}>✕</button>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: 4, marginTop: 12, flexWrap: 'wrap' }}>
+            {(['geral', 'thresholds', 'impacto', 'historico'] as const).map(t => (
+              <button key={t} onClick={() => setTab(t)} style={tabS(tab === t)}>
+                {{ geral: 'Visão Geral', thresholds: 'Thresholds', impacto: 'Impacto', historico: 'Histórico' }[t]}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+
+          {/* ── Visão Geral ── */}
+          {tab === 'geral' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: 'var(--muted-text)', marginBottom: 6, fontFamily: 'var(--font-body)' }}>Objetivo</div>
+                <div style={{ fontSize: 13, color: 'var(--ink)', lineHeight: 1.6 }}>{rule.objetivo}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: 'var(--muted-text)', marginBottom: 6, fontFamily: 'var(--font-body)' }}>Lógica de Disparo</div>
+                <pre style={{ margin: 0, fontSize: 11.5, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, padding: '10px 12px', overflowX: 'auto', fontFamily: 'var(--font-mono)', color: 'var(--ink)', lineHeight: 1.6 }}>{rule.logicaDisparo}</pre>
+                <div style={{ fontSize: 11, color: 'var(--muted-text)', marginTop: 6 }}>Evento: <strong>{rule.evento}</strong> · Frequência: <strong>{rule.frequencia}</strong></div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: 'var(--muted-text)', marginBottom: 6, fontFamily: 'var(--font-body)' }}>Cadeia de Impacto</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
+                  {rule.cadeiaImpacto.map((step, i) => (
+                    <React.Fragment key={step}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--orange)', background: 'var(--orange-soft)', borderRadius: 6, padding: '2px 8px', fontFamily: 'var(--font-mono)' }}>{step}</span>
+                      {i < rule.cadeiaImpacto.length - 1 && <span style={{ color: 'var(--muted-text)', fontSize: 12 }}>→</span>}
+                    </React.Fragment>
+                  ))}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--muted-text)', marginTop: 6 }}>SLA: {rule.sla}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: 'var(--muted-text)', marginBottom: 6, fontFamily: 'var(--font-body)' }}>Fundamento Legal</div>
+                {rule.fundamentoLegal.map((f, i) => (
+                  <div key={i} style={{ fontSize: 12, color: 'var(--ink-2)', marginBottom: 4, paddingLeft: 8, borderLeft: '2px solid var(--orange)' }}>
+                    <strong>{f.lei}, {f.artigo}</strong> — {f.descricao}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Thresholds ── */}
+          {tab === 'thresholds' && (
+            <div>
+              {Object.keys(rule.params).length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--muted-text)', textAlign: 'center', padding: '32px 0' }}>Esta regra não tem parâmetros configuráveis — é controlada por listas externas (Seção D).</div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+                    {Object.entries(rule.params).map(([k, p]) => (
+                      <div key={k} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', border: '1px solid var(--line)', borderRadius: 10, background: 'var(--bg)' }}>
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', marginBottom: 2 }}>{p.label}</div>
+                          <div style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)' }}>{k}</div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <input type="number" value={vals[k] as number}
+                            onChange={e => { setVals(v => ({ ...v, [k]: Number(e.target.value) })); setSaved(false) }}
+                            style={{ width: 64, fontFamily: 'var(--font-mono)', fontSize: 13, border: '1px solid var(--line)', borderRadius: 8, padding: '3px 8px', textAlign: 'right' }} />
+                          <span style={{ fontSize: 11, color: 'var(--muted-text)', width: 36 }}>{p.unit}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {hasChanged && !saved && (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '12px', background: 'var(--amber-soft)', borderRadius: 10, border: '1px solid var(--amber)' }}>
+                      <textarea placeholder="Motivo da alteração (mín. 50 caracteres)..." value={motivo} onChange={e => setMotivo(e.target.value)}
+                        rows={3} style={{ fontSize: 12, border: '1px solid var(--line)', borderRadius: 8, padding: '8px', resize: 'vertical', fontFamily: 'var(--font-body)', background: '#fff', width: '100%', boxSizing: 'border-box' }} />
+                      <div style={{ fontSize: 11, color: motivo.length >= 50 ? 'var(--green)' : 'var(--muted-text)' }}>{motivo.length}/50 caracteres</div>
+                      <button disabled={motivo.length < 50}
+                        onClick={() => setSaved(true)}
+                        style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: motivo.length >= 50 ? 'var(--orange)' : 'var(--muted-2)', border: 'none', borderRadius: 10, padding: '8px 16px', cursor: motivo.length >= 50 ? 'pointer' : 'default' }}>
+                        Salvar alteração
+                      </button>
+                    </div>
+                  )}
+                  {saved && <div style={{ fontSize: 13, color: 'var(--green)', fontWeight: 700 }}>✓ Alteração registrada no audit log.</div>}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ── Impacto ── */}
+          {tab === 'impacto' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                <div style={{ fontSize: 48, fontWeight: 900, color: 'var(--orange)', fontFamily: 'var(--font-head)', lineHeight: 1 }}>{alertasRule.length}</div>
+                <div style={{ fontSize: 13, color: 'var(--muted-text)', marginTop: 4 }}>alertas gerados por esta regra — últimos 30 dias</div>
+              </div>
+              {alertasRule.length > 0 && (
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: 'var(--muted-text)', marginBottom: 8, fontFamily: 'var(--font-body)' }}>Distribuição por severidade</div>
+                  {([['Crítico', criticos, 'var(--red)'], ['Alto', altos, 'var(--orange)'], ['Médio', medios, 'var(--amber)']] as [string, number, string][]).map(([sev, n, col]) => (
+                    <div key={sev} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <span style={{ fontSize: 11, color: 'var(--ink)', width: 52, fontFamily: 'var(--font-body)' }}>{sev}</span>
+                      <div style={{ flex: 1, height: 10, borderRadius: 999, background: 'var(--bg)', border: '1px solid var(--line)', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: alertasRule.length ? `${(n / alertasRule.length) * 100}%` : '0%', background: col, borderRadius: 999 }} />
+                      </div>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: col, width: 20, textAlign: 'right' }}>{n}</span>
+                    </div>
+                  ))}
+                  <div style={{ fontSize: 12, color: 'var(--muted-text)', marginTop: 8 }}>Apostadores únicos afetados: <strong>{alertasRule.length}</strong></div>
+                </div>
+              )}
+              {alertasRule.length === 0 && (
+                <div style={{ fontSize: 13, color: 'var(--muted-text)', textAlign: 'center', padding: '16px 0' }}>Nenhum alerta desta regra no período (dados mock).</div>
+              )}
+              {rule.flagGerado && (
+                <button
+                  onClick={() => { onClose(); onDrilldown?.(rule.flagGerado!) }}
+                  style={{ fontSize: 13, fontWeight: 700, color: '#fff', background: 'var(--orange)', border: 'none', borderRadius: 10, padding: '10px 16px', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                  Ver alertas desta regra →
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* ── Histórico ── */}
+          {tab === 'historico' && (
+            <div>
+              {auditEntries.length === 0 ? (
+                <div style={{ fontSize: 13, color: 'var(--muted-text)', textAlign: 'center', padding: '32px 0' }}>Nenhuma alteração registrada para esta regra.</div>
+              ) : auditEntries.map((e, i) => (
+                <div key={i} style={{ marginBottom: 16, paddingBottom: 16, borderBottom: i < auditEntries.length - 1 ? '1px solid var(--line)' : 'none' }}>
+                  <div style={{ fontSize: 11, color: 'var(--muted-text)', marginBottom: 3 }}>{e.ts}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', marginBottom: 4 }}>{e.user}</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted-text)', marginBottom: 2 }}>Antes: {e.antes}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ink-2)', marginBottom: 4 }}>Depois: {e.depois}</div>
+                  <div style={{ fontSize: 12, color: 'var(--ink-2)', fontStyle: 'italic' }}>&ldquo;{e.motivo}&rdquo;</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--line)', display: 'flex', gap: 8, flexShrink: 0 }}>
+          {!showConf ? (
+            <>
+              <button
+                disabled={rule.obrigatorio}
+                onClick={() => setShowConf(true)}
+                title={rule.obrigatorio ? 'Obrigatório por norma — não pode ser desativado' : undefined}
+                style={{ fontSize: 12, fontWeight: 700, color: rule.obrigatorio ? 'var(--muted-2)' : 'var(--red)', background: 'transparent', border: `1px solid ${rule.obrigatorio ? 'var(--line)' : 'var(--red)'}`, borderRadius: 10, padding: '6px 14px', cursor: rule.obrigatorio ? 'default' : 'pointer' }}>
+                Desativar regra
+              </button>
+              <button onClick={onClose} style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 10, padding: '6px 14px', cursor: 'pointer', marginLeft: 'auto' }}>
+                Fechar
+              </button>
+            </>
+          ) : (
+            <div style={{ width: '100%', fontSize: 12, color: 'var(--red)' }}>
+              Confirmar desativação de <strong>{rule.id}</strong>?
+              <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                <button onClick={() => setShowConf(false)}
+                  style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: 'var(--red)', border: 'none', borderRadius: 10, padding: '6px 14px', cursor: 'pointer' }}>
+                  Confirmar desativação
+                </button>
+                <button onClick={() => setShowConf(false)}
+                  style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-2)', background: 'transparent', border: '1px solid var(--line)', borderRadius: 10, padding: '6px 14px', cursor: 'pointer' }}>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Aba Regras
 // ---------------------------------------------------------------------------
-function RegraTab() {
+function RegraTab({ onDrilldown }: { onDrilldown?: (flag: string) => void } = {}) {
   type ThState = { critico: number; alto: number; medio: number; slaC: number; slaA: number; slaM: number; factorsMin: number; notifAfter: number }
   type WState  = { estruturacao: number; passThrough: number; perfil: number; vinculos: number; velocidade: number; jurisdicao: number }
 
@@ -989,9 +1223,10 @@ function RegraTab() {
   const [listTgls, setListTgls] = useState<Record<string,boolean>>(() => Object.fromEntries(EXT_LISTS.map(l => [l.id, true])) as Record<string,boolean>)
   const [thresholds, setThresholds] = useState<ThState>({ critico:85, alto:70, medio:50, slaC:24, slaA:72, slaM:30, factorsMin:70, notifAfter:20 })
   const [weights,    setWeights]    = useState<WState> ({ estruturacao:35, passThrough:25, perfil:15, vinculos:12, velocidade:8, jurisdicao:5 })
-  const [isDryRun, setIsDryRun] = useState(false)
-  const [pending,  setPending]  = useState(false)
-  const [showLog,  setShowLog]  = useState(false)
+  const [isDryRun,      setIsDryRun]      = useState(false)
+  const [pending,       setPending]       = useState(false)
+  const [showLog,       setShowLog]       = useState(false)
+  const [selectedRule,  setSelectedRule]  = useState<PldRuleCatalog | null>(null)
 
   const setTh = (k: keyof ThState, v: number) => { setThresholds(p => ({...p, [k]: v})); setPending(true) }
   const setW  = (k: keyof WState,  v: number) => { setWeights(p =>    ({...p, [k]: v})); setPending(true) }
@@ -1022,10 +1257,17 @@ function RegraTab() {
       P3: { c: 'var(--muted-2)', bg: 'var(--bg)'          },
     }
     const { c: sevC, bg: sevBg } = sevStyle[rule.severidade]
+    const catalogEntry = RULES_CATALOG.find(r => r.id === rule.id)
     return (
-      <div style={{ display:'flex', gap:10, alignItems:'flex-start', padding:'10px 0', borderBottom:'1px solid var(--line)' }}>
-        <Tog on={on} disabled={rule.obrigatorio}
-          onToggle={() => { if (!rule.obrigatorio) { setToggles(p => ({...p, [rule.id]: !p[rule.id]})); setPending(true) } }} />
+      <div
+        onClick={() => catalogEntry && setSelectedRule(catalogEntry)}
+        style={{ display:'flex', gap:10, alignItems:'flex-start', padding:'10px 0', borderBottom:'1px solid var(--line)', cursor: catalogEntry ? 'pointer' : 'default' }}
+        onMouseEnter={e => { if (catalogEntry) e.currentTarget.style.background = 'var(--bg)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}>
+        <div onClick={e => e.stopPropagation()}>
+          <Tog on={on} disabled={rule.obrigatorio}
+            onToggle={() => { if (!rule.obrigatorio) { setToggles(p => ({...p, [rule.id]: !p[rule.id]})); setPending(true) } }} />
+        </div>
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:13, fontWeight:700, color:'var(--ink)', display:'flex', alignItems:'center', gap:8, flexWrap:'wrap' }}>
             <span style={{ fontSize:10.5, fontFamily:'var(--font-mono)', color:'var(--muted-text)', fontWeight:500 }}>{rule.id}</span>
@@ -1066,6 +1308,13 @@ function RegraTab() {
 
   return (
     <div style={{ position:'relative', paddingBottom: pending ? 140 : 0 }}>
+      {selectedRule && (
+        <RuleDrawer
+          rule={selectedRule}
+          onClose={() => setSelectedRule(null)}
+          onDrilldown={onDrilldown}
+        />
+      )}
 
       {/* Cabeçalho */}
       <div style={{ display:'flex', alignItems:'center', flexWrap:'wrap', gap:12, marginBottom:20 }}>
@@ -1693,7 +1942,10 @@ const [periodo, setPeriodo]         = useState('7 dias')
           )}
 
           {aba === 'regras' && (
-            <RegraTab />
+            <RegraTab onDrilldown={(flag) => {
+              setAba('alertas')
+              if (FILTERS.includes(flag)) setFilter(flag)
+            }} />
           )}
 
           {/* Drawer de investigação — painel lateral compartilhado entre abas */}
