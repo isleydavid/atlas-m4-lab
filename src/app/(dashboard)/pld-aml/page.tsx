@@ -2057,8 +2057,21 @@ const [periodo, setPeriodo]         = useState('7 dias')
           {/* ── Aba: Visão Geral ── */}
           {aba === 'visao-geral' && (
             <>
+              {/* COAF Timeline — topo da visão geral */}
+              <Sech>Prazo COAF (24h)</Sech>
+              <CoafTimelineV2
+                onInvestigate={(id) => {
+                  if (id === 'all') {
+                    setAba('alertas')
+                  } else {
+                    const c = COAF_CASES.find(x => x.id === id)
+                    if (c) setSelected(coafToRow(c))
+                  }
+                }}
+              />
+
               {/* Indicadores — faixa plana */}
-              <Sech>Visão geral</Sech>
+              <Sech style={{ margin: '26px 0 11px' }}>Visão geral</Sech>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                 {KPI_DATA.map((kpi, i) => (
                   <button key={kpi.label}
@@ -2083,36 +2096,6 @@ const [periodo, setPeriodo]         = useState('7 dias')
               {/* Pipeline AML — linha completa */}
               <div style={{ marginTop: 26 }}>
                 <PipelineAml />
-              </div>
-
-              {/* COAF Timeline */}
-              <div style={{ marginTop: 26 }}>
-                <Sech style={{ margin: '0 0 11px' }}>Prazo COAF (24h)</Sech>
-                <CoafTimelineV2
-                  onInvestigate={(id) => {
-                    if (id === 'all') {
-                      setAba('alertas')
-                    } else {
-                      const c = COAF_CASES.find(x => x.id === id)
-                      if (c) setSelected(coafToRow(c))
-                    }
-                  }}
-                />
-              </div>
-
-              {/* Red Flags + PEP — grid 2 colunas iguais */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 26 }}>
-                <RedFlagsDonut />
-                <PepSectionV2
-                  onInvestigate={(id) => {
-                    if (id === 'all-peps') {
-                      setAba('watchlist')
-                    } else {
-                      const w = WATCH_DATA.find(x => `PEP-${String(x.id).padStart(4, '0')}` === id) ?? WATCH_DATA[0]
-                      setSelected(watchToRow(w))
-                    }
-                  }}
-                />
               </div>
 
               {/* Fluxo financeiro × jogo */}
