@@ -648,11 +648,12 @@ const SEV: Record<string, StyleToken> = {
   'Médio':   { c: 'var(--muted-text)', bg: 'transparent',           border: '1px solid var(--line)'          },
 }
 const ST: Record<string, StyleToken> = {
-  'Aberto':          { c: 'var(--muted-text)', bg: 'transparent',           border: '1px solid var(--line)'          },
-  'Em análise':      { c: 'var(--orange)',     bg: 'rgba(242,97,34,0.08)',  border: '1px solid rgba(242,97,34,0.3)'  },
-  'Pendente COAF':   { c: 'var(--amber)',      bg: 'rgba(224,144,31,0.08)', border: '1px solid rgba(224,144,31,0.3)' },
-  'Comunicado COAF': { c: '#22c55e',           bg: 'rgba(34,197,94,0.08)',  border: '1px solid rgba(34,197,94,0.3)'  },
-  'Arquivado':       { c: 'var(--muted-text)', bg: 'transparent'           },
+  'Aberto':                    { c: 'var(--muted-text)', bg: 'transparent',           border: '1px solid var(--line)'          },
+  'Em análise':                { c: 'var(--orange)',     bg: 'rgba(242,97,34,0.08)',  border: '1px solid rgba(242,97,34,0.3)'  },
+  'Aguardando aprovação':      { c: 'var(--amber)',      bg: 'rgba(224,144,31,0.08)', border: '1px solid rgba(224,144,31,0.3)' },
+  'Aprovado':                  { c: '#06b6d4',           bg: 'rgba(6,182,212,0.08)',  border: '1px solid rgba(6,182,212,0.3)'  },
+  'Comunicado COAF':           { c: '#22c55e',           bg: 'rgba(34,197,94,0.08)',  border: '1px solid rgba(34,197,94,0.3)'  },
+  'Arquivado':                 { c: 'var(--muted-text)', bg: 'transparent'           },
 }
 const DILIG: Record<string, StyleToken> = {
   'pendente':     { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
@@ -762,32 +763,29 @@ const ABAS     = [
 ] as const
 
 // ---------------------------------------------------------------------------
-// Dados mock — Comunicação COAF
+// Dados mock — Comunicação COAF (v0.2)
 // ---------------------------------------------------------------------------
-interface CoafPendente {
+interface CoafRoPendente {
   id: string; nome: string; valor: string; score: number
-  flag: string; slaH: number; urgente: boolean
-  escaladoPor: string; escaladoEm: string; marca: string
+  flag: string; analista: string; submetidoEm: string; marca: string
+  aprovado: boolean
 }
-const COAF_PENDENTES: CoafPendente[] = [
-  { id:'AML-2026-0046', nome:'E. P.',  valor:'R$ 215.430', score:92, flag:'Estruturação',        slaH:4.5,  urgente:true,  escaladoPor:'Marina Costa',  escaladoEm:'09/06 14:02', marca:'vaidebet-ngx' },
-  { id:'AML-2026-0047', nome:'C. R.',  valor:'R$ 183.210', score:88, flag:'Pass-through',         slaH:9,    urgente:false, escaladoPor:'Carlos Mendes', escaladoEm:'09/06 10:15', marca:'vaidebet'     },
-  { id:'AML-2026-0048', nome:'M. D.',  valor:'R$ 98.760',  score:85, flag:'Saque atípico',        slaH:18,   urgente:false, escaladoPor:'Marina Costa',  escaladoEm:'08/06 22:30', marca:'kto'          },
-  { id:'AML-2026-0045', nome:'P. S.',  valor:'R$ 72.540',  score:84, flag:'Estruturação',         slaH:22,   urgente:false, escaladoPor:'Carlos Mendes', escaladoEm:'08/06 18:00', marca:'vaidebet'     },
-  { id:'AML-2026-0044', nome:'L. A.',  valor:'R$ 56.320',  score:81, flag:'Movimentação atípica', slaH:31,   urgente:false, escaladoPor:'Marina Costa',  escaladoEm:'08/06 10:20', marca:'betano'       },
-  { id:'AML-2026-0043', nome:'T. M.',  valor:'R$ 44.100',  score:78, flag:'Pass-through',         slaH:35.5, urgente:false, escaladoPor:'Carlos Mendes', escaladoEm:'08/06 06:30', marca:'vaidebet-ngx' },
+const COAF_AGUARDANDO: CoafRoPendente[] = [
+  { id:'AML-2026-0046', nome:'E. P.', valor:'R$ 215.430', score:92, flag:'Estruturação',        analista:'Marina Costa',  submetidoEm:'há 2h',  marca:'vaidebet-ngx', aprovado:false },
+  { id:'AML-2026-0044', nome:'C. R.', valor:'R$ 98.760',  score:85, flag:'Pass-through',         analista:'Carlos Mendes', submetidoEm:'há 5h',  marca:'vaidebet',     aprovado:false },
+  { id:'AML-2026-0042', nome:'M. D.', valor:'R$ 72.540',  score:81, flag:'Saque atípico',        analista:'Marina Costa',  submetidoEm:'há 8h',  marca:'kto',          aprovado:true  },
+  { id:'AML-2026-0039', nome:'P. S.', valor:'R$ 56.320',  score:78, flag:'Estruturação',         analista:'Carlos Mendes', submetidoEm:'há 11h', marca:'betano',       aprovado:true  },
+  { id:'AML-2026-0037', nome:'L. A.', valor:'R$ 44.100',  score:76, flag:'Movimentação atípica', analista:'Marina Costa',  submetidoEm:'há 14h', marca:'vaidebet',     aprovado:true  },
 ]
 
-interface CoafHistoricoItem {
-  ro: string; caso: string; flag: string; valor: string
-  dataEnvio: string; responsavel: string; siscoaf: 'Registrado' | 'Pendente' | 'Erro'
+interface CoafExportacao {
+  versao: number; data: string; apostadores: number; valorTotal: string
+  responsavel: string; status: 'Exportado'
 }
-const COAF_HISTORICO: CoafHistoricoItem[] = [
-  { ro:'RO-2026-012', caso:'AML-2026-0040', flag:'Estruturação',  valor:'R$ 180 mil', dataEnvio:'02/06/2026', responsavel:'Marina C.',  siscoaf:'Registrado' },
-  { ro:'RO-2026-011', caso:'AML-2026-0038', flag:'Pass-through',  valor:'R$ 95 mil',  dataEnvio:'28/05/2026', responsavel:'Carlos M.', siscoaf:'Registrado' },
-  { ro:'RO-2026-010', caso:'AML-2026-0035', flag:'Estruturação',  valor:'R$ 142 mil', dataEnvio:'20/05/2026', responsavel:'Marina C.',  siscoaf:'Registrado' },
-  { ro:'RO-2026-009', caso:'AML-2026-0031', flag:'Saque atípico', valor:'R$ 73 mil',  dataEnvio:'14/05/2026', responsavel:'Carlos M.', siscoaf:'Registrado' },
-  { ro:'RO-2026-008', caso:'AML-2026-0028', flag:'Pass-through',  valor:'R$ 215 mil', dataEnvio:'07/05/2026', responsavel:'Marina C.',  siscoaf:'Pendente'   },
+const COAF_EXPORTACOES: CoafExportacao[] = [
+  { versao:3, data:'09/06/2026', apostadores:4, valorTotal:'R$ 521k', responsavel:'Marina Costa', status:'Exportado' },
+  { versao:2, data:'02/06/2026', apostadores:2, valorTotal:'R$ 313k', responsavel:'Carlos Mendes', status:'Exportado' },
+  { versao:1, data:'28/05/2026', apostadores:6, valorTotal:'R$ 890k', responsavel:'Marina Costa', status:'Exportado' },
 ]
 type AbaId = typeof ABAS[number]['id']
 
@@ -879,43 +877,36 @@ function RedFlagsDonut() {
 // Modal COAF / Arquivar
 // ---------------------------------------------------------------------------
 function Modal({ type, justificativa, setJustificativa, onConfirm, onClose }: {
-  type: 'coaf' | 'arquivar'
+  type: 'arquivar'
   justificativa: string
   setJustificativa: (v: string) => void
   onConfirm: () => void
   onClose: () => void
 }) {
-  const isCoaf = type === 'coaf'
-  const valid  = isCoaf || justificativa.trim().length >= 50
+  const valid = justificativa.trim().length >= 50
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,24,31,.45)', display: 'grid', placeItems: 'center', zIndex: 200, padding: 20 }}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div style={{ background: 'var(--card)', borderRadius: 'var(--radius)', width: 480, maxWidth: '100%', padding: '24px 26px', boxShadow: '0 16px 48px rgba(16,24,40,.22)' }}>
         <div style={{ fontSize: 17, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)', marginBottom: 10 }}>
-          {isCoaf ? 'Escalar para Pendente COAF' : 'Arquivar caso'}
+          Arquivar caso
         </div>
         <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--muted-text)', lineHeight: 1.6 }}>
-          {isCoaf
-            ? 'O caso será escalado para revisão do jurídico (status: Pendente COAF). A comunicação formal ao SISCOAF é concluída na aba Comunicação COAF.'
-            : 'Justificativa obrigatória (mín. 50 caracteres). Registrada em trilha auditável.'}
+          Justificativa obrigatória (mín. 50 caracteres). Registrada em trilha auditável.
         </p>
-        {!isCoaf && (
-          <>
-            <textarea value={justificativa} onChange={(e) => setJustificativa(e.target.value)}
-              placeholder="Descreva o motivo do arquivamento..." rows={4}
-              style={{ width: '100%', resize: 'vertical', borderRadius: 10, border: '1px solid var(--line)', padding: '10px 12px', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--ink)' }} />
-            <div style={{ fontSize: 11, color: justificativa.trim().length >= 50 ? 'var(--green)' : 'var(--muted-text)', marginTop: 5 }}>
-              {justificativa.trim().length}/50 caracteres mínimos
-            </div>
-          </>
-        )}
+        <textarea value={justificativa} onChange={(e) => setJustificativa(e.target.value)}
+          placeholder="Descreva o motivo do arquivamento..." rows={4}
+          style={{ width: '100%', resize: 'vertical', borderRadius: 10, border: '1px solid var(--line)', padding: '10px 12px', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--ink)' }} />
+        <div style={{ fontSize: 11, color: valid ? 'var(--green)' : 'var(--muted-text)', marginTop: 5 }}>
+          {justificativa.trim().length}/50 caracteres mínimos
+        </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 18, justifyContent: 'flex-end' }}>
           <button className="btn-ghost" onClick={onClose}>Cancelar</button>
           <button disabled={!valid} onClick={valid ? onConfirm : undefined}
             className={valid ? 'btn-primary' : undefined}
             style={!valid ? { padding: '9px 18px', borderRadius: 10, border: 'none', fontWeight: 700, fontSize: 13, background: 'var(--line)', color: 'var(--muted-text)', cursor: 'not-allowed' }
-                          : { background: isCoaf ? 'var(--orange)' : 'var(--red)' }}>
-            {isCoaf ? 'Escalar' : 'Arquivar'}
+                          : { background: 'var(--red)' }}>
+            Arquivar
           </button>
         </div>
       </div>
@@ -933,8 +924,11 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
   onClose: () => void
 }) {
   const router = useRouter()
-  const [modal, setModal] = useState<'coaf' | 'arquivar' | null>(null)
+  const [modal, setModal] = useState<'arquivar' | null>(null)
   const [justif, setJustif] = useState('')
+  const [showRoForm, setShowRoForm] = useState(false)
+  const [roFields, setRoFields] = useState({ tipoOp: '', elementos: '', caracteristicas: '', intermediarios: '' })
+  const roValid = roFields.elementos.trim().length >= 100 && roFields.caracteristicas.trim().length >= 100
   const d       = DRAWER_DATA[row.id] ?? { timeline: [], factors: [], vinculos: [] }
   const status  = rowStatus[row.id] || row.status
   const sc      = SCORE_COLOR(row.score)
@@ -942,9 +936,14 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
   const analise = ANALISE_DATA[row.id] ?? null
 
   function confirm() {
-    if (modal === 'coaf')     onUpdateStatus(row.id, 'Pendente COAF')
     if (modal === 'arquivar') onUpdateStatus(row.id, 'Arquivado')
     setModal(null); setJustif('')
+  }
+
+  function submitRo() {
+    onUpdateStatus(row.id, 'Aguardando aprovação')
+    setShowRoForm(false)
+    setRoFields({ tipoOp: '', elementos: '', caracteristicas: '', intermediarios: '' })
   }
 
   // Adapter: timeline → Transacoes dados
@@ -1077,12 +1076,70 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
               → Inicie a análise para habilitar a comunicação ao COAF.
             </div>
           )}
-          {status === 'Pendente COAF' && (
+          {status === 'Aguardando aprovação' && (
             <div style={{ color: 'var(--amber)', marginTop: 4, fontSize: 12 }}>
-              → Aguardando revisão do jurídico. Acesse a aba Comunicação COAF para gerar o RO.
+              → RO submetido. Aguardando revisão do jurídico na aba Comunicação COAF.
+            </div>
+          )}
+          {status === 'Aprovado' && (
+            <div style={{ color: '#06b6d4', marginTop: 4, fontSize: 12 }}>
+              → RO aprovado. Aguardando exportação pelo jurídico.
             </div>
           )}
         </div>
+
+        {/* Formulário de RO inline */}
+        {showRoForm && (
+          <div style={{ marginTop: 16, border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden' }}>
+            <div style={{ background: 'rgba(242,97,34,0.06)', borderBottom: '1px solid var(--line)', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--orange)' }}>Registro de Ocorrência — COAF</span>
+              <button onClick={() => setShowRoForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted-text)', fontSize: 16, lineHeight: 1 }}>✕</button>
+            </div>
+            <div style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 4 }}>Tipo de operação suspeita</div>
+                <select value={roFields.tipoOp} onChange={(e) => setRoFields(p => ({ ...p, tipoOp: e.target.value }))}
+                  style={{ width: '100%', borderRadius: 8, border: '1px solid var(--line)', padding: '8px 10px', fontSize: 13, fontFamily: 'var(--font-body)', background: 'var(--bg)', color: 'var(--ink)', outline: 'none' }}>
+                  <option value="">Selecionar…</option>
+                  {['Estruturação / Fracionamento', 'Pass-through', 'Saque atípico', 'Depósito suspeito', 'Movimentação atípica', 'Comportamento inconsistente'].map(o => <option key={o}>{o}</option>)}
+                </select>
+              </div>
+              {([
+                { key: 'elementos'       as const, label: 'Elementos da análise',                 required: true  },
+                { key: 'caracteristicas' as const, label: 'Características da operação suspeita', required: true  },
+                { key: 'intermediarios'  as const, label: 'Intermediários identificados',          required: false },
+              ]).map(({ key, label, required }) => (
+                <div key={key}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 4 }}>
+                    {label} {required && <span style={{ color: 'var(--red)' }}>*</span>}
+                  </div>
+                  <textarea value={roFields[key]} onChange={(e) => setRoFields(p => ({ ...p, [key]: e.target.value }))}
+                    placeholder={required ? 'Mín. 100 caracteres…' : 'Opcional…'} rows={3}
+                    style={{ width: '100%', resize: 'vertical', borderRadius: 8, padding: '8px 10px', fontSize: 12, fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--ink)', background: 'var(--bg)',
+                      border: `1px solid ${required && roFields[key].length > 0 && roFields[key].length < 100 ? 'var(--red)' : 'var(--line)'}` }} />
+                  {required && roFields[key].length > 0 && (
+                    <div style={{ fontSize: 10, color: roFields[key].length >= 100 ? 'var(--green)' : 'var(--red)', marginTop: 2 }}>
+                      {roFields[key].length}/100
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 4 }}>
+                <button onClick={() => alert('Rascunho salvo — Sprint H1')}
+                  style={{ fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--muted-text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                  Salvar rascunho
+                </button>
+                <button disabled={!roValid} onClick={roValid ? submitRo : undefined}
+                  style={{ fontSize: 12, fontWeight: 700, padding: '7px 14px', borderRadius: 8, border: 'none', fontFamily: 'var(--font-body)',
+                    cursor: roValid ? 'pointer' : 'not-allowed',
+                    background: roValid ? 'var(--orange)' : 'var(--line)',
+                    color: roValid ? '#fff' : 'var(--muted-text)' }}>
+                  Submeter para aprovação
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Rodapé com ações */}
@@ -1092,7 +1149,9 @@ function DrawerPanel({ row, rowStatus, onUpdateStatus, onClose }: {
             <button className="btn-primary" onClick={() => onUpdateStatus(row.id, 'Em análise')}>Iniciar análise</button>
           )}
           {status === 'Em análise' && (
-            <button className="btn-ghost" onClick={() => setModal('coaf')}>Escalar p/ COAF</button>
+            <button className="btn-ghost" onClick={() => setShowRoForm(v => !v)}>
+              {showRoForm ? 'Fechar RO ▲' : 'Comunicar ao COAF ▼'}
+            </button>
           )}
           {(status === 'Aberto' || status === 'Em análise') && (
             <button className="btn-ghost" style={{ color: 'var(--red)', borderColor: 'var(--red-soft)' }} onClick={() => setModal('arquivar')}>
@@ -1978,62 +2037,51 @@ function RegraTab({ onDrilldown }: { onDrilldown?: (flag: string) => void } = {}
 }
 
 // ---------------------------------------------------------------------------
-// Aba Comunicação COAF
+// Aba Comunicação COAF (v0.2)
 // ---------------------------------------------------------------------------
 function ComunicacaoCoafTab() {
-  const [sentIds,      setSentIds]      = useState<Set<string>>(new Set())
-  const [archivedIds,  setArchivedIds]  = useState<Set<string>>(new Set())
-  const [roCase,       setRoCase]       = useState<CoafPendente | null>(null)
-  const [roFields,     setRoFields]     = useState({ elementosAnalise: '', caracteristicasSuspeita: '', intermediarios: '' })
-  const [roStep,       setRoStep]       = useState<'form' | 'confirm'>('form')
-  const [archiveTarget, setArchiveTarget] = useState<CoafPendente | null>(null)
-  const [archiveJustif, setArchiveJustif] = useState('')
+  const [approvedIds,   setApprovedIds]   = useState<Set<string>>(new Set(['AML-2026-0042', 'AML-2026-0039', 'AML-2026-0037']))
+  const [exportedIds,   setExportedIds]   = useState<Set<string>>(new Set())
+  const [returnedIds,   setReturnedIds]   = useState<Set<string>>(new Set())
+  const [selectedExport, setSelectedExport] = useState<Set<string>>(new Set(['AML-2026-0042', 'AML-2026-0039', 'AML-2026-0037']))
+  const [exportFmt,     setExportFmt]     = useState<'PDF' | 'CSV' | 'XML'>('PDF')
+  const [showConfirm,   setShowConfirm]   = useState(false)
+  const [exportHistory, setExportHistory] = useState<typeof COAF_EXPORTACOES>([...COAF_EXPORTACOES])
+  const [returnModal,   setReturnModal]   = useState<string | null>(null)
+  const [returnComment, setReturnComment] = useState('')
 
-  const pendentes = COAF_PENDENTES.filter(p => !sentIds.has(p.id) && !archivedIds.has(p.id))
+  const pendentesRevisao = COAF_AGUARDANDO.filter(r => !approvedIds.has(r.id) && !returnedIds.has(r.id) && !exportedIds.has(r.id))
+  const prontoExportar   = COAF_AGUARDANDO.filter(r => approvedIds.has(r.id) && !exportedIds.has(r.id))
+  const selectedList     = prontoExportar.filter(r => selectedExport.has(r.id))
+  const totalSelecionado = selectedList.reduce((s, r) => {
+    const n = parseFloat(r.valor.replace('R$ ', '').replace('.', '').replace(',', '.'))
+    return s + (isNaN(n) ? 0 : n)
+  }, 0)
 
-  const enviados: CoafHistoricoItem[] = [
-    ...COAF_PENDENTES
-      .filter(p => sentIds.has(p.id))
-      .map((p, i) => ({
-        ro: `RO-2026-0${13 + i}`,
-        caso: p.id, flag: p.flag, valor: p.valor,
-        dataEnvio: '15/06/2026', responsavel: 'Marina C.', siscoaf: 'Registrado' as const,
-      })),
-    ...COAF_HISTORICO,
-  ]
-
-  function confirmRo() {
-    if (!roCase) return
-    setSentIds(prev => new Set([...prev, roCase.id]))
-    setRoCase(null)
-    setRoFields({ elementosAnalise: '', caracteristicasSuspeita: '', intermediarios: '' })
-    setRoStep('form')
+  function toggleSelect(id: string) {
+    setSelectedExport(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
   }
 
-  function archiveCase() {
-    if (!archiveTarget) return
-    setArchivedIds(prev => new Set([...prev, archiveTarget.id]))
-    setArchiveTarget(null)
-    setArchiveJustif('')
+  function doExport() {
+    const nextV = exportHistory.length > 0 ? exportHistory[0].versao + 1 : 1
+    setExportedIds(prev => new Set([...prev, ...selectedExport]))
+    setExportHistory(prev => [{
+      versao: nextV, data: '15/06/2026', apostadores: selectedList.length,
+      valorTotal: `R$ ${Math.round(totalSelecionado / 1000)}k`,
+      responsavel: 'Marina Costa', status: 'Exportado',
+    }, ...prev])
+    setSelectedExport(new Set())
+    setShowConfirm(false)
   }
-
-  function fmtSla(h: number): string {
-    const hh = Math.floor(h), mm = Math.round((h - hh) * 60)
-    return mm === 0 ? `${hh}h` : `${hh}h ${mm}min`
-  }
-
-  function slaColor(h: number)  { return h < 6 ? 'var(--red)' : h < 12 ? 'var(--orange)' : 'var(--amber)' }
-  function slaBg(h: number)     { return h < 6 ? 'rgba(239,68,68,0.08)' : h < 12 ? 'rgba(242,97,34,0.08)' : 'rgba(224,144,31,0.08)' }
-  function slaBorder(h: number) { return h < 6 ? 'rgba(239,68,68,0.3)'  : h < 12 ? 'rgba(242,97,34,0.3)'  : 'rgba(224,144,31,0.3)'  }
-
-  const roValid = roFields.elementosAnalise.trim().length >= 100 && roFields.caracteristicasSuspeita.trim().length >= 100
-  const slaRisk = pendentes.filter(p => p.slaH < 6).length
 
   const cardS: React.CSSProperties = {
     background: 'var(--card)', border: '1px solid var(--line)',
     borderRadius: 12, padding: '16px 20px', boxShadow: 'var(--shadow-card)',
   }
-
   const thS: React.CSSProperties = {
     fontSize: 11, fontWeight: 600, color: 'var(--muted-text)',
     textTransform: 'uppercase', letterSpacing: '0.06em',
@@ -2041,12 +2089,13 @@ function ComunicacaoCoafTab() {
     borderBottom: '1px solid var(--line)',
     background: 'transparent', fontFamily: 'var(--font-body)',
   }
-
   const tdS = (last: boolean): React.CSSProperties => ({
     padding: '14px 14px',
     borderBottom: last ? 'none' : '1px solid var(--border-faint, #f4f4f4)',
     fontSize: 13, color: 'var(--ink)', fontFamily: 'var(--font-body)',
   })
+  const btnGhost: React.CSSProperties = { fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer', fontFamily: 'var(--font-body)' }
+  const btnPrimary: React.CSSProperties = { fontSize: 12, fontWeight: 700, padding: '6px 12px', borderRadius: 8, border: 'none', background: 'var(--orange)', color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-body)' }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -2058,15 +2107,15 @@ function ComunicacaoCoafTab() {
             Fluxo Regulatório COAF
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
-            Comunicações ao SISCOAF — da análise ao Registro de Ocorrência.
+            Analista preenche o RO no Drawer · jurídico aprova e exporta ao SISCOAF.
           </p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
           {([
-            { label: 'Pendentes COAF',  value: String(pendentes.length),  sub: 'aguardando RO',            color: 'var(--orange)'     },
-            { label: 'SLA em risco',    value: String(slaRisk),            sub: 'vence em menos de 6h',     color: 'var(--red)'        },
-            { label: 'Enviados (mês)',  value: String(enviados.length),    sub: 'comunicados ao COAF',      color: 'var(--green)'      },
-            { label: 'Não-ocorrência',  value: 'N/A',                      sub: `${enviados.length} comunicações em 2026`, color: 'var(--muted-text)' },
+            { label: 'Aguard. aprovação', value: String(pendentesRevisao.length), sub: 'ROs submetidos',        color: 'var(--amber)'      },
+            { label: 'Prontos p/ exportar', value: String(prontoExportar.length), sub: 'ROs aprovados',         color: '#06b6d4'           },
+            { label: 'Exportações (mês)',   value: String(exportHistory.length),  sub: 'pacotes enviados',      color: '#22c55e'           },
+            { label: 'Não-ocorrência',      value: 'N/A',                         sub: `${exportHistory.length} exportações em 2026`, color: 'var(--muted-text)' },
           ] as { label: string; value: string; sub: string; color: string }[]).map((k, i) => (
             <div key={i} style={cardS}>
               <div style={{ fontSize: 12, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', marginBottom: 6 }}>{k.label}</div>
@@ -2077,124 +2126,164 @@ function ComunicacaoCoafTab() {
         </div>
       </div>
 
-      {/* ── Pendentes ── */}
+      {/* ── Aguardando Aprovação ── */}
       <div>
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
-            Quais casos precisam de RO agora?
+            Quais ROs precisam de revisão?
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
-            Casos escalados pelo analista, ordenados por SLA.
+            ROs submetidos pelo analista, aguardando aprovação do jurídico.
           </p>
         </div>
-        {pendentes.length === 0 ? (
-          <div style={{ ...cardS, padding: '40px 24px', textAlign: 'center' }}>
-            <div style={{ fontSize: 14, color: 'var(--muted-text)' }}>Nenhum caso pendente de comunicação.</div>
+        {pendentesRevisao.length === 0 ? (
+          <div style={{ ...cardS, padding: '36px 24px', textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: 'var(--muted-text)' }}>Nenhum RO aguardando revisão.</div>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            {pendentes.map(p => (
-              <div key={p.id} style={{
-                ...cardS,
-                borderLeft: `3px solid ${slaColor(p.slaH)}`,
-                border: p.urgente ? '1px solid rgba(239,68,68,0.3)' : '1px solid var(--line)',
-                display: 'flex', flexDirection: 'column', gap: 10,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', lineHeight: 1.2 }}>{p.nome}</div>
-                    <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{p.id} · {p.flag}</div>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: slaBg(p.slaH), border: `1px solid ${slaBorder(p.slaH)}`, borderRadius: 6, padding: '4px 10px' }}>
-                      <svg width={11} height={11} viewBox="0 0 24 24" fill="none" style={{ stroke: slaColor(p.slaH) }} strokeWidth={2.5} strokeLinecap="round">
-                        <circle cx={12} cy={12} r={10}/><polyline points="12 6 12 12 16 14"/>
-                      </svg>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: slaColor(p.slaH), fontFamily: 'var(--font-body)' }}>SLA: {fmtSla(p.slaH)}</span>
-                    </div>
-                    {p.urgente && <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--red)', fontFamily: 'var(--font-body)' }}>⚠ URGENTE</span>}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-body)' }}>{p.valor}</span>
-                  <span style={{ fontSize: 11, color: 'var(--muted-2)' }}>·</span>
-                  <span style={{ fontSize: 12, color: 'var(--muted-text)' }}>Score <b style={{ color: p.score >= 90 ? 'var(--red)' : 'var(--orange)' }}>{p.score}</b></span>
-                  <span style={{ fontSize: 11, color: 'var(--muted-2)' }}>·</span>
-                  <span style={{ fontSize: 11, color: 'var(--muted-text)' }}>{p.marca}</span>
-                </div>
-
-                <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>
-                  Escalado por <b style={{ color: 'var(--ink)' }}>{p.escaladoPor}</b> · {p.escaladoEm}
-                </div>
-
-                <div style={{ display: 'flex', gap: 8, paddingTop: 6, borderTop: '1px solid var(--line)', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={() => { setRoCase(p); setRoStep('form'); setRoFields({ elementosAnalise: '', caracteristicasSuspeita: '', intermediarios: '' }) }}
-                    style={{ fontSize: 12, fontWeight: 700, padding: '7px 14px', borderRadius: 8, border: 'none', background: 'var(--orange)', color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
-                  >Gerar RO</button>
-                  <button
-                    onClick={() => alert('Rascunho PDF — Sprint H1')}
-                    style={{ fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
-                  >PDF</button>
-                  <button
-                    onClick={() => { setArchiveTarget(p); setArchiveJustif('') }}
-                    style={{ fontSize: 12, fontWeight: 600, padding: '7px 14px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--muted-text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}
-                  >Arquivar</button>
-                </div>
-              </div>
-            ))}
+          <div style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', background: 'var(--card)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {['Caso', 'Apostador', 'Flag', 'Valor', 'Analista', 'Submetido', 'Ação'].map(h => (
+                    <th key={h} style={thS}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {pendentesRevisao.map((r, i) => {
+                  const last = i === pendentesRevisao.length - 1
+                  return (
+                    <tr key={r.id}>
+                      <td style={{ ...tdS(last), fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted-text)' }}>{r.id}</td>
+                      <td style={tdS(last)}><span style={{ letterSpacing: 2, color: 'var(--muted-2)' }}>●●●●●</span></td>
+                      <td style={tdS(last)}>{r.flag}</td>
+                      <td style={{ ...tdS(last), fontWeight: 600 }}>{r.valor}</td>
+                      <td style={{ ...tdS(last), fontSize: 12 }}>{r.analista}</td>
+                      <td style={{ ...tdS(last), fontSize: 12, color: 'var(--muted-text)' }}>{r.submetidoEm}</td>
+                      <td style={{ ...tdS(last) }}>
+                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                          <button onClick={() => { setApprovedIds(prev => new Set([...prev, r.id])); setSelectedExport(prev => new Set([...prev, r.id])) }}
+                            style={btnPrimary}>Aprovar</button>
+                          <button onClick={() => { setReturnModal(r.id); setReturnComment('') }}
+                            style={{ ...btnGhost, color: 'var(--muted-text)' }}>Devolver</button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
 
-      {/* ── Histórico ── */}
+      {/* ── Exportação ── */}
       <div>
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
-            O que já foi comunicado ao COAF?
+            O que será enviado ao COAF nesta exportação?
           </h2>
           <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
-            Registros de Ocorrência enviados ao SISCOAF.
+            Casos aprovados prontos para exportar. A exportação dá baixa automática em todos os selecionados.
+          </p>
+        </div>
+        <div style={{ ...cardS }}>
+          {prontoExportar.length === 0 ? (
+            <div style={{ padding: '20px 0', textAlign: 'center', fontSize: 14, color: 'var(--muted-text)' }}>
+              Nenhum caso aprovado aguardando exportação.
+            </div>
+          ) : (
+            <>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                {prontoExportar.map(r => {
+                  const sel = selectedExport.has(r.id)
+                  return (
+                    <label key={r.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 8, border: `1px solid ${sel ? 'rgba(242,97,34,0.3)' : 'var(--line)'}`, cursor: 'pointer', background: sel ? 'rgba(242,97,34,0.04)' : 'transparent' }}>
+                      <input type="checkbox" checked={sel} onChange={() => toggleSelect(r.id)} style={{ width: 16, height: 16, accentColor: 'var(--orange)', flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, fontFamily: 'var(--font-mono)', color: 'var(--muted-text)', flexShrink: 0 }}>{r.id}</span>
+                      <span style={{ fontSize: 13, color: 'var(--muted-2)' }}>·</span>
+                      <span style={{ fontSize: 13, color: 'var(--ink)' }}>{r.flag}</span>
+                      <span style={{ marginLeft: 'auto', fontSize: 13, fontWeight: 700, color: 'var(--ink)', flexShrink: 0 }}>{r.valor}</span>
+                    </label>
+                  )
+                })}
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '12px 0', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', marginBottom: 14, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 13, color: 'var(--ink)' }}>
+                  Selecionados: <b>{selectedList.length} apostadores</b>
+                </span>
+                <span style={{ fontSize: 13, color: 'var(--muted-2)' }}>·</span>
+                <span style={{ fontSize: 13, color: 'var(--ink)' }}>
+                  Total: <b>R$ {Math.round(totalSelecionado / 1000)}k</b>
+                </span>
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                  {(['PDF', 'CSV', 'XML'] as const).map(f => (
+                    <button key={f} onClick={() => setExportFmt(f)}
+                      style={{ fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 6, cursor: 'pointer', fontFamily: 'var(--font-body)',
+                        background: exportFmt === f ? 'var(--orange)' : 'transparent',
+                        color: exportFmt === f ? '#fff' : 'var(--muted-text)',
+                        border: exportFmt === f ? 'none' : '1px solid var(--line)' }}>
+                      {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button onClick={() => alert('Prévia — Sprint H1')} style={btnGhost}>Gerar prévia</button>
+                <button disabled={selectedList.length === 0} onClick={selectedList.length > 0 ? () => setShowConfirm(true) : undefined}
+                  style={{ fontSize: 12, fontWeight: 700, padding: '7px 16px', borderRadius: 8, border: 'none', fontFamily: 'var(--font-body)',
+                    cursor: selectedList.length > 0 ? 'pointer' : 'not-allowed',
+                    background: selectedList.length > 0 ? 'var(--orange)' : 'var(--line)',
+                    color: selectedList.length > 0 ? '#fff' : 'var(--muted-text)' }}>
+                  Exportar e dar baixa ▶
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ── Histórico de Exportações ── */}
+      <div>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
+            O que já foi enviado ao COAF?
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+            Pacotes de exportação versionados — snapshot imutável, retenção 5 anos (art. 32).
           </p>
         </div>
         <div style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', background: 'var(--card)' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                {['Caso', 'Apostador', 'Tipo de flag', 'Valor', 'Data envio', 'Responsável', 'Status SISCOAF', 'Ação'].map(h => (
+                {['Versão', 'Data', 'Apostadores', 'Valor total', 'Responsável', 'Status', 'Ação'].map(h => (
                   <th key={h} style={thS}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {enviados.map((h, i) => {
-                const sc = h.siscoaf === 'Registrado' ? '#22c55e' : h.siscoaf === 'Erro' ? 'var(--red)' : 'var(--amber)'
-                const bg = h.siscoaf === 'Registrado' ? 'rgba(34,197,94,0.08)' : h.siscoaf === 'Erro' ? 'rgba(239,68,68,0.08)' : 'rgba(224,144,31,0.08)'
-                const bd = h.siscoaf === 'Registrado' ? 'rgba(34,197,94,0.3)'  : h.siscoaf === 'Erro' ? 'rgba(239,68,68,0.3)'  : 'rgba(224,144,31,0.3)'
-                const last = i === enviados.length - 1
+              {exportHistory.map((e, i) => {
+                const last = i === exportHistory.length - 1
                 return (
-                  <tr key={h.ro}>
-                    <td style={{ ...tdS(last), fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted-text)' }}>{h.caso}</td>
-                    <td style={tdS(last)}><span style={{ letterSpacing: 2, color: 'var(--muted-2)' }}>●●●●●●</span></td>
-                    <td style={tdS(last)}>{h.flag}</td>
-                    <td style={{ ...tdS(last), fontWeight: 600 }}>{h.valor}</td>
-                    <td style={{ ...tdS(last), fontSize: 12, color: 'var(--muted-text)' }}>{h.dataEnvio}</td>
-                    <td style={{ ...tdS(last), fontSize: 12 }}>{h.responsavel}</td>
+                  <tr key={e.versao}>
+                    <td style={{ ...tdS(last), fontFamily: 'var(--font-mono)', fontWeight: 700 }}>v{e.versao}</td>
+                    <td style={{ ...tdS(last), fontSize: 12, color: 'var(--muted-text)' }}>{e.data}</td>
+                    <td style={{ ...tdS(last), fontWeight: 600 }}>{e.apostadores}</td>
+                    <td style={{ ...tdS(last), fontWeight: 600 }}>{e.valorTotal}</td>
+                    <td style={{ ...tdS(last), fontSize: 12 }}>{e.responsavel}</td>
                     <td style={tdS(last)}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600, color: sc, background: bg, border: `1px solid ${bd}` }}>{h.siscoaf}</span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600, color: '#22c55e', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)' }}>
+                        {e.status}
+                      </span>
                     </td>
-                    <td style={{ ...tdS(last), display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <button onClick={() => alert(`PDF ${h.ro} — Sprint H1`)}
-                        style={{ fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                        PDF
+                    <td style={tdS(last)}>
+                      <button onClick={() => alert(`Download COAF-export-v${e.versao}-2026.${exportFmt.toLowerCase()} — Sprint H1`)} style={btnGhost}>
+                        Download
                       </button>
-                      {h.siscoaf === 'Erro' && (
-                        <button onClick={() => alert('Reenvio — Sprint H2')}
-                          style={{ fontSize: 12, fontWeight: 700, padding: '6px 12px', borderRadius: 8, border: 'none', background: 'var(--red)', color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                          Reenviar
-                        </button>
-                      )}
                     </td>
                   </tr>
                 )
@@ -2221,159 +2310,73 @@ function ComunicacaoCoafTab() {
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--amber)' }} />
-              <span style={{ fontSize: 13, color: 'var(--amber)', fontWeight: 700 }}>Não aplicável este ano</span>
+              <span style={{ fontSize: 13, color: 'var(--amber)', fontWeight: 700 }}>NÃO APLICÁVEL</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', maxWidth: 500, lineHeight: 1.6 }}>
-              ⚠ Há {enviados.length} comunicações de suspeita em 2026. A declaração de não-ocorrência <b>não se aplica</b> (art. 30 § único).
+            <div style={{ fontSize: 12, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', maxWidth: 520, lineHeight: 1.6 }}>
+              ⚠ {exportHistory.length} exportações realizadas em 2026. A declaração de não-ocorrência <b>não se aplica</b> (art. 30 § único).
             </div>
-            <div style={{ fontSize: 11, color: 'var(--muted-2)', marginTop: 6 }}>Canal: SIGAP · Prazo: qualquer momento do ano, se não houver comunicações</div>
           </div>
-          <button
-            onClick={() => alert('Histórico — Sprint H1')}
+          <button onClick={() => alert('Histórico de anos anteriores — Sprint H1')}
             style={{ fontSize: 13, fontWeight: 700, padding: '9px 18px', borderRadius: 10, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer', fontFamily: 'var(--font-body)', flexShrink: 0 }}>
             Histórico de anos anteriores
           </button>
         </div>
       </div>
 
-      {/* ── Modal RO ── */}
-      {roCase && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,24,31,.45)', zIndex: 200, display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end' }}
-          onMouseDown={(e) => { if (e.target === e.currentTarget) { setRoCase(null); setRoStep('form') } }}>
-          <div style={{ width: 480, height: '100%', background: 'var(--card)', overflowY: 'auto', boxShadow: '-8px 0 32px rgba(0,0,0,0.15)', display: 'flex', flexDirection: 'column' }}>
-
-            <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--line)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>Registro de Ocorrência — COAF</div>
-                <div style={{ fontSize: 12, color: 'var(--muted-text)', marginTop: 2 }}>{roCase.id} · {roCase.flag}</div>
-              </div>
-              <button onClick={() => { setRoCase(null); setRoStep('form') }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted-text)', fontSize: 20, lineHeight: 1 }}>✕</button>
+      {/* ── Modal confirmação exportação ── */}
+      {showConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,24,31,.45)', zIndex: 200, display: 'grid', placeItems: 'center', padding: 20 }}
+          onMouseDown={(e) => { if (e.target === e.currentTarget) setShowConfirm(false) }}>
+          <div style={{ background: 'var(--card)', borderRadius: 14, padding: '24px 26px', width: 500, maxWidth: '100%', boxShadow: '0 16px 48px rgba(16,24,40,.22)' }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)', marginBottom: 12 }}>Confirmação de exportação</div>
+            <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 16, fontSize: 13, color: 'var(--ink)', lineHeight: 1.7 }}>
+              <b style={{ color: 'var(--red)' }}>Esta ação é irreversível.</b><br/>
+              <b>{selectedList.length} apostadores</b> serão marcados como <b>Comunicado COAF</b>.<br/>
+              O SLA de cada caso será fechado com o timestamp agora.<br/>
+              Um pacote versionado será salvo para retenção de 5 anos.<br/><br/>
+              <span style={{ fontSize: 12, color: 'var(--muted-text)' }}>CPFs desmascarados apenas no documento exportado (Lei 9.613, art. 11).</span>
             </div>
-
-            {roStep === 'form' ? (
-              <div style={{ padding: '20px 24px', flex: 1, display: 'flex', flexDirection: 'column', gap: 14, overflowY: 'auto' }}>
-                {([
-                  ['Caso',              roCase.id],
-                  ['Apostador',         '[mascarado — desmascarado ao confirmar]'],
-                  ['Tipo de operação',   roCase.flag],
-                  ['Data da operação',   '15/06/2026'],
-                  ['Valor',              roCase.valor],
-                  ['Marca / Plataforma', roCase.marca],
-                  ['Canal de aposta',    'PIX'],
-                  ['Responsável',        'Marina Costa (compliance_admin)'],
-                ] as [string, string][]).map(([label, value]) => (
-                  <div key={label}>
-                    <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontFamily: 'var(--font-body)', marginBottom: 4 }}>{label}</div>
-                    <div style={{ fontSize: 13, color: label === 'Apostador' ? 'var(--muted-2)' : 'var(--ink)', fontFamily: label === 'Caso' ? 'var(--font-mono)' : 'var(--font-body)', background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, padding: '8px 12px' }}>{value}</div>
-                  </div>
-                ))}
-
-                <div style={{ borderTop: '1px solid var(--line)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {([
-                    { key: 'elementosAnalise'       as const, label: 'Elementos da análise',                 required: true  },
-                    { key: 'caracteristicasSuspeita' as const, label: 'Características da operação suspeita', required: true  },
-                    { key: 'intermediarios'          as const, label: 'Intermediários identificados',          required: false },
-                  ]).map(({ key, label, required }) => (
-                    <div key={key}>
-                      <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontFamily: 'var(--font-body)', marginBottom: 4 }}>
-                        {label} {required && <span style={{ color: 'var(--red)' }}>*</span>}
-                      </div>
-                      <textarea
-                        value={roFields[key]}
-                        onChange={(e) => setRoFields(prev => ({ ...prev, [key]: e.target.value }))}
-                        placeholder={required ? 'Mínimo 100 caracteres…' : 'Opcional…'}
-                        rows={3}
-                        style={{ width: '100%', resize: 'vertical', borderRadius: 8, padding: '8px 12px', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--ink)', background: 'var(--bg)',
-                          border: `1px solid ${required && roFields[key].length > 0 && roFields[key].length < 100 ? 'var(--red)' : 'var(--line)'}` }}
-                      />
-                      {required && roFields[key].length > 0 && (
-                        <div style={{ fontSize: 11, color: roFields[key].length >= 100 ? 'var(--green)' : 'var(--red)', marginTop: 2 }}>
-                          {roFields[key].length}/100 caracteres mínimos
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div style={{ padding: '20px 24px', flex: 1 }}>
-                <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: '14px 16px', marginBottom: 20 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--red)', marginBottom: 6 }}>⚠ Esta ação é irreversível</div>
-                  <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6 }}>
-                    O caso <b>{roCase.id}</b> será marcado como <b>Comunicado COAF</b> e o RO registrado na trilha auditável. CPF/nome desmascarados no PDF (base legal: Lei 9.613, art. 11).
-                  </div>
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--muted-text)', lineHeight: 2 }}>
-                  <b style={{ color: 'var(--ink)' }}>Caso:</b> {roCase.id}<br/>
-                  <b style={{ color: 'var(--ink)' }}>Tipo:</b> {roCase.flag}<br/>
-                  <b style={{ color: 'var(--ink)' }}>Valor:</b> {roCase.valor}<br/>
-                  <b style={{ color: 'var(--ink)' }}>Responsável:</b> Marina Costa (compliance_admin)<br/>
-                  <b style={{ color: 'var(--ink)' }}>Data/hora:</b> 15/06/2026 · 15:44
-                </div>
-              </div>
-            )}
-
-            <div style={{ padding: '14px 24px', borderTop: '1px solid var(--line)', flexShrink: 0, display: 'flex', gap: 8, justifyContent: 'flex-end', background: 'var(--bg)' }}>
-              {roStep === 'form' ? (
-                <>
-                  <button onClick={() => alert('Rascunho salvo — Sprint H1')}
-                    style={{ fontSize: 12, fontWeight: 600, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--muted-text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                    Salvar rascunho
-                  </button>
-                  <button onClick={() => alert('Prévia PDF — Sprint H1')}
-                    style={{ fontSize: 12, fontWeight: 600, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                    Prévia PDF
-                  </button>
-                  <button disabled={!roValid} onClick={roValid ? () => setRoStep('confirm') : undefined}
-                    style={{ fontSize: 12, fontWeight: 700, padding: '8px 16px', borderRadius: 8, border: 'none', fontFamily: 'var(--font-body)', cursor: roValid ? 'pointer' : 'not-allowed',
-                      background: roValid ? 'var(--orange)' : 'var(--line)',
-                      color: roValid ? '#fff' : 'var(--muted-text)' }}>
-                    Confirmar envio ao COAF
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button onClick={() => setRoStep('form')}
-                    style={{ fontSize: 12, fontWeight: 600, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--muted-text)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                    Voltar
-                  </button>
-                  <button onClick={confirmRo}
-                    style={{ fontSize: 12, fontWeight: 700, padding: '8px 16px', borderRadius: 8, border: 'none', background: 'var(--orange)', color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                    Confirmar envio
-                  </button>
-                </>
-              )}
+            <div style={{ fontSize: 12, color: 'var(--muted-text)', marginBottom: 18, lineHeight: 1.8 }}>
+              <b style={{ color: 'var(--ink)' }}>Formato:</b> {exportFmt}<br/>
+              <b style={{ color: 'var(--ink)' }}>Apostadores:</b> {selectedList.length}<br/>
+              <b style={{ color: 'var(--ink)' }}>Total:</b> R$ {Math.round(totalSelecionado / 1000)}k<br/>
+              <b style={{ color: 'var(--ink)' }}>Responsável:</b> Marina Costa (compliance_admin)
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowConfirm(false)} style={btnGhost}>Cancelar</button>
+              <button onClick={doExport}
+                style={{ fontSize: 13, fontWeight: 700, padding: '8px 18px', borderRadius: 8, border: 'none', background: 'var(--orange)', color: '#fff', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                Confirmar exportação
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* ── Modal Arquivar ── */}
-      {archiveTarget && (
+      {/* ── Modal Devolver RO ── */}
+      {returnModal && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,24,31,.45)', zIndex: 200, display: 'grid', placeItems: 'center', padding: 20 }}
-          onMouseDown={(e) => { if (e.target === e.currentTarget) { setArchiveTarget(null); setArchiveJustif('') } }}>
+          onMouseDown={(e) => { if (e.target === e.currentTarget) { setReturnModal(null); setReturnComment('') } }}>
           <div style={{ background: 'var(--card)', borderRadius: 14, padding: '24px 26px', width: 460, maxWidth: '100%', boxShadow: '0 16px 48px rgba(16,24,40,.22)' }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)', marginBottom: 8 }}>Arquivar caso</div>
-            <div style={{ fontSize: 13, color: 'var(--ink-2)', marginBottom: 16 }}>
-              <b>{archiveTarget.id}</b> — justificativa obrigatória (mín. 50 caracteres).
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)', marginBottom: 8 }}>Devolver para o analista</div>
+            <div style={{ fontSize: 13, color: 'var(--ink-2)', marginBottom: 14 }}>
+              <b>{returnModal}</b> — informe o motivo da devolução (mín. 30 caracteres).
             </div>
-            <textarea value={archiveJustif} onChange={(e) => setArchiveJustif(e.target.value)}
-              placeholder="Descreva o motivo do arquivamento…" rows={4}
+            <textarea value={returnComment} onChange={(e) => setReturnComment(e.target.value)}
+              placeholder="Descreva o que precisa ser corrigido…" rows={3}
               style={{ width: '100%', resize: 'vertical', borderRadius: 8, border: '1px solid var(--line)', padding: '10px 12px', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box', color: 'var(--ink)', background: 'var(--bg)' }} />
-            <div style={{ fontSize: 11, color: archiveJustif.length >= 50 ? 'var(--green)' : 'var(--muted-text)', marginTop: 4, marginBottom: 16 }}>
-              {archiveJustif.length}/50 caracteres mínimos
+            <div style={{ fontSize: 11, color: returnComment.length >= 30 ? 'var(--green)' : 'var(--muted-text)', marginTop: 4, marginBottom: 16 }}>
+              {returnComment.length}/30 caracteres mínimos
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-              <button onClick={() => { setArchiveTarget(null); setArchiveJustif('') }}
-                style={{ fontSize: 13, fontWeight: 600, padding: '8px 16px', borderRadius: 8, border: '1px solid var(--line)', background: 'transparent', color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-                Cancelar
-              </button>
-              <button disabled={archiveJustif.length < 50} onClick={archiveJustif.length >= 50 ? archiveCase : undefined}
-                style={{ fontSize: 13, fontWeight: 700, padding: '8px 16px', borderRadius: 8, border: 'none', fontFamily: 'var(--font-body)', cursor: archiveJustif.length >= 50 ? 'pointer' : 'not-allowed',
-                  background: archiveJustif.length >= 50 ? 'var(--red)' : 'var(--line)',
-                  color: archiveJustif.length >= 50 ? '#fff' : 'var(--muted-text)' }}>
-                Arquivar
+              <button onClick={() => { setReturnModal(null); setReturnComment('') }} style={btnGhost}>Cancelar</button>
+              <button disabled={returnComment.length < 30}
+                onClick={returnComment.length >= 30 ? () => { setReturnedIds(prev => new Set([...prev, returnModal])); setReturnModal(null); setReturnComment('') } : undefined}
+                style={{ fontSize: 13, fontWeight: 700, padding: '8px 16px', borderRadius: 8, border: 'none', fontFamily: 'var(--font-body)',
+                  cursor: returnComment.length >= 30 ? 'pointer' : 'not-allowed',
+                  background: returnComment.length >= 30 ? 'var(--amber)' : 'var(--line)',
+                  color: returnComment.length >= 30 ? '#fff' : 'var(--muted-text)' }}>
+                Devolver ao analista
               </button>
             </div>
           </div>
