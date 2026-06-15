@@ -755,7 +755,7 @@ const PERIODOS = ['Hoje', 'Ontem', '7 dias', '15 dias', 'MTD', 'Trimestre']
 const ABAS     = [
   { id: 'visao-geral', label: 'Visão Geral' },
   { id: 'alertas',     label: 'Alertas'     },
-  { id: 'watchlist',   label: 'Watchlist'   },
+  { id: 'watchlist',   label: 'Monitorados' },
   { id: 'regras',      label: 'Regras'      },
 ] as const
 type AbaId = typeof ABAS[number]['id']
@@ -2207,7 +2207,7 @@ const [periodo, setPeriodo]         = useState('7 dias')
 
           {aba === 'watchlist' && (
             <>
-              <Sech>Monitorados (Watchlist)</Sech>
+              <Sech>Monitorados</Sech>
 
               {/* KPI strip */}
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 20 }}>
@@ -2373,9 +2373,9 @@ const [periodo, setPeriodo]         = useState('7 dias')
           {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 28 }}>
             <span style={{ fontSize: 12.5, color: 'var(--muted-text)' }}>Abrir páginas:</span>
-            {['Perfil do apostador', 'Watchlist', 'Glossário COAF', 'Fluxos PLD'].map((label) => (
+            {['Perfil do apostador', 'Monitorados', 'Glossário COAF', 'Fluxos PLD'].map((label) => (
               <span key={label}
-                onClick={() => { if (label === 'Watchlist') setAba('watchlist') }}
+                onClick={() => { if (label === 'Monitorados') setAba('watchlist') }}
                 style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink-2)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 999, padding: '8px 14px', cursor: 'pointer' }}>
                 {label}
               </span>
