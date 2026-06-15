@@ -2769,6 +2769,11 @@ const [periodo, setPeriodo]         = useState('7 dias')
                 }}
               />
 
+              {/* ── Pipeline AML ── */}
+              <div style={{ marginTop: 32 }}>
+                <PipelineAml />
+              </div>
+
               {/* ── Volume sob Análise ── */}
               <div style={{ marginTop: 32 }}>
                 <VolumeAnalise />
@@ -2783,11 +2788,6 @@ const [periodo, setPeriodo]         = useState('7 dias')
                   }}
                   onVerTodos={() => setAba('watchlist')}
                 />
-              </div>
-
-              {/* ── Pipeline AML ── */}
-              <div style={{ marginTop: 32 }}>
-                <PipelineAml />
               </div>
 
               {/* ── Fluxo Financeiro ── */}
