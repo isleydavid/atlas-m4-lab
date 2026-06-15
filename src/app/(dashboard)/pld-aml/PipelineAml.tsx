@@ -241,10 +241,13 @@ export function PipelineAml() {
 
         {/* Cabeçalho */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ marginBottom: 4 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-body)' }}>
-              PIPELINE AML · ÚLTIMOS 30 DIAS
-            </div>
+          <div style={{ marginBottom: 24 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
+              Quantas transações chegaram ao COAF?
+            </h2>
+            <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+              Funil de detecção AML · Últimos 30 dias.
+            </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
             <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', fontFamily: 'var(--font-body)' }}>HOJE</span>

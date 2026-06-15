@@ -141,7 +141,7 @@ export function ApostadoresFlagAtivo({ onInvestigate, onVerTodos }: ApostadoresF
     }}>
 
       {/* Cabeçalho */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 48, height: 48, borderRadius: 12, flexShrink: 0,
@@ -154,16 +154,18 @@ export function ApostadoresFlagAtivo({ onInvestigate, onVerTodos }: ApostadoresF
             </svg>
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>
-                Apostadores com flag ativo
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
+                Quem está em risco AML agora?
+              </h2>
               <svg width={15} height={15} viewBox="0 0 24 24" fill="none"
-                style={{ stroke: 'var(--muted-2)' }} strokeWidth={2} strokeLinecap="round">
+                style={{ stroke: 'var(--muted-2)', flexShrink: 0 }} strokeWidth={2} strokeLinecap="round">
                 <circle cx={12} cy={12} r={10}/><line x1={12} y1={16} x2={12} y2={12}/><line x1={12} y1={8} x2={12.01} y2={8}/>
               </svg>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--muted-text)', marginTop: 2 }}>Monitorados em risco AML</div>
+            <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+              Apostadores com flag ativo ordenados por score.
+            </p>
           </div>
         </div>
 

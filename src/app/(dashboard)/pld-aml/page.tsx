@@ -2059,8 +2059,15 @@ const [periodo, setPeriodo]         = useState('7 dias')
           {/* ── Aba: Visão Geral ── */}
           {aba === 'visao-geral' && (
             <>
-              {/* ── Grupo 1: Visão Operacional ── */}
-              <Sech>O que exige atenção agora?</Sech>
+              {/* ── KPI Cards ── */}
+              <div style={{ marginBottom: 24 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
+                  Visão Operacional — Hoje
+                </h2>
+                <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+                  Indicadores de atenção imediata do monitoramento AML.
+                </p>
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow-card)' }}>
                 {KPI_DATA.map((kpi, i) => (
                   <button key={kpi.label}
@@ -2081,39 +2088,57 @@ const [periodo, setPeriodo]         = useState('7 dias')
                   </button>
                 ))}
               </div>
-              <div style={{ marginTop: 16 }}>
-                <CoafTimelineV2
-                  onInvestigate={(id) => {
-                    if (id === 'all') {
-                      setAba('alertas')
-                    } else {
-                      const c = COAF_CASES.find(x => x.id === id)
-                      if (c) setSelected(coafToRow(c))
-                    }
+
+              {/* ── COAF Timeline ── */}
+              <div style={{ marginTop: 32, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
+                  Prazo COAF — Horizonte 36h
+                </h2>
+                <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+                  Casos se aproximando do prazo regulatório de comunicação.
+                </p>
+              </div>
+              <CoafTimelineV2
+                onInvestigate={(id) => {
+                  if (id === 'all') {
+                    setAba('alertas')
+                  } else {
+                    const c = COAF_CASES.find(x => x.id === id)
+                    if (c) setSelected(coafToRow(c))
+                  }
+                }}
+              />
+
+              {/* ── Volume sob Análise ── */}
+              <div style={{ marginTop: 32 }}>
+                <VolumeAnalise />
+              </div>
+
+              {/* ── Apostadores com Flag ── */}
+              <div style={{ marginTop: 32 }}>
+                <ApostadoresFlagAtivo
+                  onInvestigate={(nome) => {
+                    const row = ROWS.find(r => r.nome.includes(nome.split('.')[0].trim()))
+                    if (row) setSelected(row)
                   }}
+                  onVerTodos={() => setAba('watchlist')}
                 />
               </div>
 
-              {/* ── Grupo 2: Detecção e Risco ── */}
-              <Sech style={{ margin: '32px 0 11px' }}>Qual o nível de exposição atual?</Sech>
-              <VolumeAnalise />
+              {/* ── Pipeline AML ── */}
+              <div style={{ marginTop: 32 }}>
+                <PipelineAml />
+              </div>
 
-              {/* ── Grupo 3: Apostadores Monitorados ── */}
-              <Sech style={{ margin: '32px 0 11px' }}>Quem está em risco AML?</Sech>
-              <ApostadoresFlagAtivo
-                onInvestigate={(nome) => {
-                  const row = ROWS.find(r => r.nome.includes(nome.split('.')[0].trim()))
-                  if (row) setSelected(row)
-                }}
-                onVerTodos={() => setAba('watchlist')}
-              />
-
-              {/* ── Grupo 4: Pipeline Regulatório ── */}
-              <Sech style={{ margin: '32px 0 11px' }}>Quantas transações chegaram ao COAF este mês?</Sech>
-              <PipelineAml />
-
-              {/* ── Grupo 5: Padrões Suspeitos ── */}
-              <Sech style={{ margin: '32px 0 11px' }}>Há padrões suspeitos no fluxo financeiro?</Sech>
+              {/* ── Fluxo Financeiro ── */}
+              <div style={{ marginTop: 32, marginBottom: 24 }}>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
+                  Há padrões suspeitos no fluxo financeiro?
+                </h2>
+                <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+                  Estruturação e pass-through detectados nos últimos 7 dias.
+                </p>
+              </div>
               <FluxoFinanceiro onInvestigate={(row) => setSelected(row)} />
             </>
           )}

@@ -99,14 +99,19 @@ export function VolumeAnalise() {
     }}>
 
       {/* Título */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>
-          Volume sob análise
-        </span>
-        <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
-          style={{ stroke: 'var(--muted-2)' }} strokeWidth={2} strokeLinecap="round">
-          <circle cx={12} cy={12} r={10}/><line x1={12} y1={16} x2={12} y2={12}/><line x1={12} y1={8} x2={12.01} y2={8}/>
-        </svg>
+      <div style={{ marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)', margin: 0, lineHeight: 1.3 }}>
+            Como evoluiu o volume sob análise?
+          </h2>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none"
+            style={{ stroke: 'var(--muted-2)', flexShrink: 0 }} strokeWidth={2} strokeLinecap="round">
+            <circle cx={12} cy={12} r={10}/><line x1={12} y1={16} x2={12} y2={12}/><line x1={12} y1={8} x2={12.01} y2={8}/>
+          </svg>
+        </div>
+        <p style={{ fontSize: 14, color: 'var(--muted-text)', fontFamily: 'var(--font-body)', margin: '4px 0 0 0', lineHeight: 1.5 }}>
+          R$ monitorado por prioridade · Últimos 30 dias.
+        </p>
       </div>
 
       {/* Gauge + legenda */}
