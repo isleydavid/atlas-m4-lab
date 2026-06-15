@@ -26,7 +26,7 @@ interface DrawerEntry {
   factors: string[]
   vinculos: string[]
 }
-interface StyleToken { c: string; bg: string }
+interface StyleToken { c: string; bg: string; border?: string }
 interface WatchRow {
   id: number; nome: string; cpf: string; score: number
   classe: 'Alto' | 'Médio' | 'Baixo'
@@ -643,15 +643,15 @@ const FY = (v: number) => 220 - (v / 100) * 190
 // Token maps
 // ---------------------------------------------------------------------------
 const SEV: Record<string, StyleToken> = {
-  'Crítico': { c: 'var(--red)',   bg: 'var(--red-soft)'   },
-  'Alto':    { c: 'var(--amber)', bg: 'var(--amber-soft)' },
-  'Médio':   { c: 'var(--atlas-color-status-info)', bg: 'var(--bg)' },
+  'Crítico': { c: 'var(--red)',        bg: 'rgba(239,68,68,0.08)',  border: '1px solid rgba(239,68,68,0.3)'  },
+  'Alto':    { c: 'var(--orange)',     bg: 'rgba(242,97,34,0.08)',  border: '1px solid rgba(242,97,34,0.3)'  },
+  'Médio':   { c: 'var(--muted-text)', bg: 'transparent',           border: '1px solid var(--line)'          },
 }
 const ST: Record<string, StyleToken> = {
-  'Aberto':          { c: 'var(--orange)', bg: 'var(--orange-soft)' },
-  'Em análise':      { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
-  'Comunicado COAF': { c: 'var(--green)',  bg: 'var(--green-soft)'  },
-  'Arquivado':       { c: 'var(--muted-text)', bg: 'var(--bg)'      },
+  'Aberto':          { c: 'var(--muted-text)', bg: 'transparent',           border: '1px solid var(--line)'          },
+  'Em análise':      { c: 'var(--orange)',     bg: 'rgba(242,97,34,0.08)',  border: '1px solid rgba(242,97,34,0.3)'  },
+  'Comunicado COAF': { c: '#22c55e',           bg: 'rgba(34,197,94,0.08)',  border: '1px solid rgba(34,197,94,0.3)'  },
+  'Arquivado':       { c: 'var(--muted-text)', bg: 'transparent'           },
 }
 const DILIG: Record<string, StyleToken> = {
   'pendente':     { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
@@ -659,14 +659,14 @@ const DILIG: Record<string, StyleToken> = {
   'ok':           { c: 'var(--green)',  bg: 'var(--green-soft)'  },
 }
 const WS: Record<string, StyleToken> = {
-  'Em observação': { c: 'var(--ink-2)',     bg: 'var(--bg)'          },
-  'Escalado':      { c: 'var(--orange)',    bg: 'var(--orange-soft)' },
-  'Removido':      { c: 'var(--muted-text)', bg: 'var(--bg)'         },
+  'Em observação': { c: 'var(--muted-text)', bg: 'transparent',          border: '1px solid var(--line)'          },
+  'Escalado':      { c: 'var(--orange)',     bg: 'rgba(242,97,34,0.08)', border: '1px solid rgba(242,97,34,0.3)'  },
+  'Removido':      { c: 'var(--muted-text)', bg: 'transparent'          },
 }
 const WM: Record<string, StyleToken> = {
-  'PEP':          { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
-  'Reincidência': { c: 'var(--red)',    bg: 'var(--red-soft)'    },
-  'Alto volume':  { c: 'var(--amber)',  bg: 'var(--amber-soft)'  },
+  'PEP':          { c: 'var(--amber)', bg: 'rgba(224,144,31,0.08)', border: '1px solid rgba(224,144,31,0.3)' },
+  'Reincidência': { c: 'var(--red)',   bg: 'rgba(239,68,68,0.08)',  border: '1px solid rgba(239,68,68,0.3)'  },
+  'Alto volume':  { c: 'var(--amber)', bg: 'rgba(224,144,31,0.08)', border: '1px solid rgba(224,144,31,0.3)' },
 }
 
 const SCORE_COLOR = (s: number) =>
@@ -763,9 +763,9 @@ type AbaId = typeof ABAS[number]['id']
 // ---------------------------------------------------------------------------
 // Atoms
 // ---------------------------------------------------------------------------
-function Pill({ c, bg, children }: { c: string; bg: string; children: React.ReactNode }) {
+function Pill({ c, bg, border, children }: { c: string; bg: string; border?: string; children: React.ReactNode }) {
   return (
-    <span style={{ fontSize: 10.5, fontWeight: 700, padding: '3px 9px', borderRadius: 999, display: 'inline-block', whiteSpace: 'nowrap', color: c, background: bg }}>
+    <span style={{ fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 6, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap', color: c, background: bg, border: border || 'none' }}>
       {children}
     </span>
   )
@@ -2164,7 +2164,7 @@ const [periodo, setPeriodo]         = useState('7 dias')
                   <thead>
                     <tr>
                       {['Apostador','Marca','Red flag','Score PLD','Severidade','SLA','Status','Responsável'].map((h) => (
-                        <th key={h} style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.4px', color: 'var(--muted-text)', textAlign: 'left', fontWeight: 700, padding: '11px 14px', borderBottom: '1px solid var(--line)', background: 'var(--bg)', fontFamily: 'var(--font-body)' }}>{h}</th>
+                        <th key={h} style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left', padding: '12px 14px', borderBottom: '1px solid var(--line)', background: 'transparent', fontFamily: 'var(--font-body)' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -2180,22 +2180,22 @@ const [periodo, setPeriodo]         = useState('7 dias')
                       return (
                         <tr key={row.id} onClick={() => setSelected(isSel ? null : row)}
                           style={{ cursor: 'pointer', boxShadow: row.crit ? 'inset 3px 0 0 var(--red)' : 'none' }}>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: bg }}>
                             <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{row.nome}</div>
                             <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{row.cpf}</div>
                           </td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.marca}</td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.flag}</td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.marca}</td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', fontSize: 13.5, color: 'var(--ink)', background: bg }}>{row.flag}</td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: bg }}>
                             <span style={{ width: 84, height: 6, background: 'var(--line)', borderRadius: 999, overflow: 'hidden', display: 'inline-block', verticalAlign: 'middle', marginRight: 7 }}>
                               <span style={{ display: 'block', height: '100%', borderRadius: 999, background: sc, width: `${row.score}%` }} />
                             </span>
                             <span style={{ fontWeight: 800, fontSize: 13.5, color: sc }}>{row.score}</span>
                           </td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}><Pill c={sev.c} bg={sev.bg}>{row.sev}</Pill></td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13, color: slaCol, background: bg }}>{row.sla}</td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: bg }}><Pill c={st.c} bg={st.bg}>{status}</Pill></td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13, color: 'var(--muted-text)', background: bg }}>{row.resp}</td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: bg }}><Pill c={sev.c} bg={sev.bg} border={sev.border}>{row.sev}</Pill></td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: 13, color: slaCol, background: bg }}>{row.sla}</td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: bg }}><Pill c={st.c} bg={st.bg} border={st.border}>{status}</Pill></td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', fontSize: 13, color: 'var(--muted-text)', background: bg }}>{row.resp}</td>
                         </tr>
                       )
                     })}
@@ -2251,7 +2251,7 @@ const [periodo, setPeriodo]         = useState('7 dias')
                   <thead>
                     <tr>
                       {['Apostador', 'Score PLD', 'Motivo', 'Marca', 'Última ocorrência', 'Status', 'Ação'].map((h) => (
-                        <th key={h} style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.4px', color: 'var(--muted-text)', textAlign: 'left', fontWeight: 700, padding: '11px 14px', borderBottom: '1px solid var(--line)', background: 'var(--bg)', fontFamily: 'var(--font-body)' }}>{h}</th>
+                        <th key={h} style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '0.06em', textAlign: 'left', padding: '12px 14px', borderBottom: '1px solid var(--line)', background: 'transparent', fontFamily: 'var(--font-body)' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -2265,24 +2265,29 @@ const [periodo, setPeriodo]         = useState('7 dias')
                       const rowBg  = dimmed ? 'var(--bg)' : undefined
                       return (
                         <tr key={w.id} style={{ opacity: dimmed ? 0.55 : 1 }}>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: rowBg }}>
                             <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{w.nome}</div>
                             <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{w.cpf}</div>
                           </td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: rowBg }}>
                             <span style={{ width: 72, height: 6, background: 'var(--line)', borderRadius: 999, overflow: 'hidden', display: 'inline-block', verticalAlign: 'middle', marginRight: 7 }}>
                               <span style={{ display: 'block', height: '100%', borderRadius: 999, background: sc, width: `${w.score}%` }} />
                             </span>
                             <span style={{ fontWeight: 800, fontSize: 13.5, color: sc }}>{w.score}</span>
                           </td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}><Pill c={wm.c} bg={wm.bg}>{w.motivo}</Pill></td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13.5, color: 'var(--ink)', background: rowBg }}>{w.marca}</td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', fontSize: 13, color: 'var(--muted-text)', background: rowBg }}>{w.ultima}</td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}><Pill c={wst.c} bg={wst.bg}>{st}</Pill></td>
-                          <td style={{ padding: '12px 14px', borderBottom: '1px solid var(--line)', background: rowBg }}>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: rowBg }}><Pill c={wm.c} bg={wm.bg} border={wm.border}>{w.motivo}</Pill></td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', fontSize: 13.5, color: 'var(--ink)', background: rowBg }}>{w.marca}</td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', fontSize: 13, color: 'var(--muted-text)', background: rowBg }}>{w.ultima}</td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: rowBg }}><Pill c={wst.c} bg={wst.bg} border={wst.border}>{st}</Pill></td>
+                          <td style={{ padding: '14px 14px', borderBottom: '1px solid var(--border-faint, #f4f4f4)', background: rowBg }}>
                             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                               <button onClick={() => setSelected(watchToRow(w))}
-                                style={{ fontSize: 12, fontWeight: 700, padding: '5px 10px', borderRadius: 8, border: '1px solid var(--line)', background: 'var(--card)', color: 'var(--ink-2)', cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                                style={{ fontSize: 12, fontWeight: 700, padding: '5px 10px', borderRadius: 8, cursor: dimmed ? 'default' : 'pointer', fontFamily: 'var(--font-body)',
+                                  ...(st === 'Escalado'
+                                    ? { background: 'var(--orange)', border: 'none', color: '#fff' }
+                                    : dimmed
+                                    ? { background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted-text)' }
+                                    : { background: 'transparent', border: '1px solid var(--line)', color: 'var(--ink)' }) }}>
                                 Abrir ↗
                               </button>
                               {st !== 'Removido' && (

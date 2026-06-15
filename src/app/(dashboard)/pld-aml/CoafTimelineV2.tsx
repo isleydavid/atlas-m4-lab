@@ -187,9 +187,9 @@ function CaseTable({ cases, onInvestigate }: { cases: CoafCase[]; onInvestigate?
         Próximos a vencer
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1.2fr 1fr 1.4fr 0.9fr', gap: 8, paddingBottom: 8, borderBottom: '1px solid var(--border-default)', marginBottom: 4 }}>
-        {['Apostador', 'Caso', 'Tempo restante', 'Valor envolvido', 'Nível de risco'].map(h => (
-          <span key={h} style={{ fontSize: 10, color: 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>{h}</span>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1.2fr 1fr 1.4fr 0.9fr auto', gap: 8, paddingBottom: 12, borderBottom: '1px solid var(--line)', marginBottom: 4 }}>
+        {['Apostador', 'Caso', 'Tempo restante', 'Valor envolvido', 'Nível de risco', 'Ação'].map(h => (
+          <span key={h} style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontFamily: 'var(--font-body)' }}>{h}</span>
         ))}
       </div>
 
@@ -200,10 +200,10 @@ function CaseTable({ cases, onInvestigate }: { cases: CoafCase[]; onInvestigate?
             onClick={() => onInvestigate?.(c.id)}
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.6fr 1.2fr 1fr 1.4fr 0.9fr',
+              gridTemplateColumns: '1.6fr 1.2fr 1fr 1.4fr 0.9fr auto',
               gap: 8,
-              padding: '10px 0',
-              borderBottom: i < visible.length - 1 ? '1px solid var(--border-default)' : 'none',
+              padding: '14px 0',
+              borderBottom: i < visible.length - 1 ? '1px solid var(--border-faint, #f4f4f4)' : 'none',
               alignItems: 'center',
               cursor: onInvestigate ? 'pointer' : 'default',
             }}
@@ -222,13 +222,13 @@ function CaseTable({ cases, onInvestigate }: { cases: CoafCase[]; onInvestigate?
               display: 'inline-flex', alignItems: 'center', gap: 4,
               background: sevColor(c.sev, true),
               border: `1px solid ${sevBorder(c.sev)}`,
-              borderRadius: 6, padding: '3px 8px',
+              borderRadius: 6, padding: '4px 10px',
               width: 'fit-content',
             }}>
               <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={sevColor(c.sev)} strokeWidth={2.5} strokeLinecap="round">
                 <circle cx={12} cy={12} r={10}/><polyline points="12 6 12 12 16 14"/>
               </svg>
-              <span style={{ fontSize: 11, fontWeight: 700, color: sevColor(c.sev), fontFamily: 'var(--font-body)' }}>{fmtTime(c.tHoras)}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: sevColor(c.sev), fontFamily: 'var(--font-body)' }}>{fmtTime(c.tHoras)}</span>
             </div>
 
             <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--ink)', fontFamily: 'var(--font-body)' }}>{c.valor}</div>
@@ -237,10 +237,24 @@ function CaseTable({ cases, onInvestigate }: { cases: CoafCase[]; onInvestigate?
               display: 'inline-flex', justifyContent: 'center',
               background: sevColor(c.sev, true),
               border: `1px solid ${sevBorder(c.sev)}`,
-              borderRadius: 6, padding: '3px 8px', width: 'fit-content',
+              borderRadius: 6, padding: '4px 10px', width: 'fit-content',
             }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: sevColor(c.sev), fontFamily: 'var(--font-body)' }}>{c.sev}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: sevColor(c.sev), fontFamily: 'var(--font-body)' }}>{c.sev}</span>
             </div>
+
+            <button
+              onClick={(e) => { e.stopPropagation(); onInvestigate?.(c.id) }}
+              style={{
+                fontSize: 12, fontWeight: 700, padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap',
+                ...(c.sev === 'Crítico'
+                  ? { background: 'var(--orange)', border: 'none', color: '#fff' }
+                  : c.sev === 'Alto'
+                  ? { background: 'transparent', border: '1px solid var(--line)', color: 'var(--ink)' }
+                  : { background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted-text)' }),
+              }}
+            >
+              Investigar
+            </button>
           </div>
         ))}
       </div>

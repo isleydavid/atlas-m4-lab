@@ -154,10 +154,10 @@ export function PepSectionV2({ onInvestigate }: PepSectionV2Props) {
         </div>
 
         {/* header colunas */}
-        <div style={{ display: 'grid', gridTemplateColumns: '2.2fr 1.4fr 0.8fr 1fr 0.8fr 0.8fr', gap: 8, padding: '7px 14px', borderBottom: '1px solid var(--border-default)', background: 'var(--bg)' }}>
-          {['PEP', 'VÍNCULO', 'SCORE', 'VOLUME', 'ALERTAS', 'RISCO'].map((h, i) => (
+        <div style={{ display: 'grid', gridTemplateColumns: '2.2fr 1.4fr 0.8fr 1fr 0.8fr 0.8fr auto', gap: 8, padding: '10px 14px 12px', borderBottom: '1px solid var(--line)', background: 'transparent' }}>
+          {['PEP', 'VÍNCULO', 'SCORE', 'VOLUME', 'ALERTAS', 'RISCO', 'AÇÃO'].map((h, i) => (
             <div key={h} style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'var(--font-body)' }}>{h}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', fontFamily: 'var(--font-body)' }}>{h}</span>
               {i >= 2 && i <= 4 && (
                 <svg width={8} height={8} viewBox="0 0 10 14" fill="var(--muted-text)">
                   <path d="M5 0L9 5H1L5 0Z"/><path d="M5 14L1 9H9L5 14Z"/>
@@ -174,9 +174,9 @@ export function PepSectionV2({ onInvestigate }: PepSectionV2Props) {
             onClick={() => onInvestigate?.(row.id)}
             style={{
               display: 'grid',
-              gridTemplateColumns: '2.2fr 1.4fr 0.8fr 1fr 0.8fr 0.8fr',
-              gap: 8, padding: '10px 14px',
-              borderBottom: i < ROWS.length - 1 ? '1px solid var(--border-default)' : 'none',
+              gridTemplateColumns: '2.2fr 1.4fr 0.8fr 1fr 0.8fr 0.8fr auto',
+              gap: 8, padding: '14px 14px',
+              borderBottom: i < ROWS.length - 1 ? '1px solid var(--border-faint, #f4f4f4)' : 'none',
               alignItems: 'center',
               cursor: onInvestigate ? 'pointer' : 'default',
               transition: 'background 0.1s',
@@ -224,13 +224,28 @@ export function PepSectionV2({ onInvestigate }: PepSectionV2Props) {
             {/* Risco badge */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              padding: '3px 8px', borderRadius: 6,
+              padding: '4px 10px', borderRadius: 6,
               background: riscoBg(row.risco),
               border: `1px solid ${riscoColor(row.risco)}40`,
               width: 'fit-content',
             }}>
-              <span style={{ fontSize: 10, fontWeight: 700, color: riscoColor(row.risco), fontFamily: 'var(--font-body)' }}>{row.risco}</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: riscoColor(row.risco), fontFamily: 'var(--font-body)' }}>{row.risco}</span>
             </div>
+
+            {/* Ação */}
+            <button
+              onClick={(e) => { e.stopPropagation(); onInvestigate?.(row.id) }}
+              style={{
+                fontSize: 12, fontWeight: 700, padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap',
+                ...(row.risco === 'Crítico'
+                  ? { background: 'var(--orange)', border: 'none', color: '#fff' }
+                  : row.risco === 'Alto'
+                  ? { background: 'transparent', border: '1px solid var(--line)', color: 'var(--ink)' }
+                  : { background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted-text)' }),
+              }}
+            >
+              Investigar
+            </button>
           </div>
         ))}
 
