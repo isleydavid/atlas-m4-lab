@@ -7,6 +7,8 @@ import Transacoes from '@/modules/perfil-apostador/charts/transacoes'
 import AnaliseRiscos from '@/modules/perfil-apostador/charts/analise-riscos'
 import { ScoreFactors } from '@/modules/perfil-apostador/charts/score'
 import { PipelineAml } from './PipelineAml'
+import { VolumeAnalise } from './VolumeAnalise'
+import { ApostadoresFlagAtivo } from './ApostadoresFlagAtivo'
 import { CoafTimelineV2, COAF_CASES } from './CoafTimelineV2'
 import { PepSectionV2 } from './PepSectionV2'
 import { RULES_CATALOG, RULE_AUDIT, type PldRuleCatalog, type RuleAuditEntry } from './catalog'
@@ -2096,6 +2098,18 @@ const [periodo, setPeriodo]         = useState('7 dias')
               {/* Pipeline AML — linha completa */}
               <div style={{ marginTop: 26 }}>
                 <PipelineAml />
+              </div>
+
+              {/* Grid 2 colunas — Volume sob Análise + Apostadores com flag */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 26 }}>
+                <VolumeAnalise />
+                <ApostadoresFlagAtivo
+                  onInvestigate={(nome) => {
+                    const row = ROWS.find(r => r.nome.includes(nome.split('.')[0].trim()))
+                    if (row) setSelected(row)
+                  }}
+                  onVerTodos={() => setAba('watchlist')}
+                />
               </div>
 
               {/* Fluxo financeiro × jogo */}
