@@ -767,15 +767,81 @@ const ABAS     = [
 // ---------------------------------------------------------------------------
 interface CoafRoPendente {
   id: string; nome: string; valor: string; score: number
-  flag: string; analista: string; submetidoEm: string; marca: string
-  aprovado: boolean
+  flag: string; analista: string; submetidoEm: string; marca: string; aprovado: boolean
+  cpf: string
+  timeline: { desc: string; ts: string }[]
+  scoreFactors: string[]
+  ro: {
+    tipoOperacao: string; dataOperacao: string
+    elementosAnalise: string; caracteristicasSuspeita: string; intermediarios: string
+  }
 }
 const COAF_AGUARDANDO: CoafRoPendente[] = [
-  { id:'AML-2026-0046', nome:'E. P.', valor:'R$ 215.430', score:92, flag:'Estruturação',        analista:'Marina Costa',  submetidoEm:'há 2h',  marca:'vaidebet-ngx', aprovado:false },
-  { id:'AML-2026-0044', nome:'C. R.', valor:'R$ 98.760',  score:85, flag:'Pass-through',         analista:'Carlos Mendes', submetidoEm:'há 5h',  marca:'vaidebet',     aprovado:false },
-  { id:'AML-2026-0042', nome:'M. D.', valor:'R$ 72.540',  score:81, flag:'Saque atípico',        analista:'Marina Costa',  submetidoEm:'há 8h',  marca:'kto',          aprovado:true  },
-  { id:'AML-2026-0039', nome:'P. S.', valor:'R$ 56.320',  score:78, flag:'Estruturação',         analista:'Carlos Mendes', submetidoEm:'há 11h', marca:'betano',       aprovado:true  },
-  { id:'AML-2026-0037', nome:'L. A.', valor:'R$ 44.100',  score:76, flag:'Movimentação atípica', analista:'Marina Costa',  submetidoEm:'há 14h', marca:'vaidebet',     aprovado:true  },
+  {
+    id:'AML-2026-0046', nome:'E. P.', valor:'R$ 215.430', score:92, flag:'Estruturação',
+    analista:'Marina Costa', submetidoEm:'há 2h', marca:'vaidebet-ngx', aprovado:false,
+    cpf:'•••.•••.•••-70',
+    timeline:[
+      { desc:'Depósito PIX R$ 1.980', ts:'09/06 14:02' },
+      { desc:'Depósito PIX R$ 1.950', ts:'09/06 14:09' },
+      { desc:'Depósito PIX R$ 1.990', ts:'09/06 14:21' },
+      { desc:'Saque R$ 5.800 sem aposta', ts:'09/06 14:35' },
+    ],
+    scoreFactors:[
+      'Fracionamento < R$ 2.000 · ×3',
+      'Saque sem aposta registrada',
+      'Velocidade atípica entre transações',
+      'IP compartilhado com 2 outras contas',
+    ],
+    ro:{
+      tipoOperacao:'Estruturação / Fracionamento',
+      dataOperacao:'09/06/2026',
+      elementosAnalise:'Apostador realizou 3 depósitos via PIX em 19 minutos, todos abaixo de R$ 2.000, somando R$ 5.920. Saque de R$ 5.800 sem registro de apostas. Padrão consistente com estruturação para evitar limiar de reporte.',
+      caracteristicasSuspeita:'Fracionamento intencional abaixo do limiar regulatório. Ausência de atividade de aposta entre depósito e saque. IP compartilhado com contas previamente sinalizadas.',
+      intermediarios:'PIX originado de 3 remetentes distintos sem histórico de vínculo.',
+    },
+  },
+  {
+    id:'AML-2026-0044', nome:'C. R.', valor:'R$ 98.760', score:85, flag:'Pass-through',
+    analista:'Carlos Mendes', submetidoEm:'há 5h', marca:'vaidebet', aprovado:false,
+    cpf:'•••.•••.•••-10',
+    timeline:[
+      { desc:'Depósito R$ 4.200', ts:'08/06 09:14' },
+      { desc:'Aposta R$ 50',       ts:'08/06 09:17' },
+      { desc:'Saque R$ 4.100',    ts:'08/06 09:22' },
+    ],
+    scoreFactors:[
+      'Saque logo após depósito (8 min)',
+      'Aposta simbólica (1,2% do depósito)',
+      'Ratio dep/saque > 97%',
+      'IP compartilhado com conta banida',
+    ],
+    ro:{
+      tipoOperacao:'Pass-through / Saque atípico',
+      dataOperacao:'08/06/2026',
+      elementosAnalise:'Apostador depositou R$ 4.200, realizou aposta simbólica de R$ 50 e sacou R$ 4.100 em 8 minutos. Uso da plataforma como canal de lavagem.',
+      caracteristicasSuspeita:'Pass-through clássico. Ratio 97,6%. IP compartilhado com conta banida. Sem histórico de apostas regulares.',
+      intermediarios:'Conta bancária de destino diverge do cadastro.',
+    },
+  },
+  {
+    id:'AML-2026-0042', nome:'M. D.', valor:'R$ 72.540', score:81, flag:'Saque atípico',
+    analista:'Marina Costa', submetidoEm:'há 8h', marca:'kto', aprovado:true,
+    cpf:'•••.•••.•••-44', timeline:[], scoreFactors:[],
+    ro:{ tipoOperacao:'Saque atípico', dataOperacao:'08/06/2026', elementosAnalise:'—', caracteristicasSuspeita:'—', intermediarios:'—' },
+  },
+  {
+    id:'AML-2026-0039', nome:'P. S.', valor:'R$ 56.320', score:78, flag:'Estruturação',
+    analista:'Carlos Mendes', submetidoEm:'há 11h', marca:'betano', aprovado:true,
+    cpf:'•••.•••.•••-29', timeline:[], scoreFactors:[],
+    ro:{ tipoOperacao:'Estruturação', dataOperacao:'08/06/2026', elementosAnalise:'—', caracteristicasSuspeita:'—', intermediarios:'—' },
+  },
+  {
+    id:'AML-2026-0037', nome:'L. A.', valor:'R$ 44.100', score:76, flag:'Movimentação atípica',
+    analista:'Marina Costa', submetidoEm:'há 14h', marca:'vaidebet', aprovado:true,
+    cpf:'•••.•••.•••-83', timeline:[], scoreFactors:[],
+    ro:{ tipoOperacao:'Movimentação atípica', dataOperacao:'08/06/2026', elementosAnalise:'—', caracteristicasSuspeita:'—', intermediarios:'—' },
+  },
 ]
 
 interface CoafExportacao {
@@ -2049,6 +2115,15 @@ function ComunicacaoCoafTab() {
   const [exportHistory, setExportHistory] = useState<typeof COAF_EXPORTACOES>([...COAF_EXPORTACOES])
   const [returnModal,   setReturnModal]   = useState<string | null>(null)
   const [returnComment, setReturnComment] = useState('')
+  const [expandedId,   setExpandedId]    = useState<string | null>(null)
+  const [devolvendo,   setDevolvendo]    = useState<string | null>(null)
+  const [comentario,   setComentario]    = useState('')
+
+  function toggleExpand(id: string) {
+    setExpandedId(prev => prev === id ? null : id)
+    setDevolvendo(null)
+    setComentario('')
+  }
 
   const pendentesRevisao = COAF_AGUARDANDO.filter(r => !approvedIds.has(r.id) && !returnedIds.has(r.id) && !exportedIds.has(r.id))
   const prontoExportar   = COAF_AGUARDANDO.filter(r => approvedIds.has(r.id) && !exportedIds.has(r.id))
@@ -2152,24 +2227,163 @@ function ComunicacaoCoafTab() {
               </thead>
               <tbody>
                 {pendentesRevisao.map((r, i) => {
-                  const last = i === pendentesRevisao.length - 1
+                  const isExpanded = expandedId === r.id
+                  const last = i === pendentesRevisao.length - 1 && !isExpanded
                   return (
-                    <tr key={r.id}>
-                      <td style={{ ...tdS(last), fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted-text)' }}>{r.id}</td>
-                      <td style={tdS(last)}><span style={{ letterSpacing: 2, color: 'var(--muted-2)' }}>●●●●●</span></td>
-                      <td style={tdS(last)}>{r.flag}</td>
-                      <td style={{ ...tdS(last), fontWeight: 600 }}>{r.valor}</td>
-                      <td style={{ ...tdS(last), fontSize: 12 }}>{r.analista}</td>
-                      <td style={{ ...tdS(last), fontSize: 12, color: 'var(--muted-text)' }}>{r.submetidoEm}</td>
-                      <td style={{ ...tdS(last) }}>
-                        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <button onClick={() => { setApprovedIds(prev => new Set([...prev, r.id])); setSelectedExport(prev => new Set([...prev, r.id])) }}
-                            style={btnPrimary}>Aprovar</button>
-                          <button onClick={() => { setReturnModal(r.id); setReturnComment('') }}
-                            style={{ ...btnGhost, color: 'var(--muted-text)' }}>Devolver</button>
-                        </div>
-                      </td>
-                    </tr>
+                    <React.Fragment key={r.id}>
+                      <tr onClick={() => toggleExpand(r.id)}
+                        style={{ background: isExpanded ? 'rgba(242,97,34,0.03)' : 'transparent', cursor: 'pointer' }}>
+                        <td style={{ ...tdS(last), fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--muted-text)' }}>{r.id}</td>
+                        <td style={tdS(last)}><span style={{ letterSpacing: 2, color: 'var(--muted-2)' }}>●●●●●</span></td>
+                        <td style={tdS(last)}>{r.flag}</td>
+                        <td style={{ ...tdS(last), fontWeight: 600 }}>{r.valor}</td>
+                        <td style={{ ...tdS(last), fontSize: 12 }}>{r.analista}</td>
+                        <td style={{ ...tdS(last), fontSize: 12, color: 'var(--muted-text)' }}>{r.submetidoEm}</td>
+                        <td style={{ ...tdS(last) }}>
+                          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                            <button onClick={(e) => { e.stopPropagation(); setApprovedIds(prev => new Set([...prev, r.id])); setSelectedExport(prev => new Set([...prev, r.id])); setExpandedId(null) }}
+                              style={btnPrimary}>Aprovar</button>
+                            <button onClick={(e) => { e.stopPropagation(); setReturnModal(r.id); setReturnComment('') }}
+                              style={{ ...btnGhost, color: 'var(--muted-text)' }}>Devolver</button>
+                          </div>
+                        </td>
+                      </tr>
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={7} style={{ padding: 0, borderBottom: i === pendentesRevisao.length - 1 ? 'none' : '1px solid var(--border-faint, #f4f4f4)' }}>
+                            <div style={{
+                              display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 24,
+                              padding: 24,
+                              background: 'var(--surface, #fafafa)',
+                              borderTop: '1px solid var(--line)',
+                              borderBottom: '2px solid var(--orange)',
+                            }}>
+
+                              {/* COLUNA 1 — Apostador + Timeline + Score factors */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ padding: 14, background: 'var(--card)', borderRadius: 10, border: '1px solid var(--line)' }}>
+                                  <div style={{ fontSize: 10, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 8 }}>Apostador</div>
+                                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{r.nome}</div>
+                                  <div style={{ fontSize: 11, color: 'var(--muted-text)', fontFamily: 'var(--font-mono)', marginTop: 2 }}>{r.cpf}</div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+                                    <span style={{ fontSize: 10, color: 'var(--muted-text)' }}>Score AML</span>
+                                    <span style={{ fontSize: 16, fontWeight: 900, color: SCORE_COLOR(r.score), background: `${SCORE_COLOR(r.score)}14`, padding: '2px 10px', borderRadius: 6, fontFamily: 'var(--font-head)' }}>
+                                      {r.score}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {r.timeline.length > 0 && (
+                                  <div style={{ padding: 14, background: 'var(--card)', borderRadius: 10, border: '1px solid var(--line)' }}>
+                                    <div style={{ fontSize: 10, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 10 }}>Timeline de transações</div>
+                                    {r.timeline.map((t, ti) => (
+                                      <div key={ti} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', paddingBottom: 8 }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                                          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--orange)', marginTop: 3 }} />
+                                          {ti < r.timeline.length - 1 && <div style={{ width: 1, flex: 1, background: 'var(--line)', marginTop: 2, minHeight: 14 }} />}
+                                        </div>
+                                        <div>
+                                          <div style={{ fontSize: 12, color: 'var(--ink)' }}>{t.desc}</div>
+                                          <div style={{ fontSize: 10, color: 'var(--muted-text)', marginTop: 1 }}>{t.ts}</div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {r.scoreFactors.length > 0 && (
+                                  <div style={{ padding: 14, background: 'var(--card)', borderRadius: 10, border: '1px solid var(--line)' }}>
+                                    <div style={{ fontSize: 10, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 10 }}>Score factors</div>
+                                    {r.scoreFactors.map((f, fi) => (
+                                      <div key={fi} style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 6 }}>
+                                        <span style={{ color: 'var(--orange)', fontSize: 12, flexShrink: 0, marginTop: 1 }}>▸</span>
+                                        <span style={{ fontSize: 12, color: 'var(--ink)' }}>{f}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* COLUNA 2 — RO preenchido pelo analista */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                <div style={{ fontSize: 10, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
+                                  RO preenchido por {r.analista}
+                                </div>
+                                {([
+                                  { label: 'Tipo de operação',         value: r.ro.tipoOperacao          },
+                                  { label: 'Data da operação',          value: r.ro.dataOperacao           },
+                                  { label: 'Elementos da análise',      value: r.ro.elementosAnalise       },
+                                  { label: 'Características suspeitas', value: r.ro.caracteristicasSuspeita },
+                                  { label: 'Intermediários',            value: r.ro.intermediarios         },
+                                ]).map((f, fi) => (
+                                  <div key={fi} style={{ padding: 12, background: 'var(--card)', borderRadius: 8, border: '1px solid var(--line)' }}>
+                                    <div style={{ fontSize: 10, color: 'var(--muted-text)', marginBottom: 4 }}>{f.label}</div>
+                                    <div style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.6 }}>{f.value}</div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* COLUNA 3 — Decisão */}
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                <div style={{ fontSize: 10, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>Decisão do jurídico</div>
+
+                                <div style={{ padding: 16, background: 'var(--card)', borderRadius: 10, border: '1px solid var(--line)' }}>
+                                  <div style={{ fontSize: 12, color: 'var(--muted-text)', marginBottom: 12, lineHeight: 1.5 }}>
+                                    Ao aprovar, o caso entra na fila de exportação.
+                                  </div>
+                                  <button
+                                    onClick={() => { setApprovedIds(prev => new Set([...prev, r.id])); setSelectedExport(prev => new Set([...prev, r.id])); setExpandedId(null) }}
+                                    style={{ width: '100%', padding: '10px 0', background: 'var(--orange)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-body)' }}>
+                                    Aprovar RO
+                                  </button>
+                                </div>
+
+                                <div style={{ padding: 16, background: 'var(--card)', borderRadius: 10, border: devolvendo === r.id ? '1px solid var(--orange)' : '1px solid var(--line)' }}>
+                                  {devolvendo !== r.id ? (
+                                    <>
+                                      <div style={{ fontSize: 12, color: 'var(--muted-text)', marginBottom: 12, lineHeight: 1.5 }}>
+                                        Devolva com comentário para correção pelo analista.
+                                      </div>
+                                      <button
+                                        onClick={() => { setDevolvendo(r.id); setComentario('') }}
+                                        style={{ width: '100%', padding: '10px 0', background: 'transparent', color: 'var(--ink)', border: '1px solid var(--line)', borderRadius: 8, cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+                                        Devolver para correção
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div style={{ fontSize: 11, color: 'var(--orange)', fontWeight: 600, marginBottom: 8 }}>Comentário para o analista *</div>
+                                      <textarea value={comentario} onChange={e => setComentario(e.target.value)}
+                                        placeholder="Descreva o que precisa ser corrigido..."
+                                        style={{ width: '100%', minHeight: 90, padding: 10, borderRadius: 8, border: '1px solid var(--line)', fontSize: 12, fontFamily: 'var(--font-body)', color: 'var(--ink)', resize: 'vertical', boxSizing: 'border-box', background: 'var(--bg)', outline: 'none' }} />
+                                      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                                        <button onClick={() => setDevolvendo(null)}
+                                          style={{ flex: 1, padding: '8px 0', background: 'transparent', border: '1px solid var(--line)', borderRadius: 8, cursor: 'pointer', fontSize: 12, color: 'var(--muted-text)', fontFamily: 'var(--font-body)' }}>
+                                          Cancelar
+                                        </button>
+                                        <button disabled={comentario.trim().length === 0}
+                                          onClick={() => { setReturnedIds(prev => new Set([...prev, r.id])); setDevolvendo(null); setExpandedId(null) }}
+                                          style={{ flex: 2, padding: '8px 0', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-body)',
+                                            cursor: comentario.trim().length > 0 ? 'pointer' : 'not-allowed',
+                                            background: comentario.trim().length > 0 ? 'var(--orange)' : 'var(--line)',
+                                            color: comentario.trim().length > 0 ? '#fff' : 'var(--muted-text)' }}>
+                                          Enviar devolução
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+
+                                <div style={{ padding: 12, borderRadius: 8, background: 'rgba(242,97,34,0.05)', border: '1px solid rgba(242,97,34,0.15)', fontSize: 11, color: 'var(--muted-text)', lineHeight: 1.6 }}>
+                                  ⓘ Sua decisão será registrada na trilha de auditoria com nome e timestamp. Irreversível.
+                                </div>
+                              </div>
+
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   )
                 })}
               </tbody>
