@@ -757,13 +757,10 @@ export default function GestaoVipPage() {
     return matchChurn && matchRfm && matchTier && matchTag && matchSearch
   })
 
-  const tabBtnS = (active: boolean): React.CSSProperties => ({
-    fontSize: 13, fontWeight: 700, padding: '8px 18px', borderRadius: 9,
-    border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-    background: active ? 'var(--orange)' : 'transparent',
-    color: active ? '#fff' : 'var(--ink-2)',
-    transition: 'all .15s',
-  })
+  const ABAS_VIP = [
+    { id: 'visao-geral',  label: 'Visão Geral'  },
+    { id: 'clientes-vip', label: 'Clientes VIP' },
+  ] as const
 
   return (
     <main className="canvas">
@@ -771,7 +768,7 @@ export default function GestaoVipPage() {
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
 
           {/* Header */}
-          <div style={{ marginBottom: 16 }}>
+          <div style={{ marginBottom: 0 }}>
             <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
               Gestão VIP
             </h1>
@@ -780,10 +777,20 @@ export default function GestaoVipPage() {
             </div>
           </div>
 
-          {/* Tab bar */}
-          <div style={{ display: 'flex', background: '#F1F2F4', borderRadius: 11, padding: 4, gap: 3, marginBottom: 18, width: 'fit-content' }}>
-            <button style={tabBtnS(aba === 'visao-geral')}  onClick={() => setAba('visao-geral')}>Visão Geral</button>
-            <button style={tabBtnS(aba === 'clientes-vip')} onClick={() => setAba('clientes-vip')}>Clientes VIP</button>
+          {/* Barra de Abas */}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: 0, borderBottom: '1px solid var(--line)', marginTop: 18, marginBottom: 20 }}>
+            {ABAS_VIP.map((a) => {
+              const active = aba === a.id
+              return (
+                <button key={a.id} onClick={() => setAba(a.id)}
+                  style={{ padding: '10px 18px', fontSize: 13, fontWeight: active ? 800 : 600, fontFamily: 'var(--font-body)', background: 'none', border: 'none', cursor: 'pointer',
+                    color:        active ? 'var(--orange)'           : 'var(--muted-text)',
+                    borderBottom: active ? '2px solid var(--orange)' : '2px solid transparent',
+                    marginBottom: -1 }}>
+                  {a.label}
+                </button>
+              )
+            })}
           </div>
 
           {/* ── Visão Geral ── */}
