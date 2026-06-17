@@ -229,14 +229,14 @@ function VipTierBarsPanel() {
 
 // ── VIP Roster data ─────────────────────────────────────────────────────────
 const ROSTER = [
-  { name: 'Marcos A.',  id: 'usr_8f3a91', tier: 'Legend',    sub: 1, vertical: 'Cassino', risco: '412.800', ltv: '480k',  ggr: '180.300', hold: '9,5%', score: 82, rfm: 'Camp.', flag: true,  churn: 'critical', turnover_90d: 2_150_000 },
-  { name: 'Rafael S.',  id: 'usr_5b22e0', tier: 'Legend',    sub: 3, vertical: 'Híbrido', risco: '246.600', ltv: '390k',  ggr: '118.900', hold: '8,1%', score: 74, rfm: 'Leal',  flag: false, churn: 'med',      turnover_90d: 1_480_000 },
-  { name: 'Beatriz L.', id: 'usr_2a77f1', tier: 'Elite',     sub: 2, vertical: 'Cassino', risco: '201.300', ltv: '230k',  ggr: '61.200',  hold: '7,4%', score: 69, rfm: 'Risco', flag: true,  churn: 'critical', turnover_90d: 1_080_000 },
-  { name: 'Diego F.',   id: 'usr_9e34c2', tier: 'Elite',     sub: 4, vertical: 'Esporte', risco: '144.900', ltv: '188k',  ggr: '42.500',  hold: '5,2%', score: 58, rfm: 'Aten.', flag: true,  churn: 'med',      turnover_90d:   860_000 },
-  { name: 'Carla M.',   id: 'usr_1f55d7', tier: 'Exclusive', sub: 1, vertical: 'Cassino', risco: '86.400',  ltv: '140k',  ggr: '33.800',  hold: '8,8%', score: 80, rfm: 'Leal',  flag: false, churn: 'high',     turnover_90d:   380_000 },
-  { name: 'Helena C.',  id: 'usr_7c10aa', tier: 'Legend',    sub: 1, vertical: 'Esporte', risco: '60.400',  ltv: '305k',  ggr: '96.700',  hold: '6,1%', score: 88, rfm: 'Camp.', flag: false, churn: 'low',      turnover_90d: 1_580_000 },
-  { name: 'Bruno T.',   id: 'usr_3c92a4', tier: 'Black',     sub: 4, vertical: 'Híbrido', risco: '37.500',  ltv: '62k',   ggr: '12.900',  hold: '5,9%', score: 61, rfm: 'Risco', flag: true,  churn: 'critical', turnover_90d:   230_000 },
-  { name: 'Paula N.',   id: 'usr_4d88b9', tier: 'Elite',     sub: 1, vertical: 'Híbrido', risco: '25.100',  ltv: '167k',  ggr: '74.000',  hold: '9,1%', score: 85, rfm: 'Camp.', flag: false, churn: 'low',      turnover_90d:   820_000 },
+  { name: 'Marcos A.',  id: 'usr_8f3a91', tier: 'Legend',    sub: 1, vertical: 'Cassino', risco: '412.800', ltv: '480k',  ggr: '180.300', hold: '9,5%', score: 82, rfm: 'Camp.', flag: true,  churn: 'critical', turnover_90d: 2_150_000, casino_t90: 2_040_000, sport_t90:   110_000 },
+  { name: 'Rafael S.',  id: 'usr_5b22e0', tier: 'Legend',    sub: 3, vertical: 'Híbrido', risco: '246.600', ltv: '390k',  ggr: '118.900', hold: '8,1%', score: 74, rfm: 'Leal',  flag: false, churn: 'med',      turnover_90d: 1_480_000, casino_t90:   740_000, sport_t90:   740_000 },
+  { name: 'Beatriz L.', id: 'usr_2a77f1', tier: 'Elite',     sub: 2, vertical: 'Cassino', risco: '201.300', ltv: '230k',  ggr: '61.200',  hold: '7,4%', score: 69, rfm: 'Risco', flag: true,  churn: 'critical', turnover_90d: 1_080_000, casino_t90: 1_030_000, sport_t90:    50_000 },
+  { name: 'Diego F.',   id: 'usr_9e34c2', tier: 'Elite',     sub: 4, vertical: 'Esporte', risco: '144.900', ltv: '188k',  ggr: '42.500',  hold: '5,2%', score: 58, rfm: 'Aten.', flag: true,  churn: 'med',      turnover_90d:   860_000, casino_t90:    45_000, sport_t90:   815_000 },
+  { name: 'Carla M.',   id: 'usr_1f55d7', tier: 'Exclusive', sub: 1, vertical: 'Cassino', risco: '86.400',  ltv: '140k',  ggr: '33.800',  hold: '8,8%', score: 80, rfm: 'Leal',  flag: false, churn: 'high',     turnover_90d:   380_000, casino_t90:   360_000, sport_t90:    20_000 },
+  { name: 'Helena C.',  id: 'usr_7c10aa', tier: 'Legend',    sub: 1, vertical: 'Esporte', risco: '60.400',  ltv: '305k',  ggr: '96.700',  hold: '6,1%', score: 88, rfm: 'Camp.', flag: false, churn: 'low',      turnover_90d: 1_580_000, casino_t90:    80_000, sport_t90: 1_500_000 },
+  { name: 'Bruno T.',   id: 'usr_3c92a4', tier: 'Black',     sub: 4, vertical: 'Híbrido', risco: '37.500',  ltv: '62k',   ggr: '12.900',  hold: '5,9%', score: 61, rfm: 'Risco', flag: true,  churn: 'critical', turnover_90d:   230_000, casino_t90:   120_000, sport_t90:   110_000 },
+  { name: 'Paula N.',   id: 'usr_4d88b9', tier: 'Elite',     sub: 1, vertical: 'Híbrido', risco: '25.100',  ltv: '167k',  ggr: '74.000',  hold: '9,1%', score: 85, rfm: 'Camp.', flag: false, churn: 'low',      turnover_90d:   820_000, casino_t90:   410_000, sport_t90:   410_000 },
 ]
 
 const CHURN_STYLE: Record<string, { bg: string; color: string; label: string }> = {
@@ -634,8 +634,184 @@ function ClientesFilterBar({
   )
 }
 
-// ── Clientes VIP — tabela filtrada e ordenável ──────────────────────────────
+// ── VIP Drawer ─────────────────────────────────────────────────────────────
 type RosterRow = typeof ROSTER[number]
+
+function VipDrawer({ row, idx, total, onPrev, onNext, onClose }: {
+  row:    RosterRow
+  idx:    number
+  total:  number
+  onPrev: () => void
+  onNext: () => void
+  onClose: () => void
+}) {
+  const tierColor = TIER_COLORS[row.tier]
+  const churnS    = CHURN_STYLE[row.churn]
+
+  const ggrNum     = parseGgr(row.ggr)
+  const ngrNum     = Math.round(ggrNum * 0.70)
+  const netCashNum = Math.round(row.turnover_90d * 0.023)
+
+  const casinoPct = row.turnover_90d > 0 ? Math.round(row.casino_t90 / row.turnover_90d * 100) : 0
+  const sportPct  = row.turnover_90d > 0 ? Math.round(row.sport_t90  / row.turnover_90d * 100) : 0
+
+  function fmtK(n: number): string {
+    if (n >= 1_000_000) return `R$ ${(n / 1_000_000).toFixed(1).replace('.', ',')}M`
+    return `R$ ${Math.round(n / 1000)}k`
+  }
+
+  let opp = 'VIP em monitoramento regular.'
+  if      (row.churn === 'critical')                        opp = 'VIP em churn crítico — acionar account manager imediatamente.'
+  else if (row.churn === 'high')                            opp = 'Risco de churn elevado — contato proativo recomendado em 48h.'
+  else if (row.tier === 'Exclusive' && row.sub === 1)       opp = 'Elegível para upgrade para Elite — 8% abaixo do limiar.'
+  else if (row.rfm === 'Camp.')                             opp = 'Champion VIP ativo — candidato a benefícios exclusivos de subtier.'
+
+  const SLBL: React.CSSProperties = { fontSize: 9, fontWeight: 800, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '.6px', marginBottom: 10 }
+  const LBL:  React.CSSProperties = { fontSize: 11.5, color: 'var(--muted-text)', fontWeight: 600, minWidth: 80 }
+  const VAL:  React.CSSProperties = { fontSize: 12, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-mono)' }
+  const ROW:  React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 8, borderBottom: '1px solid var(--line)', marginBottom: 8, gap: 10 }
+  const ROWL: React.CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }
+
+  const navBtn = (disabled: boolean): React.CSSProperties => ({
+    padding: '5px 10px', fontSize: 11, fontWeight: 700,
+    border: '1px solid var(--line)', borderRadius: 7, background: 'transparent',
+    color: disabled ? 'var(--muted-2)' : 'var(--ink)',
+    cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
+  })
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(26,26,26,.28)', zIndex: 50 }} />
+      <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 410, background: 'var(--card)', boxShadow: '-4px 0 32px rgba(0,0,0,.14)', zIndex: 51, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+
+        {/* Top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={onPrev} disabled={idx === 0}         style={navBtn(idx === 0)}>← Anterior</button>
+            <button onClick={onNext} disabled={idx === total - 1} style={navBtn(idx === total - 1)}>Próximo →</button>
+          </div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <button style={{ padding: '5px 10px', fontSize: 11, fontWeight: 700, border: '1px solid var(--orange)', borderRadius: 7, background: 'transparent', color: 'var(--orange)', cursor: 'pointer', fontFamily: 'inherit' }}>
+              ↗ Ver completo
+            </button>
+            <button onClick={onClose} style={{ padding: '4px 10px', fontSize: 18, border: 'none', background: 'none', color: 'var(--muted-text)', cursor: 'pointer', lineHeight: 1 }}>×</button>
+          </div>
+        </div>
+
+        {/* Header */}
+        <div style={{ padding: '16px 18px 14px', borderBottom: '1px solid var(--line)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-head)', lineHeight: 1.2 }}>
+                {row.flag && <span style={{ color: 'var(--amber)', marginRight: 6 }}>⚑</span>}{row.name}
+              </div>
+              <div style={{ fontSize: 10.5, color: 'var(--muted-2)', fontFamily: 'var(--font-mono)', marginTop: 3 }}>{row.id}</div>
+            </div>
+            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' as const, justifyContent: 'flex-end' }}>
+              <span style={{ fontSize: 10.5, fontWeight: 800, color: tierColor, background: `${tierColor}18`, padding: '3px 8px', borderRadius: 5 }}>{row.tier} S{row.sub}</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: churnS.color, background: churnS.bg, padding: '3px 8px', borderRadius: 5 }}>{churnS.label}</span>
+              <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--muted-text)', background: 'var(--bg)', border: '1px solid var(--line)', padding: '3px 8px', borderRadius: 5 }}>{row.rfm}</span>
+            </div>
+          </div>
+          <div style={{ fontSize: 10.5, color: 'var(--muted-text)' }}>{row.vertical} · {String(idx + 1).padStart(2, '0')} de {total}</div>
+        </div>
+
+        {/* Body */}
+        <div style={{ flex: 1, padding: '0 18px 28px', display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* FINANCEIRO */}
+          <div style={{ paddingTop: 18 }}>
+            <div style={SLBL}>Financeiro (MTD)</div>
+            {[
+              { lbl: 'GGR',      val: `R$ ${row.ggr}` },
+              { lbl: 'NGR',      val: fmtK(ngrNum)     },
+              { lbl: 'Net Cash', val: fmtK(netCashNum)  },
+              { lbl: 'Turnover', val: fmtTurnover(row.turnover_90d) + ' (90d)' },
+            ].map((item, ii, arr) => (
+              <div key={item.lbl} style={ii < arr.length - 1 ? ROW : ROWL}>
+                <span style={LBL}>{item.lbl}</span>
+                <span style={VAL}>{item.val}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* SCORES */}
+          <div>
+            <div style={SLBL}>Scores</div>
+
+            <div style={ROW}>
+              <span style={LBL}>Subtier</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 80, height: 5, borderRadius: 3, background: '#EEF0F2', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${(row.sub / 4) * 100}%`, background: tierColor, borderRadius: 3 }} />
+                </div>
+                <span style={VAL}>S{row.sub} / S4</span>
+              </div>
+            </div>
+
+            <div style={ROW}>
+              <span style={LBL}>Score</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 80, height: 5, borderRadius: 3, background: '#EEF0F2', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${row.score}%`, background: row.score >= 80 ? 'var(--green)' : row.score >= 60 ? 'var(--amber)' : 'var(--red)', borderRadius: 3 }} />
+                </div>
+                <span style={VAL}>{row.score}</span>
+              </div>
+            </div>
+
+            <div style={ROW}>
+              <span style={LBL}>Churn Risk</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: churnS.color, background: churnS.bg, padding: '2px 8px', borderRadius: 5 }}>{churnS.label}</span>
+            </div>
+
+            <div style={ROWL}>
+              <span style={LBL}>RFM</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink)', background: 'var(--bg)', border: '1px solid var(--line)', padding: '2px 8px', borderRadius: 5 }}>{row.rfm}</span>
+            </div>
+          </div>
+
+          {/* PERFIL DE APOSTAS */}
+          {row.turnover_90d > 0 && (
+            <div>
+              <div style={SLBL}>Perfil de Apostas</div>
+
+              <div style={{ ...ROW }}>
+                <span style={{ ...LBL, minWidth: 52 }}>Casino</span>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, height: 6, borderRadius: 3, background: '#EEF0F2', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${casinoPct}%`, background: 'var(--orange)', borderRadius: 3 }} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--orange)', minWidth: 32, textAlign: 'right' as const }}>{casinoPct}%</span>
+                </div>
+                <span style={{ ...VAL, minWidth: 60, textAlign: 'right' as const }}>{fmtK(row.casino_t90)}</span>
+              </div>
+
+              <div style={ROWL}>
+                <span style={{ ...LBL, minWidth: 52 }}>Sports</span>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, height: 6, borderRadius: 3, background: '#EEF0F2', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${sportPct}%`, background: 'var(--green)', borderRadius: 3 }} />
+                  </div>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--green)', minWidth: 32, textAlign: 'right' as const }}>{sportPct}%</span>
+                </div>
+                <span style={{ ...VAL, minWidth: 60, textAlign: 'right' as const }}>{fmtK(row.sport_t90)}</span>
+              </div>
+            </div>
+          )}
+
+          {/* OPORTUNIDADES */}
+          <div style={{ padding: '14px 16px', background: 'var(--orange-soft)', borderRadius: 12, border: '1px solid var(--orange-line)' }}>
+            <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--orange)', textTransform: 'uppercase' as const, letterSpacing: '.6px', marginBottom: 8 }}>Oportunidades</div>
+            <div style={{ fontSize: 12, color: 'var(--ink)', lineHeight: 1.55 }}>{opp}</div>
+          </div>
+
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ── Clientes VIP — tabela filtrada e ordenável ──────────────────────────────
 
 const SORTABLE_COLS: Record<string, { field: string; label: string }> = {
   'GGR MTD':       { field: 'ggr',          label: 'GGR MTD' },
@@ -644,12 +820,13 @@ const SORTABLE_COLS: Record<string, { field: string; label: string }> = {
 }
 
 function ClientesVipTable({
-  rows, sortBy, sortDir, onSort,
+  rows, sortBy, sortDir, onSort, onRowClick,
 }: {
   rows: RosterRow[]
   sortBy: string | null
   sortDir: 'asc' | 'desc'
   onSort: (field: string) => void
+  onRowClick?: (idx: number) => void
 }) {
   const [hovered, setHovered] = useState<number | null>(null)
 
@@ -704,7 +881,8 @@ function ClientesVipTable({
                   <tr key={r.id}
                     onMouseEnter={() => setHovered(i)}
                     onMouseLeave={() => setHovered(null)}
-                    style={{ background: isHov ? C.orangeSoft : 'transparent', transition: 'background .15s' }}
+                    onClick={() => onRowClick?.(i)}
+                    style={{ background: isHov ? C.orangeSoft : 'transparent', transition: 'background .15s', cursor: onRowClick ? 'pointer' : 'default' }}
                   >
                     <td style={{ padding: '9px 10px', color: 'var(--muted-text)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{String(i + 1).padStart(2, '0')}</td>
                     <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
@@ -747,6 +925,7 @@ export default function GestaoVipPage() {
   const [verticalFilter, setVerticalFilter] = useState('')
   const [sortBy,         setSortBy]         = useState<string | null>(null)
   const [sortDir,        setSortDir]        = useState<'asc' | 'desc'>('desc')
+  const [selectedVipIdx, setSelectedVipIdx] = useState<number | null>(null)
 
   function goToClientes(opts: GoToClientesOpts) {
     setChurnFilter(opts.churn ?? [])
@@ -850,12 +1029,25 @@ export default function GestaoVipPage() {
                 sortBy={sortBy}
                 sortDir={sortDir}
                 onSort={handleSort}
+                onRowClick={setSelectedVipIdx}
               />
             </div>
           )}
 
         </div>
       </div>
+
+      {/* VIP Drawer */}
+      {selectedVipIdx !== null && sortedRoster[selectedVipIdx] && (
+        <VipDrawer
+          row={sortedRoster[selectedVipIdx]}
+          idx={selectedVipIdx}
+          total={sortedRoster.length}
+          onPrev={() => setSelectedVipIdx(i => (i !== null && i > 0 ? i - 1 : i))}
+          onNext={() => setSelectedVipIdx(i => (i !== null && i < sortedRoster.length - 1 ? i + 1 : i))}
+          onClose={() => setSelectedVipIdx(null)}
+        />
+      )}
     </main>
   )
 }
