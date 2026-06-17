@@ -6,6 +6,7 @@ export const MODULES: Module[] = [
   { id: "apostas",          nome: "Apostas Esportivas",  icone: "🎯", status: "soon"  },
   { id: "cassino",          nome: "Cassino",             icone: "🌐", status: "soon"  },
   { id: "pld-aml",          nome: "PLD / AML",           icone: "🛡️", status: "ready" },
+  { id: "gestao-vip",       nome: "Gestão VIP",          icone: "👑", status: "ready" },
   { id: "risco-fraude",     nome: "Risco & Fraude",      icone: "🚨", status: "soon"  },
   { id: "web-analytics",    nome: "Web Analytics",       icone: "📈", status: "soon"  },
 ]
@@ -26,6 +27,7 @@ export const NAV: NavGroup[] = [
       { id: "perfil-apostador", icon: "👤", label: "Perfil de Apostador" },
       { id: "risco-fraude",     icon: "🛡️", label: "Risco e Fraude",     disabled: true },
       { id: "pld-aml",          icon: "🛡️", label: "PLD / AML" },
+      { id: "gestao-vip",       icon: "👑", label: "Gestão VIP",           badge: "NEW" },
       { id: "web-analytics",    icon: "📈", label: "Web Analytics",       badge: "NEW" },
     ],
   },
