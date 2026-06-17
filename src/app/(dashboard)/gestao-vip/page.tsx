@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react'
 
-// ── Color palette (hex only used where CSS vars unavailable, e.g. recharts) ─
+// ── Color palette ───────────────────────────────────────────────────────────
 const C = {
   orange:     '#F26122',
   orange2:    '#F08A52',
@@ -19,6 +19,15 @@ const TIER_COLORS: Record<string, string> = {
   Elite:     C.orange,
   Exclusive: '#E08A4E',
   Black:     C.ink,
+}
+
+// ── Tipo compartilhado de navegação ────────────────────────────────────────
+type GoToClientesOpts = {
+  churn?:    string[]
+  rfm?:      string[]
+  tag?:      string
+  vertical?: string
+  sort?:     { field: string; dir: 'asc' | 'desc' }
 }
 
 // ── Shared Panel wrapper ────────────────────────────────────────────────────
@@ -89,14 +98,14 @@ function VipTriagePanel() {
 
 // ── VIP KPIs ────────────────────────────────────────────────────────────────
 const KPIS = [
-  { lbl: 'VIPs ativos',     val: '1.284',     varStr: '+6,2%',  dir: 'up',   note: null },
-  { lbl: 'GGR da carteira', val: 'R$ 18,4M',  varStr: '+9,1%',  dir: 'up',   note: '68% do GGR total' },
-  { lbl: 'NGR da carteira', val: 'R$ 12,6M',  varStr: '+7,4%',  dir: 'up',   note: null },
-  { lbl: 'ARPPU (GGR)',     val: 'R$ 14.330', varStr: '+3,1%',  dir: 'up',   note: 'receita média por VIP' },
-  { lbl: 'Hold médio',      val: '6,8%',      varStr: null,     dir: null,   note: 'GGR ÷ turnover' },
-  { lbl: 'Bônus / GGR',     val: '11,2%',     varStr: '+1,4pp', dir: 'down', note: 'monitorar custo' },
-  { lbl: 'Net Cash (MTD)',  val: 'R$ 11,9M',  varStr: '+4,3%',  dir: 'up',   note: null },
-  { lbl: 'Score médio',     val: '78',        varStr: null,     dir: null,   note: '4% em alto/crítico' },
+  { lbl: 'VIPs ativos',     val: '1.284',     varStr: '+6,2%',  dir: 'up',   note: null,                    click: {} as GoToClientesOpts },
+  { lbl: 'GGR da carteira', val: 'R$ 18,4M',  varStr: '+9,1%',  dir: 'up',   note: '68% do GGR total',      click: { sort: { field: 'ggr', dir: 'desc' as const } } as GoToClientesOpts },
+  { lbl: 'NGR da carteira', val: 'R$ 12,6M',  varStr: '+7,4%',  dir: 'up',   note: null,                    click: {} as GoToClientesOpts },
+  { lbl: 'ARPPU (GGR)',     val: 'R$ 14.330', varStr: '+3,1%',  dir: 'up',   note: 'receita média por VIP',  click: undefined },
+  { lbl: 'Hold médio',      val: '6,8%',      varStr: null,     dir: null,   note: 'GGR ÷ turnover',         click: undefined },
+  { lbl: 'Bônus / GGR',     val: '11,2%',     varStr: '+1,4pp', dir: 'down', note: 'monitorar custo',        click: undefined },
+  { lbl: 'Net Cash (MTD)',  val: 'R$ 11,9M',  varStr: '+4,3%',  dir: 'up',   note: null,                    click: {} as GoToClientesOpts },
+  { lbl: 'Score médio',     val: '78',        varStr: null,     dir: null,   note: '4% em alto/crítico',     click: undefined },
 ]
 
 const SPARK = [3, 5, 4, 6, 5, 7, 8]
@@ -114,7 +123,8 @@ function Sparkline({ up }: { up: boolean }) {
   )
 }
 
-function VipKpisPanel() {
+function VipKpisPanel({ onCardClick }: { onCardClick?: (opts: GoToClientesOpts) => void }) {
+  const [hov, setHov] = useState<number | null>(null)
   return (
     <Panel title="VIP — Saúde da carteira" sub="GGR · NGR · ARPPU · Hold">
       <div style={{
@@ -122,14 +132,27 @@ function VipKpisPanel() {
         gap: 1, background: 'var(--line)', border: '1px solid var(--line)',
         borderRadius: 10, overflow: 'hidden',
       }}>
-        {KPIS.map((k) => {
-          const isDown = k.dir === 'down'
-          const dirColor = k.dir === 'up' ? 'var(--green)' : k.dir === 'down' ? 'var(--red)' : 'var(--muted-text)'
-          const arrow = k.dir === 'up' ? '▲' : k.dir === 'down' ? '▼' : ''
+        {KPIS.map((k, i) => {
+          const isDown    = k.dir === 'down'
+          const dirColor  = k.dir === 'up' ? 'var(--green)' : k.dir === 'down' ? 'var(--red)' : 'var(--muted-text)'
+          const arrow     = k.dir === 'up' ? '▲' : k.dir === 'down' ? '▼' : ''
+          const clickable = onCardClick !== undefined && k.click !== undefined
+          const isHov     = hov === i
           return (
-            <div key={k.lbl} style={{ background: 'var(--card)', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '.4px' }}>
-                {k.lbl}
+            <div
+              key={k.lbl}
+              onClick={clickable ? () => onCardClick!(k.click!) : undefined}
+              onMouseEnter={() => { if (clickable) setHov(i) }}
+              onMouseLeave={() => setHov(null)}
+              style={{
+                background: isHov ? C.orangeSoft : 'var(--card)',
+                padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 4,
+                cursor: clickable ? 'pointer' : 'default',
+                transition: 'background .15s',
+              }}
+            >
+              <div style={{ fontSize: 9.5, fontWeight: 700, color: isHov ? 'var(--orange)' : 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '.4px', transition: 'color .15s' }}>
+                {k.lbl} {clickable && <span style={{ fontSize: 9 }}>→</span>}
               </div>
               <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>
                 {k.val}
@@ -182,15 +205,7 @@ function VipTierBarsPanel() {
               <div style={{ height: 10, borderRadius: 6, background: '#F0F1F4', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${widthPct}%`, display: 'flex', overflow: 'hidden', borderRadius: 6 }}>
                   {t.subs.map((s, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        height: '100%',
-                        width: `${(s / total) * 100}%`,
-                        background: color,
-                        opacity: 1 - i * 0.18,
-                      }}
-                    />
+                    <div key={i} style={{ height: '100%', width: `${(s / total) * 100}%`, background: color, opacity: 1 - i * 0.18 }} />
                   ))}
                 </div>
               </div>
@@ -212,23 +227,23 @@ function VipTierBarsPanel() {
   )
 }
 
-// ── VIP Roster data (3 entradas promovidas a 'critical') ────────────────────
+// ── VIP Roster data ─────────────────────────────────────────────────────────
 const ROSTER = [
-  { name: 'Marcos A.',  id: 'usr_8f3a91', tier: 'Legend',    sub: 1, vertical: 'Cassino', risco: '412.800', ltv: '480k',  ggr: '180.300', hold: '9,5%', score: 82, rfm: 'Camp.', flag: true,  churn: 'critical' },
-  { name: 'Rafael S.',  id: 'usr_5b22e0', tier: 'Legend',    sub: 3, vertical: 'Híbrido', risco: '246.600', ltv: '390k',  ggr: '118.900', hold: '8,1%', score: 74, rfm: 'Leal',  flag: false, churn: 'med'      },
-  { name: 'Beatriz L.', id: 'usr_2a77f1', tier: 'Elite',     sub: 2, vertical: 'Cassino', risco: '201.300', ltv: '230k',  ggr: '61.200',  hold: '7,4%', score: 69, rfm: 'Risco', flag: true,  churn: 'critical' },
-  { name: 'Diego F.',   id: 'usr_9e34c2', tier: 'Elite',     sub: 4, vertical: 'Esporte', risco: '144.900', ltv: '188k',  ggr: '42.500',  hold: '5,2%', score: 58, rfm: 'Aten.', flag: true,  churn: 'med'      },
-  { name: 'Carla M.',   id: 'usr_1f55d7', tier: 'Exclusive', sub: 1, vertical: 'Cassino', risco: '86.400',  ltv: '140k',  ggr: '33.800',  hold: '8,8%', score: 80, rfm: 'Leal',  flag: false, churn: 'high'     },
-  { name: 'Helena C.',  id: 'usr_7c10aa', tier: 'Legend',    sub: 1, vertical: 'Esporte', risco: '60.400',  ltv: '305k',  ggr: '96.700',  hold: '6,1%', score: 88, rfm: 'Camp.', flag: false, churn: 'low'      },
-  { name: 'Bruno T.',   id: 'usr_3c92a4', tier: 'Black',     sub: 4, vertical: 'Híbrido', risco: '37.500',  ltv: '62k',   ggr: '12.900',  hold: '5,9%', score: 61, rfm: 'Risco', flag: true,  churn: 'critical' },
-  { name: 'Paula N.',   id: 'usr_4d88b9', tier: 'Elite',     sub: 1, vertical: 'Híbrido', risco: '25.100',  ltv: '167k',  ggr: '74.000',  hold: '9,1%', score: 85, rfm: 'Camp.', flag: false, churn: 'low'      },
+  { name: 'Marcos A.',  id: 'usr_8f3a91', tier: 'Legend',    sub: 1, vertical: 'Cassino', risco: '412.800', ltv: '480k',  ggr: '180.300', hold: '9,5%', score: 82, rfm: 'Camp.', flag: true,  churn: 'critical', turnover_90d: 2_150_000 },
+  { name: 'Rafael S.',  id: 'usr_5b22e0', tier: 'Legend',    sub: 3, vertical: 'Híbrido', risco: '246.600', ltv: '390k',  ggr: '118.900', hold: '8,1%', score: 74, rfm: 'Leal',  flag: false, churn: 'med',      turnover_90d: 1_480_000 },
+  { name: 'Beatriz L.', id: 'usr_2a77f1', tier: 'Elite',     sub: 2, vertical: 'Cassino', risco: '201.300', ltv: '230k',  ggr: '61.200',  hold: '7,4%', score: 69, rfm: 'Risco', flag: true,  churn: 'critical', turnover_90d: 1_080_000 },
+  { name: 'Diego F.',   id: 'usr_9e34c2', tier: 'Elite',     sub: 4, vertical: 'Esporte', risco: '144.900', ltv: '188k',  ggr: '42.500',  hold: '5,2%', score: 58, rfm: 'Aten.', flag: true,  churn: 'med',      turnover_90d:   860_000 },
+  { name: 'Carla M.',   id: 'usr_1f55d7', tier: 'Exclusive', sub: 1, vertical: 'Cassino', risco: '86.400',  ltv: '140k',  ggr: '33.800',  hold: '8,8%', score: 80, rfm: 'Leal',  flag: false, churn: 'high',     turnover_90d:   380_000 },
+  { name: 'Helena C.',  id: 'usr_7c10aa', tier: 'Legend',    sub: 1, vertical: 'Esporte', risco: '60.400',  ltv: '305k',  ggr: '96.700',  hold: '6,1%', score: 88, rfm: 'Camp.', flag: false, churn: 'low',      turnover_90d: 1_580_000 },
+  { name: 'Bruno T.',   id: 'usr_3c92a4', tier: 'Black',     sub: 4, vertical: 'Híbrido', risco: '37.500',  ltv: '62k',   ggr: '12.900',  hold: '5,9%', score: 61, rfm: 'Risco', flag: true,  churn: 'critical', turnover_90d:   230_000 },
+  { name: 'Paula N.',   id: 'usr_4d88b9', tier: 'Elite',     sub: 1, vertical: 'Híbrido', risco: '25.100',  ltv: '167k',  ggr: '74.000',  hold: '9,1%', score: 85, rfm: 'Camp.', flag: false, churn: 'low',      turnover_90d:   820_000 },
 ]
 
 const CHURN_STYLE: Record<string, { bg: string; color: string; label: string }> = {
-  critical: { bg: '#FBE7E7',           color: '#E23B3B',        label: 'Crítico' },
-  high:     { bg: 'var(--red-soft)',   color: 'var(--red)',     label: 'Alto'    },
-  med:      { bg: 'var(--amber-soft)', color: 'var(--amber)',   label: 'Médio'   },
-  low:      { bg: 'var(--green-soft)', color: 'var(--green)',   label: 'Baixo'   },
+  critical: { bg: '#FBE7E7',           color: '#E23B3B',      label: 'Crítico' },
+  high:     { bg: 'var(--red-soft)',   color: 'var(--red)',   label: 'Alto'    },
+  med:      { bg: 'var(--amber-soft)', color: 'var(--amber)', label: 'Médio'   },
+  low:      { bg: 'var(--green-soft)', color: 'var(--green)', label: 'Baixo'   },
 }
 
 function ScoreBar({ score }: { score: number }) {
@@ -241,6 +256,15 @@ function ScoreBar({ score }: { score: number }) {
       <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--ink)', fontSize: 12 }}>{score}</span>
     </div>
   )
+}
+
+function fmtTurnover(v: number): string {
+  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1).replace('.', ',')}M`
+  return `R$ ${Math.round(v / 1000)}k`
+}
+
+function parseGgr(s: string): number {
+  return parseFloat(s.replace(/\./g, ''))
 }
 
 function VipRosterPanel() {
@@ -268,45 +292,26 @@ function VipRosterPanel() {
               const isTop3 = i < 3
               const isHov = hovered === i
               return (
-                <tr
-                  key={r.id}
+                <tr key={r.id}
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
-                  style={{
-                    background: isHov ? C.orangeSoft : isTop3 ? '#FBE7E7' : 'transparent',
-                    transition: 'background .15s',
-                  }}
+                  style={{ background: isHov ? C.orangeSoft : isTop3 ? '#FBE7E7' : 'transparent', transition: 'background .15s' }}
                 >
-                  <td style={{ padding: '9px 10px', color: 'var(--muted-text)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                    {String(i + 1).padStart(2, '0')}
-                  </td>
+                  <td style={{ padding: '9px 10px', color: 'var(--muted-text)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{String(i + 1).padStart(2, '0')}</td>
                   <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
-                    <div style={{ fontWeight: 700, color: 'var(--ink)' }}>
-                      {r.flag && <span style={{ color: 'var(--amber)', marginRight: 5 }}>⚑</span>}
-                      {r.name}
-                    </div>
+                    <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{r.flag && <span style={{ color: 'var(--amber)', marginRight: 5 }}>⚑</span>}{r.name}</div>
                     <div style={{ fontSize: 10, color: 'var(--muted-2)', fontFamily: 'var(--font-mono)', marginTop: 1 }}>{r.id}</div>
                   </td>
                   <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: tierColor }}>{r.tier}</span>
                     <span style={{ fontSize: 10.5, color: 'var(--muted-text)', marginLeft: 4 }}>S{r.sub}</span>
                   </td>
-                  <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>
-                    R$ {r.ggr}
-                  </td>
-                  <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--orange)', whiteSpace: 'nowrap' }}>
-                    R$ {r.risco}
-                  </td>
-                  <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)' }}>
-                    {r.hold}
-                  </td>
+                  <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>R$ {r.ggr}</td>
+                  <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--orange)', whiteSpace: 'nowrap' }}>R$ {r.risco}</td>
+                  <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)' }}>{r.hold}</td>
+                  <td style={{ padding: '9px 10px' }}><ScoreBar score={r.score} /></td>
                   <td style={{ padding: '9px 10px' }}>
-                    <ScoreBar score={r.score} />
-                  </td>
-                  <td style={{ padding: '9px 10px' }}>
-                    <span style={{ fontSize: 10.5, fontWeight: 700, color: churnS.color, background: churnS.bg, padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>
-                      {churnS.label}
-                    </span>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, color: churnS.color, background: churnS.bg, padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>{churnS.label}</span>
                   </td>
                 </tr>
               )
@@ -331,23 +336,12 @@ function VipOpportunitiesPanel() {
     <Panel title="VIP — Oportunidades" sub="Retenção · upsell · reativação">
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, flex: 1 }}>
         {OPPS.map((o) => (
-          <div key={o.title} style={{
-            border: '1px solid var(--line)', borderRadius: 12, padding: '14px 16px',
-            display: 'flex', flexDirection: 'column', gap: 6,
-          }}>
-            <span style={{
-              fontSize: 9.5, fontWeight: 800, color: 'var(--orange)',
-              background: 'var(--orange-soft)', padding: '2px 8px', borderRadius: 4,
-              display: 'inline-block', textTransform: 'uppercase' as const, letterSpacing: '.4px', alignSelf: 'flex-start',
-            }}>
+          <div key={o.title} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <span style={{ fontSize: 9.5, fontWeight: 800, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '2px 8px', borderRadius: 4, display: 'inline-block', textTransform: 'uppercase' as const, letterSpacing: '.4px', alignSelf: 'flex-start' }}>
               {o.tag}
             </span>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>
-              {o.title}
-            </div>
-            <div style={{ fontSize: 11, color: 'var(--muted-text)', lineHeight: 1.45, flex: 1 }}>
-              {o.desc}
-            </div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{o.title}</div>
+            <div style={{ fontSize: 11, color: 'var(--muted-text)', lineHeight: 1.45, flex: 1 }}>{o.desc}</div>
             <div style={{ marginTop: 4, display: 'flex', alignItems: 'baseline', gap: 6 }}>
               <span style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--ink)', lineHeight: 1 }}>{o.stat}</span>
               <span style={{ fontSize: 10.5, color: 'var(--muted-text)' }}>{o.unit}</span>
@@ -360,8 +354,6 @@ function VipOpportunitiesPanel() {
 }
 
 // ── Revenue Intelligence ────────────────────────────────────────────────────
-type GoToClientesOpts = { churn?: string[]; rfm?: string[]; tag?: string }
-
 const RI_CARDS = [
   {
     label: 'Revenue at Risk', borderColor: 'var(--red)',
@@ -377,9 +369,9 @@ const RI_CARDS = [
   },
   {
     label: 'Cross Sell Opportunity', borderColor: '#5B9BD5',
-    stat: '146', unit: 'VIPs', detail: 'R$ 2,1M GGR potencial em 90d',
-    badge: 'At Risk', badgeColor: '#5B9BD5', badgeBg: '#E5EEF8',
-    opts: { rfm: ['Risco'] } as GoToClientesOpts,
+    stat: '146', unit: 'VIPs', detail: 'Cassino-puros sem esporte em 90d',
+    badge: 'Cassino', badgeColor: '#5B9BD5', badgeBg: '#E5EEF8',
+    opts: { vertical: 'Cassino' } as GoToClientesOpts,
   },
   {
     label: 'VIPs Críticos', borderColor: 'var(--orange)',
@@ -400,33 +392,23 @@ function RevenueIntelligenceSection({ onCardClick }: { onCardClick: (opts: GoToC
         {RI_CARDS.map((card, i) => {
           const isHov = hovCard === i
           return (
-            <div
-              key={card.label}
+            <div key={card.label}
               onClick={() => onCardClick(card.opts)}
               onMouseEnter={() => setHovCard(i)}
               onMouseLeave={() => setHovCard(null)}
               title={`${card.label} — clique para ver em Clientes VIP`}
               style={{
-                background: 'var(--card)',
-                border: '1px solid var(--line)',
-                borderLeft: `4px solid ${card.borderColor}`,
-                borderRadius: 'var(--radius)',
-                boxShadow: isHov ? '0 4px 12px rgba(0,0,0,.09)' : 'var(--shadow-card)',
-                padding: '14px 16px',
-                cursor: 'pointer',
-                display: 'flex', flexDirection: 'column', gap: 6,
-                opacity: isHov ? 1 : 0.93,
-                transition: 'opacity .15s, box-shadow .15s',
+                background: 'var(--card)', border: '1px solid var(--line)', borderLeft: `4px solid ${card.borderColor}`,
+                borderRadius: 'var(--radius)', boxShadow: isHov ? '0 4px 12px rgba(0,0,0,.09)' : 'var(--shadow-card)',
+                padding: '14px 16px', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 6,
+                opacity: isHov ? 1 : 0.93, transition: 'opacity .15s, box-shadow .15s',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
                 <div style={{ fontSize: 10, fontWeight: 800, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '.4px', lineHeight: 1.3 }}>
                   {card.label}
                 </div>
-                <span style={{
-                  fontSize: 9, fontWeight: 700, color: card.badgeColor, background: card.badgeBg,
-                  padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap' as const, flexShrink: 0,
-                }}>
+                <span style={{ fontSize: 9, fontWeight: 700, color: card.badgeColor, background: card.badgeBg, padding: '2px 6px', borderRadius: 4, whiteSpace: 'nowrap' as const, flexShrink: 0 }}>
                   {card.badge}
                 </span>
               </div>
@@ -446,12 +428,58 @@ function RevenueIntelligenceSection({ onCardClick }: { onCardClick: (opts: GoToC
   )
 }
 
+// ── Ticket Médio por Tier (novo) ────────────────────────────────────────────
+const TICKET_MEDIO = [
+  { tier: 'Legend',    val: 'R$ 41k', color: '#C9A227' },
+  { tier: 'Elite',     val: 'R$ 28k', color: C.orange  },
+  { tier: 'Exclusive', val: 'R$ 17k', color: '#E08A4E' },
+  { tier: 'Black',     val: 'R$ 8k',  color: C.ink     },
+]
+
+function TicketMedioPorTierCard({ onClick }: { onClick?: () => void }) {
+  const [hov, setHov] = useState(false)
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => { if (onClick) setHov(true)  }}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: 'var(--card)', border: '1px solid var(--line)',
+        borderRadius: 'var(--radius)', boxShadow: hov ? '0 4px 12px rgba(0,0,0,.08)' : 'var(--shadow-card)',
+        overflow: 'hidden', cursor: onClick ? 'pointer' : 'default',
+        transition: 'box-shadow .15s',
+      }}
+    >
+      <div style={{ padding: '12px 15px 10px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>Ticket Médio por Tier</div>
+          <div style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 2 }}>GGR ÷ VIPs ativos · mensal</div>
+        </div>
+        {onClick && <span style={{ fontSize: 15, fontWeight: 700, color: hov ? 'var(--orange)' : 'var(--muted-text)', transition: 'color .15s' }}>→</span>}
+      </div>
+      <div style={{ padding: '12px 15px', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 0 }}>
+        {TICKET_MEDIO.map(t => (
+          <div key={t.tier} style={{ background: hov ? C.orangeSoft : 'var(--card)', padding: '12px 14px', transition: 'background .15s' }}>
+            <div style={{ fontSize: 9.5, fontWeight: 800, color: t.color, textTransform: 'uppercase' as const, letterSpacing: '.4px', marginBottom: 6 }}>
+              {t.tier}
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--ink)', lineHeight: 1 }}>
+              {t.val}
+            </div>
+            <div style={{ fontSize: 9.5, color: 'var(--muted-2)', marginTop: 4 }}>GGR / VIP</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Clientes VIP — filtros ──────────────────────────────────────────────────
 const CHURN_BUTTONS = [
-  { key: 'critical', label: 'Crítico', color: '#E23B3B',        bg: '#FBE7E7'          },
-  { key: 'high',     label: 'Alto',    color: 'var(--red)',      bg: 'var(--red-soft)'  },
-  { key: 'med',      label: 'Médio',   color: 'var(--amber)',    bg: 'var(--amber-soft)'},
-  { key: 'low',      label: 'Baixo',   color: 'var(--green)',    bg: 'var(--green-soft)'},
+  { key: 'critical', label: 'Crítico', color: '#E23B3B',        bg: '#FBE7E7'           },
+  { key: 'high',     label: 'Alto',    color: 'var(--red)',      bg: 'var(--red-soft)'   },
+  { key: 'med',      label: 'Médio',   color: 'var(--amber)',    bg: 'var(--amber-soft)' },
+  { key: 'low',      label: 'Baixo',   color: 'var(--green)',    bg: 'var(--green-soft)' },
 ]
 
 const RFM_BUTTONS = [
@@ -464,18 +492,20 @@ const RFM_BUTTONS = [
 const TIER_FILTER_BUTTONS = ['Todos', 'Legend', 'Elite', 'Exclusive', 'Black']
 
 function ClientesFilterBar({
-  churnFilter, setChurnFilter,
-  rfmFilter,   setRfmFilter,
-  tierFilter,  setTierFilter,
-  tagFilter,   setTagFilter,
-  search,      setSearch,
-  total,       filtered,
+  churnFilter,   setChurnFilter,
+  rfmFilter,     setRfmFilter,
+  tierFilter,    setTierFilter,
+  tagFilter,     setTagFilter,
+  search,        setSearch,
+  verticalFilter, setVerticalFilter,
+  total,         filtered,
 }: {
-  churnFilter: string[]; setChurnFilter: (v: string[]) => void
-  rfmFilter:   string[]; setRfmFilter:   (v: string[]) => void
-  tierFilter:  string;   setTierFilter:  (v: string) => void
-  tagFilter:   string[]; setTagFilter:   (v: string[]) => void
-  search:      string;   setSearch:      (v: string) => void
+  churnFilter:    string[]; setChurnFilter:    (v: string[]) => void
+  rfmFilter:      string[]; setRfmFilter:      (v: string[]) => void
+  tierFilter:     string;   setTierFilter:     (v: string)   => void
+  tagFilter:      string[]; setTagFilter:      (v: string[]) => void
+  search:         string;   setSearch:         (v: string)   => void
+  verticalFilter: string;   setVerticalFilter: (v: string)   => void
   total: number; filtered: number
 }) {
   function toggleMulti(arr: string[], key: string, setFn: (v: string[]) => void) {
@@ -498,6 +528,7 @@ function ClientesFilterBar({
     }),
     ...(tierFilter !== 'Todos' ? [{ label: `Tier: ${tierFilter}`, remove: () => setTierFilter('Todos') }] : []),
     ...tagFilter.map(t => ({ label: t, remove: () => setTagFilter(tagFilter.filter(f => f !== t)) })),
+    ...(verticalFilter !== '' ? [{ label: `Tipo: ${verticalFilter}`, remove: () => setVerticalFilter('') }] : []),
   ]
 
   function clearAll() {
@@ -506,6 +537,7 @@ function ClientesFilterBar({
     setTierFilter('Todos')
     setTagFilter([])
     setSearch('')
+    setVerticalFilter('')
   }
 
   return (
@@ -522,20 +554,10 @@ function ClientesFilterBar({
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nome ou ID..."
-            style={{
-              width: '100%', padding: '8px 12px 8px 32px', fontSize: 12,
-              border: '1px solid var(--line)', borderRadius: 8, fontFamily: 'inherit',
-              color: 'var(--ink)', outline: 'none', background: 'var(--bg)',
-              boxSizing: 'border-box' as const,
-            }}
+            style={{ width: '100%', padding: '8px 12px 8px 32px', fontSize: 12, border: '1px solid var(--line)', borderRadius: 8, fontFamily: 'inherit', color: 'var(--ink)', outline: 'none', background: 'var(--bg)', boxSizing: 'border-box' as const }}
           />
         </div>
-        <button style={{
-          padding: '8px 14px', fontSize: 11.5, fontWeight: 700,
-          border: '1px solid var(--line)', borderRadius: 8,
-          background: 'transparent', color: 'var(--muted-text)',
-          cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' as const,
-        }}>
+        <button style={{ padding: '8px 14px', fontSize: 11.5, fontWeight: 700, border: '1px solid var(--line)', borderRadius: 8, background: 'transparent', color: 'var(--muted-text)', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' as const }}>
           ↓ CSV
         </button>
       </div>
@@ -547,16 +569,8 @@ function ClientesFilterBar({
           {CHURN_BUTTONS.map(b => {
             const active = churnFilter.includes(b.key)
             return (
-              <button
-                key={b.key}
-                onClick={() => toggleMulti(churnFilter, b.key, setChurnFilter)}
-                style={{
-                  ...filterBtnBase,
-                  border: `1px solid ${active ? 'transparent' : 'var(--line)'}`,
-                  background: active ? b.bg : 'transparent',
-                  color: active ? b.color : 'var(--muted-text)',
-                }}
-              >
+              <button key={b.key} onClick={() => toggleMulti(churnFilter, b.key, setChurnFilter)}
+                style={{ ...filterBtnBase, border: `1px solid ${active ? 'transparent' : 'var(--line)'}`, background: active ? b.bg : 'transparent', color: active ? b.color : 'var(--muted-text)' }}>
                 {b.label}
               </button>
             )
@@ -571,16 +585,8 @@ function ClientesFilterBar({
           {RFM_BUTTONS.map(b => {
             const active = rfmFilter.includes(b.key)
             return (
-              <button
-                key={b.key}
-                onClick={() => toggleMulti(rfmFilter, b.key, setRfmFilter)}
-                style={{
-                  ...filterBtnBase,
-                  border: `1px solid ${active ? 'transparent' : 'var(--line)'}`,
-                  background: active ? 'var(--orange)' : 'transparent',
-                  color: active ? '#fff' : 'var(--muted-text)',
-                }}
-              >
+              <button key={b.key} onClick={() => toggleMulti(rfmFilter, b.key, setRfmFilter)}
+                style={{ ...filterBtnBase, border: `1px solid ${active ? 'transparent' : 'var(--line)'}`, background: active ? 'var(--orange)' : 'transparent', color: active ? '#fff' : 'var(--muted-text)' }}>
                 {b.label}
               </button>
             )
@@ -596,17 +602,8 @@ function ClientesFilterBar({
             const active = tierFilter === t
             const col = t !== 'Todos' ? TIER_COLORS[t] : undefined
             return (
-              <button
-                key={t}
-                onClick={() => setTierFilter(active && t !== 'Todos' ? 'Todos' : t)}
-                style={{
-                  ...filterBtnBase,
-                  border: `1px solid ${active ? 'transparent' : 'var(--line)'}`,
-                  background: active ? (col ? `${col}22` : 'var(--orange)') : 'transparent',
-                  color: active ? (col ?? '#fff') : 'var(--muted-text)',
-                  fontWeight: active ? 800 : 700,
-                }}
-              >
+              <button key={t} onClick={() => setTierFilter(active && t !== 'Todos' ? 'Todos' : t)}
+                style={{ ...filterBtnBase, border: `1px solid ${active ? 'transparent' : 'var(--line)'}`, background: active ? (col ? `${col}22` : 'var(--orange)') : 'transparent', color: active ? (col ?? '#fff') : 'var(--muted-text)', fontWeight: active ? 800 : 700 }}>
                 {t}
               </button>
             )
@@ -618,11 +615,7 @@ function ClientesFilterBar({
       {activeTags.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' as const }}>
           {activeTags.map(t => (
-            <span key={t.label} style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              fontSize: 11, fontWeight: 600, color: 'var(--orange)',
-              background: 'var(--orange-soft)', padding: '3px 8px', borderRadius: 6,
-            }}>
+            <span key={t.label} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 600, color: 'var(--orange)', background: 'var(--orange-soft)', padding: '3px 8px', borderRadius: 6 }}>
               {t.label}
               <button onClick={t.remove} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 13, color: 'var(--orange)', lineHeight: 1 }}>×</button>
             </span>
@@ -641,24 +634,54 @@ function ClientesFilterBar({
   )
 }
 
-// ── Clientes VIP — tabela filtrada ──────────────────────────────────────────
+// ── Clientes VIP — tabela filtrada e ordenável ──────────────────────────────
 type RosterRow = typeof ROSTER[number]
 
-function ClientesVipTable({ rows }: { rows: RosterRow[] }) {
+const SORTABLE_COLS: Record<string, { field: string; label: string }> = {
+  'GGR MTD':       { field: 'ggr',          label: 'GGR MTD' },
+  'Turnover 90d':  { field: 'turnover_90d',  label: 'Turnover 90d' },
+  'Valor em Risco':{ field: 'risco',         label: 'Valor em Risco' },
+}
+
+function ClientesVipTable({
+  rows, sortBy, sortDir, onSort,
+}: {
+  rows: RosterRow[]
+  sortBy: string | null
+  sortDir: 'asc' | 'desc'
+  onSort: (field: string) => void
+}) {
   const [hovered, setHovered] = useState<number | null>(null)
-  const TH_STYLE: React.CSSProperties = {
-    textAlign: 'left', padding: '6px 10px', fontSize: 10, fontWeight: 700,
-    color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '.3px',
-    borderBottom: '1px solid var(--line)', whiteSpace: 'nowrap',
+
+  function ThSort({ label }: { label: string }) {
+    const col = SORTABLE_COLS[label]
+    if (!col) {
+      return (
+        <th style={{ textAlign: 'left', padding: '6px 10px', fontSize: 10, fontWeight: 700, color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '.3px', borderBottom: '1px solid var(--line)', whiteSpace: 'nowrap' }}>
+          {label}
+        </th>
+      )
+    }
+    const active = sortBy === col.field
+    const indicator = active ? (sortDir === 'desc' ? ' ↓' : ' ↑') : ' ↕'
+    return (
+      <th
+        onClick={() => onSort(col.field)}
+        style={{ textAlign: 'left', padding: '6px 10px', fontSize: 10, fontWeight: 700, color: active ? 'var(--orange)' : 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '.3px', borderBottom: `2px solid ${active ? 'var(--orange)' : 'var(--line)'}`, whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none' }}>
+        {label}<span style={{ opacity: active ? 1 : 0.4 }}>{indicator}</span>
+      </th>
+    )
   }
+
+  const COLS = ['#', 'Jogador', 'Tier', 'GGR MTD', 'Turnover 90d', 'Valor em Risco', 'Hold%', 'Score', 'Churn']
+
   return (
-    <div style={{
-      background: 'var(--card)', border: '1px solid var(--line)',
-      borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', overflow: 'hidden',
-    }}>
+    <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
       <div style={{ padding: '12px 15px 10px', borderBottom: '1px solid var(--line)' }}>
         <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>Clientes VIP</div>
-        <div style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 2 }}>Ordenada por valor em risco</div>
+        <div style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 2 }}>
+          {sortBy ? `Ordenada por ${SORTABLE_COLS[COLS.find(c => SORTABLE_COLS[c]?.field === sortBy) ?? '']?.label ?? sortBy} ${sortDir === 'desc' ? '↓' : '↑'}` : 'Ordenada por valor em risco'}
+        </div>
       </div>
       <div style={{ padding: '0 4px 12px', overflowX: 'auto' }}>
         {rows.length === 0 ? (
@@ -669,49 +692,34 @@ function ClientesVipTable({ rows }: { rows: RosterRow[] }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
             <thead>
               <tr>
-                {['#', 'Jogador', 'Tier', 'GGR MTD', 'Valor em Risco', 'Hold%', 'Score', 'Churn'].map((h) => (
-                  <th key={h} style={TH_STYLE}>{h}</th>
-                ))}
+                {COLS.map(h => <ThSort key={h} label={h} />)}
               </tr>
             </thead>
             <tbody>
               {rows.map((r, i) => {
-                const churnS = CHURN_STYLE[r.churn]
+                const churnS    = CHURN_STYLE[r.churn]
                 const tierColor = TIER_COLORS[r.tier]
-                const isHov = hovered === i
+                const isHov     = hovered === i
                 return (
-                  <tr
-                    key={r.id}
+                  <tr key={r.id}
                     onMouseEnter={() => setHovered(i)}
                     onMouseLeave={() => setHovered(null)}
                     style={{ background: isHov ? C.orangeSoft : 'transparent', transition: 'background .15s' }}
                   >
-                    <td style={{ padding: '9px 10px', color: 'var(--muted-text)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-                      {String(i + 1).padStart(2, '0')}
-                    </td>
+                    <td style={{ padding: '9px 10px', color: 'var(--muted-text)', fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{String(i + 1).padStart(2, '0')}</td>
                     <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
-                      <div style={{ fontWeight: 700, color: 'var(--ink)' }}>
-                        {r.flag && <span style={{ color: 'var(--amber)', marginRight: 5 }}>⚑</span>}
-                        {r.name}
-                      </div>
+                      <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{r.flag && <span style={{ color: 'var(--amber)', marginRight: 5 }}>⚑</span>}{r.name}</div>
                       <div style={{ fontSize: 10, color: 'var(--muted-2)', fontFamily: 'var(--font-mono)', marginTop: 1 }}>{r.id}</div>
                     </td>
                     <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: tierColor }}>{r.tier}</span>
                       <span style={{ fontSize: 10.5, color: 'var(--muted-text)', marginLeft: 4 }}>S{r.sub}</span>
                     </td>
-                    <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>
-                      R$ {r.ggr}
-                    </td>
-                    <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--orange)', whiteSpace: 'nowrap' }}>
-                      R$ {r.risco}
-                    </td>
-                    <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)' }}>
-                      {r.hold}
-                    </td>
-                    <td style={{ padding: '9px 10px' }}>
-                      <ScoreBar score={r.score} />
-                    </td>
+                    <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>R$ {r.ggr}</td>
+                    <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>{fmtTurnover(r.turnover_90d)}</td>
+                    <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', fontWeight: 800, color: 'var(--orange)', whiteSpace: 'nowrap' }}>R$ {r.risco}</td>
+                    <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)' }}>{r.hold}</td>
+                    <td style={{ padding: '9px 10px' }}><ScoreBar score={r.score} /></td>
                     <td style={{ padding: '9px 10px' }}>
                       <span style={{ fontSize: 10.5, fontWeight: 700, color: churnS.color, background: churnS.bg, padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>
                         {churnS.label}
@@ -730,31 +738,49 @@ function ClientesVipTable({ rows }: { rows: RosterRow[] }) {
 
 // ── Page ────────────────────────────────────────────────────────────────────
 export default function GestaoVipPage() {
-  const [aba, setAba]               = useState<'visao-geral' | 'clientes-vip'>('visao-geral')
-  const [churnFilter, setChurnFilter] = useState<string[]>([])
-  const [rfmFilter,   setRfmFilter]   = useState<string[]>([])
-  const [tierFilter,  setTierFilter]  = useState('Todos')
-  const [tagFilter,   setTagFilter]   = useState<string[]>([])
-  const [search,      setSearch]      = useState('')
+  const [aba,            setAba]            = useState<'visao-geral' | 'clientes-vip'>('visao-geral')
+  const [churnFilter,    setChurnFilter]    = useState<string[]>([])
+  const [rfmFilter,      setRfmFilter]      = useState<string[]>([])
+  const [tierFilter,     setTierFilter]     = useState('Todos')
+  const [tagFilter,      setTagFilter]      = useState<string[]>([])
+  const [search,         setSearch]         = useState('')
+  const [verticalFilter, setVerticalFilter] = useState('')
+  const [sortBy,         setSortBy]         = useState<string | null>(null)
+  const [sortDir,        setSortDir]        = useState<'asc' | 'desc'>('desc')
 
   function goToClientes(opts: GoToClientesOpts) {
     setChurnFilter(opts.churn ?? [])
     setRfmFilter(opts.rfm ?? [])
     setTagFilter(opts.tag ? [opts.tag] : [])
     setTierFilter('Todos')
+    setVerticalFilter(opts.vertical ?? '')
+    if (opts.sort) { setSortBy(opts.sort.field); setSortDir(opts.sort.dir) }
+    else setSortBy(null)
     setAba('clientes-vip')
   }
 
+  function handleSort(field: string) {
+    if (sortBy === field) setSortDir(prev => prev === 'asc' ? 'desc' : 'asc')
+    else { setSortBy(field); setSortDir('desc') }
+  }
+
   const filteredRoster = ROSTER.filter(r => {
-    const matchChurn  = churnFilter.length === 0 || churnFilter.includes(r.churn)
-    const matchRfm    = rfmFilter.length === 0   || rfmFilter.includes(r.rfm)
-    const matchTier   = tierFilter === 'Todos'   || r.tier === tierFilter
-    const matchTag    = tagFilter.length === 0
-      || (tagFilter.includes('Elegível Upgrade') && r.tier === 'Exclusive' && r.sub === 1)
-    const matchSearch = search === ''
-      || r.name.toLowerCase().includes(search.toLowerCase())
-      || r.id.includes(search)
-    return matchChurn && matchRfm && matchTier && matchTag && matchSearch
+    const matchChurn    = churnFilter.length === 0    || churnFilter.includes(r.churn)
+    const matchRfm      = rfmFilter.length === 0      || rfmFilter.includes(r.rfm)
+    const matchTier     = tierFilter === 'Todos'      || r.tier === tierFilter
+    const matchTag      = tagFilter.length === 0      || (tagFilter.includes('Elegível Upgrade') && r.tier === 'Exclusive' && r.sub === 1)
+    const matchSearch   = search === ''               || r.name.toLowerCase().includes(search.toLowerCase()) || r.id.includes(search)
+    const matchVertical = verticalFilter === ''       || r.vertical === verticalFilter
+    return matchChurn && matchRfm && matchTier && matchTag && matchSearch && matchVertical
+  })
+
+  const sortedRoster = [...filteredRoster].sort((a, b) => {
+    if (!sortBy) return 0
+    let av = 0, bv = 0
+    if (sortBy === 'ggr')         { av = parseGgr(a.ggr);        bv = parseGgr(b.ggr)        }
+    if (sortBy === 'turnover_90d'){ av = a.turnover_90d;          bv = b.turnover_90d          }
+    if (sortBy === 'risco')       { av = parseGgr(a.risco);      bv = parseGgr(b.risco)       }
+    return sortDir === 'desc' ? bv - av : av - bv
   })
 
   const ABAS_VIP = [
@@ -796,7 +822,8 @@ export default function GestaoVipPage() {
           {/* ── Visão Geral ── */}
           {aba === 'visao-geral' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <VipKpisPanel />
+              <VipKpisPanel onCardClick={goToClientes} />
+              <TicketMedioPorTierCard onClick={() => goToClientes({})} />
               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,5fr) minmax(0,7fr)', gap: 14, alignItems: 'stretch' }}>
                 <VipTierBarsPanel />
                 <VipOpportunitiesPanel />
@@ -810,14 +837,20 @@ export default function GestaoVipPage() {
           {aba === 'clientes-vip' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
               <ClientesFilterBar
-                churnFilter={churnFilter} setChurnFilter={setChurnFilter}
-                rfmFilter={rfmFilter}     setRfmFilter={setRfmFilter}
-                tierFilter={tierFilter}   setTierFilter={setTierFilter}
-                tagFilter={tagFilter}     setTagFilter={setTagFilter}
-                search={search}           setSearch={setSearch}
-                total={ROSTER.length}     filtered={filteredRoster.length}
+                churnFilter={churnFilter}       setChurnFilter={setChurnFilter}
+                rfmFilter={rfmFilter}           setRfmFilter={setRfmFilter}
+                tierFilter={tierFilter}         setTierFilter={setTierFilter}
+                tagFilter={tagFilter}           setTagFilter={setTagFilter}
+                search={search}                 setSearch={setSearch}
+                verticalFilter={verticalFilter} setVerticalFilter={setVerticalFilter}
+                total={ROSTER.length}           filtered={sortedRoster.length}
               />
-              <ClientesVipTable rows={filteredRoster} />
+              <ClientesVipTable
+                rows={sortedRoster}
+                sortBy={sortBy}
+                sortDir={sortDir}
+                onSort={handleSort}
+              />
             </div>
           )}
 
