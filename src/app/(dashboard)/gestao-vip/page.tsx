@@ -914,9 +914,314 @@ function ClientesVipTable({
   )
 }
 
+// ── Aba Oportunidades ───────────────────────────────────────────────────────
+
+const UPGRADE_PIPELINE = [
+  { name: 'Carla M.',  id: 'usr_1f55d7', tier: 'Exclusive', nextTier: 'Elite',     sub: 1, ggrMtd: 33_800, gapGgr: 12_200, gapNetCash:  8_600, meses: 2 },
+  { name: 'Paula N.',  id: 'usr_4d88b9', tier: 'Elite',     nextTier: 'Legend',    sub: 1, ggrMtd: 74_000, gapGgr: 35_100, gapNetCash: 24_600, meses: 3 },
+  { name: 'Bruno T.',  id: 'usr_3c92a4', tier: 'Black',     nextTier: 'Exclusive', sub: 4, ggrMtd: 12_900, gapGgr: 21_300, gapNetCash: 14_900, meses: 4 },
+  { name: 'Diego F.',  id: 'usr_9e34c2', tier: 'Elite',     nextTier: 'Legend',    sub: 4, ggrMtd: 42_500, gapGgr: 48_800, gapNetCash: 34_200, meses: 6 },
+]
+
+const CHURN_SCORE: Record<string, number> = { critical: 0.85, high: 0.55, med: 0.30, low: 0.10 }
+const DIAS_SEM_APOSTAR: Record<string, number> = {
+  'usr_8f3a91': 12, 'usr_2a77f1': 18, 'usr_1f55d7': 8, 'usr_3c92a4': 24,
+}
+
+function KpiRow({ items }: { items: { label: string; value: string }[] }) {
+  return (
+    <div style={{ display: 'flex', gap: 1, background: 'var(--line)', border: '1px solid var(--line)', borderRadius: 10, overflow: 'hidden', marginBottom: 14 }}>
+      {items.map(item => (
+        <div key={item.label} style={{ flex: 1, background: 'var(--card)', padding: '10px 14px' }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, color: 'var(--muted-text)', textTransform: 'uppercase' as const, letterSpacing: '.3px', marginBottom: 4 }}>
+            {item.label}
+          </div>
+          <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--ink)', fontFamily: 'var(--font-mono)', lineHeight: 1 }}>
+            {item.value}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function OportunidadesTab() {
+  const [subTab, setSubTab] = useState<'upgrade' | 'crosssell' | 'atrisk'>('upgrade')
+
+  // Cross-sell: VIPs onde um produto < 8% do turnover (single-product player)
+  const crossSellRows = ROSTER
+    .filter(r => r.turnover_90d > 0 && (
+      r.sport_t90  / r.turnover_90d < 0.08 ||
+      r.casino_t90 / r.turnover_90d < 0.08
+    ))
+    .map(r => ({
+      ...r,
+      product: r.casino_t90 > r.sport_t90 ? 'Casino' : 'Sports',
+      opp:     r.casino_t90 > r.sport_t90 ? '→ Sports' : '→ Casino',
+      ngr90:   Math.round(parseGgr(r.ggr) * 0.70),
+    }))
+    .sort((a, b) => b.ngr90 - a.ngr90)
+
+  // Revenue At Risk: churn critical ou high, ordenado por impacto desc
+  const atRiskRows = ROSTER
+    .filter(r => r.churn === 'critical' || r.churn === 'high')
+    .map(r => {
+      const ngr90   = Math.round(parseGgr(r.ggr) * 0.70)
+      const impacto = Math.round(ngr90 * CHURN_SCORE[r.churn])
+      return { ...r, ngr90, impacto, dias: DIAS_SEM_APOSTAR[r.id] ?? 0 }
+    })
+    .sort((a, b) => b.impacto - a.impacto)
+
+  const totalImpacto      = atRiskRows.reduce((s, r) => s + r.impacto, 0)
+  const legendElite       = atRiskRows.filter(r => r.tier === 'Legend' || r.tier === 'Elite').length
+  const criticos          = atRiskRows.filter(r => r.churn === 'critical').length
+  const csGgrPotencial    = crossSellRows.reduce((s, r) => s + r.ngr90, 0)
+  const csCasinoToSport   = crossSellRows.filter(r => r.product === 'Casino').length
+  const csSportToCasino   = crossSellRows.filter(r => r.product === 'Sports').length
+  const upgradeGgrPotencial = UPGRADE_PIPELINE.reduce((s, r) => s + r.gapGgr, 0)
+
+  const TH: React.CSSProperties = {
+    textAlign: 'left', padding: '6px 10px', fontSize: 10, fontWeight: 700,
+    color: 'var(--muted-text)', textTransform: 'uppercase', letterSpacing: '.3px',
+    borderBottom: '1px solid var(--line)', whiteSpace: 'nowrap',
+  }
+
+  const SUB_TABS = [
+    { id: 'upgrade',   label: 'Pipeline de Upgrade' },
+    { id: 'crosssell', label: 'Cross-sell'           },
+    { id: 'atrisk',    label: 'Revenue At Risk'      },
+  ] as const
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+      {/* Cards de resumo */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+        <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderLeft: `4px solid ${C.green}`, borderRadius: 'var(--radius)', padding: '14px 16px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ fontSize: 9.5, fontWeight: 800, color: C.green, textTransform: 'uppercase' as const, letterSpacing: '.4px', marginBottom: 6 }}>Revenue Opportunity</div>
+          <div style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--ink)', lineHeight: 1 }}>
+            {fmtTurnover(upgradeGgrPotencial + csGgrPotencial)}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--muted-text)', marginTop: 6 }}>
+            {UPGRADE_PIPELINE.length} upgrades · {crossSellRows.length} cross-sell elegíveis
+          </div>
+        </div>
+        {/* Correção: "LTV em risco" → "Churn crítico/alto" */}
+        <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderLeft: '4px solid var(--red)', borderRadius: 'var(--radius)', padding: '14px 16px', boxShadow: 'var(--shadow-card)' }}>
+          <div style={{ fontSize: 9.5, fontWeight: 800, color: 'var(--red)', textTransform: 'uppercase' as const, letterSpacing: '.4px', marginBottom: 6 }}>Revenue At Risk</div>
+          <div style={{ fontSize: 26, fontWeight: 800, fontFamily: 'var(--font-mono)', color: 'var(--ink)', lineHeight: 1 }}>
+            {fmtTurnover(totalImpacto)}
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--muted-text)', marginTop: 6 }}>
+            {atRiskRows.length} VIPs · Churn crítico/alto
+          </div>
+        </div>
+      </div>
+
+      {/* Barra de sub-tabs */}
+      <div style={{ display: 'flex', background: '#F1F2F4', borderRadius: 10, padding: 3, gap: 2, marginBottom: 16, width: 'fit-content' }}>
+        {SUB_TABS.map(t => {
+          const active = subTab === t.id
+          return (
+            <button key={t.id} onClick={() => setSubTab(t.id)}
+              style={{ fontSize: 12, fontWeight: active ? 800 : 600, padding: '6px 14px', borderRadius: 8, border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                background: active ? 'var(--card)' : 'transparent',
+                color: active ? 'var(--orange)' : 'var(--muted-text)',
+                boxShadow: active ? '0 1px 4px rgba(0,0,0,.07)' : 'none',
+                transition: 'all .15s' }}>
+              {t.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ── Pipeline de Upgrade ── */}
+      {subTab === 'upgrade' && (
+        <div>
+          <KpiRow items={[
+            { label: 'Elegíveis',       value: String(UPGRADE_PIPELINE.length) },
+            { label: 'GGR incremental', value: fmtTurnover(upgradeGgrPotencial) },
+            { label: 'Média de prazo',  value: `${(UPGRADE_PIPELINE.reduce((s, r) => s + r.meses, 0) / UPGRADE_PIPELINE.length).toFixed(1)} m` },
+            { label: 'Net Cash gap',    value: fmtTurnover(UPGRADE_PIPELINE.reduce((s, r) => s + r.gapNetCash, 0)) },
+          ]} />
+          <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
+            <div style={{ padding: '12px 15px 10px', borderBottom: '1px solid var(--line)' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>Pipeline de Upgrade</div>
+              <div style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 2 }}>Ordenado por prazo estimado</div>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr>
+                    {['Jogador', 'Tier Atual → Próximo', 'GGR Atual', 'Gap GGR', 'Gap Net Cash', 'Viável / Mês'].map(h => <th key={h} style={TH}>{h}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {UPGRADE_PIPELINE.map(r => {
+                    const tc = TIER_COLORS[r.tier]
+                    const tn = TIER_COLORS[r.nextTier]
+                    return (
+                      <tr key={r.id}>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{r.name}</div>
+                          <div style={{ fontSize: 10, color: 'var(--muted-2)', fontFamily: 'var(--font-mono)', marginTop: 1 }}>{r.id}</div>
+                        </td>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: tc }}>{r.tier}</span>
+                          <span style={{ color: 'var(--muted-text)', margin: '0 6px' }}>→</span>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: tn }}>{r.nextTier}</span>
+                        </td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)' }}>{fmtTurnover(r.ggrMtd)}</td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--amber)', fontWeight: 700 }}>+{fmtTurnover(r.gapGgr)}</td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--muted-text)' }}>+{fmtTurnover(r.gapNetCash)}</td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: r.meses <= 3 ? C.green : 'var(--amber)', background: r.meses <= 3 ? 'var(--green-soft)' : 'var(--amber-soft)', padding: '3px 8px', borderRadius: 6 }}>
+                            {r.meses}m
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Cross-sell ── */}
+      {subTab === 'crosssell' && (
+        <div>
+          <KpiRow items={[
+            { label: 'Elegíveis',       value: String(crossSellRows.length) },
+            { label: 'GGR potencial',   value: fmtTurnover(csGgrPotencial)  },
+            { label: 'Casino → Sports', value: String(csCasinoToSport)      },
+            { label: 'Sports → Casino', value: String(csSportToCasino)      },
+          ]} />
+          <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
+            <div style={{ padding: '12px 15px 10px', borderBottom: '1px solid var(--line)' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>VIPs elegíveis para cross-sell</div>
+              <div style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 2 }}>Ordenado por NGR desc</div>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr>
+                    {['Jogador', 'Tier', 'Produto Atual', 'Oportunidade', 'GGR', 'NGR', 'Turnover', 'Churn'].map(h => <th key={h} style={TH}>{h}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {crossSellRows.map(r => {
+                    const churnS    = CHURN_STYLE[r.churn]
+                    const tierColor = TIER_COLORS[r.tier]
+                    const isCasino  = r.product === 'Casino'
+                    return (
+                      <tr key={r.id}>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{r.name}</div>
+                          <div style={{ fontSize: 10, color: 'var(--muted-2)', fontFamily: 'var(--font-mono)', marginTop: 1 }}>{r.id}</div>
+                        </td>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: tierColor }}>{r.tier}</span>
+                          <span style={{ fontSize: 10.5, color: 'var(--muted-text)', marginLeft: 4 }}>S{r.sub}</span>
+                        </td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: isCasino ? 'var(--orange)' : 'var(--green)', background: isCasino ? 'var(--orange-soft)' : 'var(--green-soft)', padding: '2px 8px', borderRadius: 5 }}>
+                            {r.product}
+                          </span>
+                        </td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: isCasino ? 'var(--green)' : 'var(--orange)', background: isCasino ? 'var(--green-soft)' : 'var(--orange-soft)', padding: '2px 8px', borderRadius: 5 }}>
+                            {r.opp}
+                          </span>
+                        </td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>R$ {r.ggr}</td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>{fmtTurnover(r.ngr90)}</td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>{fmtTurnover(r.turnover_90d)}</td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <span style={{ fontSize: 10.5, fontWeight: 700, color: churnS.color, background: churnS.bg, padding: '3px 8px', borderRadius: 6, whiteSpace: 'nowrap' }}>
+                            {churnS.label}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Revenue At Risk ── */}
+      {subTab === 'atrisk' && (
+        <div>
+          <KpiRow items={[
+            { label: 'VIPs em risco',  value: String(atRiskRows.length)  },
+            { label: 'Impacto total',  value: fmtTurnover(totalImpacto)  },
+            { label: 'Legend / Elite', value: String(legendElite)         },
+            { label: 'Churn crítico',  value: String(criticos)            },
+          ]} />
+          <div style={{ background: 'var(--card)', border: '1px solid var(--line)', borderRadius: 'var(--radius)', boxShadow: 'var(--shadow-card)', overflow: 'hidden' }}>
+            <div style={{ padding: '12px 15px 10px', borderBottom: '1px solid var(--line)' }}>
+              <div style={{ fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>VIPs em risco de churn</div>
+              <div style={{ fontSize: 10.5, color: 'var(--muted-text)', marginTop: 2 }}>Ordenado por impacto estimado desc</div>
+            </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                <thead>
+                  <tr>
+                    {['Jogador', 'Tier', 'Churn Risk', 'RFM', 'NGR (90d)', 'Turnover (90d)', 'Impacto Est.', 'Dias s/ apostar'].map(h => <th key={h} style={TH}>{h}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {atRiskRows.map(r => {
+                    const churnS    = CHURN_STYLE[r.churn]
+                    const tierColor = TIER_COLORS[r.tier]
+                    return (
+                      <tr key={r.id}>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontWeight: 700, color: 'var(--ink)' }}>{r.flag && <span style={{ color: 'var(--amber)', marginRight: 5 }}>⚑</span>}{r.name}</div>
+                          <div style={{ fontSize: 10, color: 'var(--muted-2)', fontFamily: 'var(--font-mono)', marginTop: 1 }}>{r.id}</div>
+                        </td>
+                        <td style={{ padding: '9px 10px', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: tierColor }}>{r.tier}</span>
+                          <span style={{ fontSize: 10.5, color: 'var(--muted-text)', marginLeft: 4 }}>S{r.sub}</span>
+                        </td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <span style={{ fontSize: 10.5, fontWeight: 700, color: churnS.color, background: churnS.bg, padding: '3px 8px', borderRadius: 6 }}>{churnS.label}</span>
+                        </td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink)', background: 'var(--bg)', border: '1px solid var(--line)', padding: '2px 8px', borderRadius: 5 }}>{r.rfm}</span>
+                        </td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>{fmtTurnover(r.ngr90)}</td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', color: 'var(--ink)', whiteSpace: 'nowrap' }}>{fmtTurnover(r.turnover_90d)}</td>
+                        <td style={{ padding: '9px 10px' }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--red)', background: 'var(--red-soft)', padding: '3px 8px', borderRadius: 6, fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>
+                            {fmtTurnover(r.impacto)}
+                          </span>
+                        </td>
+                        <td style={{ padding: '9px 10px', fontFamily: 'var(--font-mono)', fontWeight: 700, whiteSpace: 'nowrap',
+                          color: r.dias >= 20 ? 'var(--red)' : r.dias >= 10 ? 'var(--amber)' : 'var(--muted-text)' }}>
+                          {r.dias}d
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+  )
+}
+
 // ── Page ────────────────────────────────────────────────────────────────────
 export default function GestaoVipPage() {
-  const [aba,            setAba]            = useState<'visao-geral' | 'clientes-vip'>('visao-geral')
+  const [aba,            setAba]            = useState<'visao-geral' | 'clientes-vip' | 'oportunidades'>('visao-geral')
   const [churnFilter,    setChurnFilter]    = useState<string[]>([])
   const [rfmFilter,      setRfmFilter]      = useState<string[]>([])
   const [tierFilter,     setTierFilter]     = useState('Todos')
@@ -965,6 +1270,7 @@ export default function GestaoVipPage() {
   const ABAS_VIP = [
     { id: 'visao-geral',  label: 'Visão Geral'  },
     { id: 'clientes-vip', label: 'Clientes VIP' },
+    { id: 'oportunidades', label: 'Oportunidades' },
   ] as const
 
   return (
@@ -1010,6 +1316,11 @@ export default function GestaoVipPage() {
               <VipTriagePanel />
               <RevenueIntelligenceSection onCardClick={goToClientes} />
             </div>
+          )}
+
+          {/* ── Oportunidades ── */}
+          {aba === 'oportunidades' && (
+            <OportunidadesTab />
           )}
 
           {/* ── Clientes VIP ── */}
