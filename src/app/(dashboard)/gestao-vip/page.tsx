@@ -796,13 +796,13 @@ export default function GestaoVipPage() {
           {/* ── Visão Geral ── */}
           {aba === 'visao-geral' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <VipTriagePanel />
-              <RevenueIntelligenceSection onCardClick={goToClientes} />
               <VipKpisPanel />
               <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,5fr) minmax(0,7fr)', gap: 14, alignItems: 'stretch' }}>
                 <VipTierBarsPanel />
                 <VipOpportunitiesPanel />
               </div>
+              <VipTriagePanel />
+              <RevenueIntelligenceSection onCardClick={goToClientes} />
             </div>
           )}
 
